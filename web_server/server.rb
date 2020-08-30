@@ -10,13 +10,27 @@ all_people = [
   model.create_person('Person 4'),
 ]
 
+all_accounts = []
+
 get '/' do
   @people = all_people
+  @accounts = all_accounts
+
   erb :home
 end
 
 post '/people' do
   all_people << model.create_person(params[:name])
   @people = all_people
-  erb :home
+  @accounts = all_accounts
+
+  redirect '/'
+end
+
+post '/accounts' do
+  all_accounts << model.create_account(params[:name])
+  @people = all_people
+  @accounts = all_accounts
+
+  redirect '/'
 end

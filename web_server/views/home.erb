@@ -1,10 +1,25 @@
-<h1>Header</h1>
+<h1>People</h1>
 <% @people.each do |person| %>
   Person: <%= person.name %>
+  <br>
 <% end %>
 
+<h1>Accounts</h1>
+<% @accounts.each do |account| %>
+  Account: <%= account.name %>
+  <br>
+<% end %>
+
+<h1>Create people</h1>
 <form action="/people" method="post">
   <label for="name">Person name:</label>
   <input name="name" type="text">
   <input type="submit">Create Person</input>
+</form>
+
+<h1>Create accounts</h1>
+<form action="/accounts" method="post">
+  <label for="name">Account name:</label>
+  <input name="name" type="text">
+  <input type="submit">Create Account</input>
 </form>
