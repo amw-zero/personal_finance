@@ -1,0 +1,10 @@
+<h1>Header</h1>
+<% @people.each do |person| %>
+  Person: <%= person.name %>
+<% end %>
+
+<form action="/people" method="post">
+  <label for="name">Person name:</label>
+  <input name="name" type="text">
+  <input type="submit">Create Person</input>
+</form>
