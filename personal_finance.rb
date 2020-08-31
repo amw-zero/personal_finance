@@ -13,11 +13,15 @@ module PersonalFinance
     attr_reader :people
 
     def initialize
-      @people = []
+      @people = Bmg::Relation.new([])
+    end
+
+    def relation
+      @people
     end
 
     def persist(data)
-      @people << data
+      @people = @people.union(Bmg::Relation.new([data]))
     end
   end
 
@@ -26,16 +30,13 @@ module PersonalFinance
       @db = Sequel.connect(Postgres::SERVER_URL)
     end
 
-    def persist(data)
-      relation = Bmg.sequel(:people, @db)
-      relation.insert(data.attributes)
+    def relation
+      Bmg.sequel(:people, @db)
     end
 
-    def people
+    def persist(data)
       relation = Bmg.sequel(:people, @db)
-      relation.restrict(Predicate.neq(name: 'abc')).map do |data|
-        Person.new(data)
-      end
+      relation.insert(data)
     end
   end
 
@@ -45,11 +46,13 @@ module PersonalFinance
     end
 
     def persist(data)
-      @persistence.persist(data)
+      @persistence.persist(data.attributes)
     end
 
     def people
-      @persistence.people
+      @persistence.relation.map do |data|
+        Person.new(data)
+      end
     end
   end
 

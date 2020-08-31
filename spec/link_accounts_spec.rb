@@ -1,7 +1,11 @@
 require_relative '../personal_finance'
 
 describe 'Linking Accounts' do
-  subject { PersonalFinance::Application.new }
+  subject do
+    PersonalFinance::Application.new(
+      datastore: PersonalFinance::Datastore.create_null
+    )
+  end
 
   let(:command) { subject.method(:link_account) }
   let(:person) { subject.create_person('Test Person') }
