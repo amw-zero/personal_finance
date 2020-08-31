@@ -1,4 +1,8 @@
 require 'dry-struct'
+require 'bmg'
+require 'pg'
+require 'bmg/sequel'
+require_relative 'postgres/postgres'
 
 module Types
   include Dry::Types()
@@ -17,8 +21,26 @@ module PersonalFinance
     end
   end
 
+  class PostgresPersistence
+    def initialize
+      @db = Sequel.connect(Postgres::SERVER_URL)
+    end
+
+    def persist(data)
+      relation = @db[:people]
+      relation.insert(data.attributes)
+    end
+
+    def people
+      relation = Bmg.sequel(:people, @db)
+      relation.restrict(Predicate.neq(name: 'abc')).map do |data|
+        Person.new(data)
+      end
+    end
+  end
+
   class Datastore
-    def initialize(persistence: MemoryPersistence.new)
+    def initialize(persistence: PostgresPersistence.new)
       @persistence = persistence
     end
 
@@ -64,6 +86,7 @@ module PersonalFinance
   end
 
   class Person < Dry::Struct
+    attribute? :id, Types::Integer
     attribute :name, Types::String
   end
 
