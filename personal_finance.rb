@@ -27,7 +27,7 @@ module PersonalFinance
     end
 
     def persist(data)
-      relation = @db[:people]
+      relation = Bmg.sequel(:people, @db)
       relation.insert(data.attributes)
     end
 
