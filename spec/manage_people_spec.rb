@@ -1,7 +1,7 @@
 require_relative '../personal_finance'
 
 describe 'Creating People' do
-  subject { PersonalFinance::Model.new }
+  subject { PersonalFinance::Application.new }
 
   let(:command) { subject.method(:create_person) }
 

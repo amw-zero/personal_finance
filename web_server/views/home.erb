@@ -4,20 +4,24 @@
   <br>
 <% end %>
 
-<h1>Accounts</h1>
-<% @accounts.each do |account| %>
-  Account: <%= account.name %>
-  <br>
-<% end %>
-
-<h1>Create people</h1>
+<h3>Create people</h3>
 <form action="/people" method="post">
   <label for="name">Person name:</label>
   <input name="name" type="text">
   <input type="submit">Create Person</input>
 </form>
 
-<h1>Create accounts</h1>
+<h1>Accounts</h1>
+<% if @accounts.length == 0 %>
+  No accounts
+<% else %>
+  <% @accounts.each do |account| %>
+    Account: <%= account.name %>
+    <br>
+  <% end %>
+<% end %>
+
+<h3>Create accounts</h3>
 <form action="/accounts" method="post">
   <label for="name">Account name:</label>
   <input name="name" type="text">

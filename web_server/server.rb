@@ -1,16 +1,18 @@
 require 'sinatra'
 require_relative '../personal_finance'
 
-model = PersonalFinance::Model.new
+application = PersonalFinance::Application.new
 
 all_people = [
-  model.create_person('Person 1'),
-  model.create_person('Person 2'),
-  model.create_person('Person 3'),
-  model.create_person('Person 4'),
+  application.create_person('Person 1'),
+  application.create_person('Person 2'),
+  application.create_person('Person 3'),
+  application.create_person('Person 4'),
 ]
 
 all_accounts = []
+
+linked_accounts = []
 
 get '/' do
   @people = all_people
@@ -20,17 +22,17 @@ get '/' do
 end
 
 post '/people' do
-  all_people << model.create_person(params[:name])
-  @people = all_people
-  @accounts = all_accounts
+  all_people << application.create_person(params[:name])
 
   redirect '/'
 end
 
 post '/accounts' do
-  all_accounts << model.create_account(params[:name])
-  @people = all_people
-  @accounts = all_accounts
+  all_accounts << application.create_account(params[:name])
 
   redirect '/'
 end
+
+post 'linked_accounts' do
+end
+ 

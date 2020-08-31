@@ -5,7 +5,7 @@ module Types
 end
 
 module PersonalFinance
-  class Model
+  class Application
     def create_person(name)
       Person.new(name: name)
     end
