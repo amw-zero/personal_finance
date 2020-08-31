@@ -6,8 +6,15 @@ end
 
 module PersonalFinance
   class Application
+    def initialize
+      @people = []
+      @accounts = []
+    end
+
     def create_person(name)
-      Person.new(name: name)
+      Person.new(name: name).tap do |p|
+        @people << p
+      end
     end
 
     def create_account(name)
@@ -16,6 +23,10 @@ module PersonalFinance
 
     def link_account(person:, account:)
       LinkedAccount.new(person: person, account: account)
+    end
+
+    def all_people
+      @people
     end
   end
 

@@ -5,7 +5,11 @@ describe 'Creating People' do
 
   let(:command) { subject.method(:create_person) }
 
+  before do
+    command.call('Jane')
+  end
+
   it do
-    expect(command.call('Jane').name).to eq('Jane')
+    expect(subject.all_people.first.name).to eq('Jane')
   end
 end
