@@ -6,6 +6,8 @@ end
 
 module PersonalFinance
   class Application
+    attr_reader :people, :accounts
+
     def initialize
       @people = []
       @accounts = []
@@ -18,15 +20,13 @@ module PersonalFinance
     end
 
     def create_account(name)
-      Account.new(name: name)
+      Account.new(name: name).tap do |a|
+        @accounts << a
+      end
     end
 
     def link_account(person:, account:)
       LinkedAccount.new(person: person, account: account)
-    end
-
-    def all_people
-      @people
     end
   end
 

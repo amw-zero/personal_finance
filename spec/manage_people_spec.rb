@@ -10,6 +10,6 @@ describe 'Creating People' do
   end
 
   it do
-    expect(subject.all_people.first.name).to eq('Jane')
+    expect(subject.people.first.name).to eq('Jane')
   end
 end

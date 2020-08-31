@@ -5,7 +5,11 @@ describe 'Creating Accounts' do
 
   let(:command) { subject.method(:create_account) }
 
+  before do
+    command.call('Checking')
+  end
+
   it do
-    expect(command.call('Checking').name).to eq('Checking')
+    expect(subject.accounts.first.name).to eq('Checking')
   end
 end
