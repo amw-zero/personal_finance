@@ -28,8 +28,8 @@
   <input type="submit">Create Account</input>
 </form>
 
-<h3>Create incomes</h3>
-<form action="/incomes" method="post">
+<h3>Create transactions</h3>
+<form action="/transactions" method="post">
   <label for="account_id">Account</label>
   <select id="idk" name="account_id">
     <% @accounts.each do |a| %>
@@ -45,7 +45,7 @@
   <label for="day_of_month">Day of month</label>
   <input name="day_of_month" type="number" />
 
-  <input type="submit">Create Income</input>
+  <input type="submit">Create Transaction</input>
 </form>
 
 <form id="accountform">

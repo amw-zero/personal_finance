@@ -75,13 +75,14 @@ module PersonalFinance
       end
     end
 
-    def create_income(account_id:, amount:, currency:, day_of_month:)
-      Income.new(
+    def create_transaction(account_id:, amount:, currency:, day_of_month:)
+      Transaction.new(
+        account_id: account_id,
         amount: amount, 
         currency: currency, 
         day_of_month: day_of_month
       ).tap do |i|
-        @persistence.persist(:incomes, persistable_income(i, account_id))
+        @persistence.persist(:transactions, persistable_transation(i))
       end
     end
 
@@ -97,24 +98,24 @@ module PersonalFinance
       end
     end
 
-    def incomes
-      @persistence.relation_of(:incomes).map do |data|
+    def transactions
+      @persistence.relation_of(:transactions).map do |data|
         data[:currency] = data[:currency].to_sym
-        Income.new(data)
+        Transaction.new(data)
       end
     end
 
     def cash_flow(account_id)
-      incomes = @persistence.relation_of(:incomes)
+      transactions = @persistence.relation_of(:transactions)
       accounts = @persistence.relation_of(:accounts).restrict(id: account_id)
-      incomes.join(accounts, { account_id: :id }).map do |data|
+      transactions.join(accounts, { account_id: :id }).map do |data|
         data[:currency] = data[:currency].to_sym
-        Income.new(data)
+        Transaction.new(data)
       end.sort_by(&:day_of_month)
     end
 
-    def persistable_income(i, account_id)
-      i.attributes.merge({ currency: i.currency.to_s, account_id: account_id })
+    def persistable_transation(t)
+      t.attributes.merge({ currency: t.currency.to_s })
     end
   end
 
@@ -133,9 +134,10 @@ module PersonalFinance
     attribute :account, Account
   end
 
-  class Income < Dry::Struct
+  class Transaction < Dry::Struct
     attribute? :id, Types::Integer
     attribute? :account, Account
+    attribute :account_id, Types::Integer
     attribute :amount, Types::Float
     attribute :currency, Types::Value(:usd)
     attribute :day_of_month, Types::Integer

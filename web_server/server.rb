@@ -27,9 +27,11 @@ post '/accounts' do
   redirect '/'
 end
 
-post '/incomes' do
-  application.create_income(
-    account_id: params[:account_id],
+post '/transactions' do
+  # TODO: These type coercions can be a source of bugs
+  # add to application kernel
+  application.create_transaction(
+    account_id: params[:account_id].to_i,
     amount: params[:amount].to_f,
     currency: params[:currency].to_sym,
     day_of_month: params[:day_of_month].to_i

@@ -18,7 +18,7 @@ DB.create_table :accounts do
   String :name
 end
 
-DB.create_table :incomes do
+DB.create_table :transactions do
   primary_key :id
   foreign_key :account_id, :accounts
   Float :amount
@@ -26,9 +26,9 @@ DB.create_table :incomes do
   Integer :day_of_month
 end
 
-items = DB[:people]
+# items = DB[:people]
 
-# Populate the table
-items.insert(:name => 'abc')
-items.insert(:name => 'def')
-items.insert(:name => 'ghi')
+# # Populate the table
+# items.insert(:name => 'abc')
+# items.insert(:name => 'def')
+# items.insert(:name => 'ghi')
