@@ -64,62 +64,24 @@ module PersonalFinance
     end
   end
 
-  class Datastore
-    def initialize(persistence: PostgresPersistence.new)
-      @persistence = persistence
-    end
-
-    def persist(relation, data)
-      @persistence.persist(relation, data)
-    end
-
-    def people
-      @persistence.relation.map do |data|
-        Person.new(data)
-      end
-    end
-
-    def incomes(include: nil)
-      @persistence.relation_of(:incomes).map do |data|
-        data[:currency] = data[:currency].to_sym
-        Income.new(data)
-      end
-    end
-
-    def accounts
-      @persistence.relation_of(:accounts).map do |data|
-        Account.new(data)
-      end
-    end
-
-    def cash_flow(account_id)
-      incomes = @persistence.relation_of(:incomes)
-      accounts = @persistence.relation_of(:accounts).restrict(id: account_id)
-      incomes.join(accounts, { account_id: :id }).map do |data|
-        data[:currency] = data[:currency].to_sym
-        Income.new(data)
-      end
-    end
-  end
-
   class Application
     attr_reader :accounts, :linked_accounts
 
-    def initialize(datastore: Datastore.new)
+    def initialize(persistence: MemoryPersistence.new)
       @accounts = []
       @linked_accounts = []
-      @datastore = datastore
+      @persistence = persistence
     end
 
     def create_person(name)
       Person.new(name: name).tap do |p|
-        @datastore.persist(:people, p.attributes)
+        @persistence.persist(:people, p.attributes)
       end
     end
 
     def create_account(name)
       Account.new(name: name).tap do |a|
-        @datastore.persist(:accounts, a.attributes)
+        @persistence.persist(:accounts, a.attributes)
       end
     end
 
@@ -135,24 +97,36 @@ module PersonalFinance
         currency: currency, 
         day_of_month: day_of_month
       ).tap do |i|
-        @datastore.persist(:incomes, persistable_income(i, account_id))
+        @persistence.persist(:incomes, persistable_income(i, account_id))
       end
     end
 
     def people
-      @datastore.people
+      @persistence.relation.map do |data|
+        Person.new(data)
+      end
     end
 
     def accounts
-      @datastore.accounts
+      @persistence.relation_of(:accounts).map do |data|
+        Account.new(data)
+      end
     end
 
     def incomes
-      @datastore.incomes
+      @persistence.relation_of(:incomes).map do |data|
+        data[:currency] = data[:currency].to_sym
+        Income.new(data)
+      end
     end
 
     def cash_flow(account_id)
-      @datastore.cash_flow(account_id).sort_by(&:day_of_month)
+      incomes = @persistence.relation_of(:incomes)
+      accounts = @persistence.relation_of(:accounts).restrict(id: account_id)
+      incomes.join(accounts, { account_id: :id }).map do |data|
+        data[:currency] = data[:currency].to_sym
+        Income.new(data)
+      end.sort_by(&:day_of_month)
     end
 
     def persistable_income(i, account_id)
