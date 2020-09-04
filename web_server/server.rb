@@ -4,7 +4,6 @@ require_relative '../personal_finance'
 application = PersonalFinance::Application.new
 
 get '/' do
-  puts params
   @people = application.people
   @accounts = application.accounts
   @cash_flow = if params[:account]
