@@ -26,14 +26,6 @@ module PersonalFinance
       }
     end
 
-    def relation
-      @relations[:people]
-    end
-
-    def accounts
-      @relations[:accounts]
-    end
-
     def relation_of(r)
       @relations[r]
     end
@@ -102,7 +94,7 @@ module PersonalFinance
     end
 
     def people
-      @persistence.relation.map do |data|
+      @persistence.relation_of(:people).map do |data|
         Person.new(data)
       end
     end
