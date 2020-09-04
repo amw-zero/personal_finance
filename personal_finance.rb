@@ -67,7 +67,7 @@ module PersonalFinance
   class Application
     attr_reader :accounts, :linked_accounts
 
-    def initialize(persistence: MemoryPersistence.new)
+    def initialize(persistence: PostgresPersistence.new)
       @accounts = []
       @linked_accounts = []
       @persistence = persistence
