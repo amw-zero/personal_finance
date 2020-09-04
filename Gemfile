@@ -10,6 +10,7 @@ source 'https://rubygems.org' do
   group :development do
     gem 'rspec'
     gem 'rack-test'
+    gem 'pry'
   end
 end
 
