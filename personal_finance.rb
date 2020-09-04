@@ -14,16 +14,8 @@ module PersonalFinance
     attr_reader :people
 
     def initialize
-      @relations = {
-        people: Bmg::Relation.new([]),
-        incomes: Bmg::Relation.new([]),
-        accounts: Bmg::Relation.new([])
-      }
-      @ids = {
-        people: 1,
-        incomes: 1,
-        accounts: 1
-      }
+      @relations = Hash.new(Bmg::Relation.new([]))
+      @ids = Hash.new(1)
     end
 
     def relation_of(r)
