@@ -1,13 +1,8 @@
-require_relative '../personal_finance'
-require_relative 'datastore'
+require_relative 'test_application'
 
 
 describe 'Viewing cash flow' do
-  subject do
-    PersonalFinance::Application.new(
-      datastore: PersonalFinance::Datastore.create_null
-    )
-  end
+  subject { test_application }
 
   let(:checking_account) { subject.create_account('Checking') }
   let(:savings_account) { subject.create_account('Savings') }

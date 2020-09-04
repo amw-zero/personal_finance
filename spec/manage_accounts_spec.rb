@@ -1,11 +1,7 @@
-require_relative '../personal_finance'
+require_relative 'test_application'
 
 describe 'Creating Accounts' do
-  subject do
-    PersonalFinance::Application.new(
-      datastore: PersonalFinance::Datastore.create_null
-    )
-  end
+  subject { test_application }
 
   let(:command) { subject.method(:create_account) }
 

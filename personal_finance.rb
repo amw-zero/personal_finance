@@ -152,7 +152,7 @@ module PersonalFinance
     end
 
     def cash_flow(account_id)
-      @datastore.cash_flow(account_id)
+      @datastore.cash_flow(account_id).sort_by(&:day_of_month)
     end
 
     def persistable_income(i, account_id)
