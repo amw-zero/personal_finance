@@ -26,6 +26,14 @@ DB.create_table :transactions do
   Integer :day_of_month
 end
 
+DB.create_table :transaction_tags do
+  primary_key :id
+  foreign_key :transaction_id, :transactions
+  String :name
+end
+
+# make transaction tags
+
 # items = DB[:people]
 
 # # Populate the table

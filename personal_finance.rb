@@ -86,6 +86,15 @@ module PersonalFinance
       end
     end
 
+    def tag_transaction(transaction_id, tag:)
+      TransactionTag.new(
+        transaction_id: transaction_id,
+        name: tag
+      ).tap do |i|
+        @persistence.persist(:transaction_tags, i.attributes)
+      end
+    end
+
     def people
       @persistence.relation_of(:people).map do |data|
         Person.new(data)
@@ -114,8 +123,52 @@ module PersonalFinance
       end.sort_by(&:day_of_month)
     end
 
+    def transactions_for_tag(tag)
+      transactions = relation(:transactions)
+      tags = relation(:transaction_tags)
+      transactions.join(tags.restrict(name: tag), { id: :transaction_id }).map do |data|
+        # TODO: Remove this duiplication each time a transaction is mapped from the db
+        data[:currency] = data[:currency].to_sym
+        Transaction.new(data)
+      end
+    end
+
+    def tag_index
+      to_models(
+        relation(:transaction_tags),
+        TransactionTag
+      ).group_by { |t| t.transaction_id }
+    end
+
+    def transaction_tags
+      relation(:transaction_tags).map do |data|
+        TransactionTag.new(data)
+      end.uniq(&:name)
+    end
+
+    def relation(r)
+      @persistence.relation_of(r)
+    end
+
     def persistable_transation(t)
-      t.attributes.merge({ currency: t.currency.to_s })
+      # TODO: the attributes are mutable here, and this is surprising and confusing
+      # Persisting this later one modifies the attributes which modifies the struct.
+      # Terrifying.
+      t.attributes.merge!({ currency: t.currency.to_s })
+    end
+
+    def to_models(relation, model_klass)
+      case model_klass.to_s
+      when 'PersonalFinance::Transaction'
+        relation.map do |data|
+          data[:currency] = data[:currency].to_sym
+          model_klass.new(data)
+        end
+      else
+        relation.map do |data|
+          model_klass.new(data)
+        end
+      end
     end
   end
 
@@ -141,6 +194,12 @@ module PersonalFinance
     attribute :amount, Types::Float
     attribute :currency, Types::Value(:usd)
     attribute :day_of_month, Types::Integer
+  end
+
+  class TransactionTag < Dry::Struct
+    attribute? :id, Types::Integer
+    attribute :transaction_id, Types::Integer
+    attribute :name, Types::String
   end
 
   private_constant :Person

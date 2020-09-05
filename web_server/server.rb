@@ -11,6 +11,7 @@ get '/' do
                else
                  []
                end
+  @tag_index = application.tag_index
 
   erb :home
 end
@@ -29,13 +30,22 @@ end
 
 post '/transactions' do
   # TODO: These type coercions can be a source of bugs
-  # add to application kernel
+  # add to application kernel, should only be:
+  # application.create_transaction(params)
+  # Can keep the same API internally with the above as an "anti-corruption" wrapper
+  # which handles web concerns
   application.create_transaction(
     account_id: params[:account_id].to_i,
     amount: params[:amount].to_f,
     currency: params[:currency].to_sym,
     day_of_month: params[:day_of_month].to_i
   )
+
+  redirect '/'
+end
+
+post '/transaction_tags' do
+  application.tag_transaction(params[:transaction_id].to_i, tag: params[:name])
 
   redirect '/'
 end

@@ -1,3 +1,4 @@
+<!--
 <h1>People</h1>
 <% @people.each do |person| %>
   Person: <%= person.name %>
@@ -10,6 +11,7 @@
   <input name="name" type="text">
   <input type="submit">Create Person</input>
 </form>
+-->
 
 <h1>Accounts</h1>
 <% if @accounts.length == 0 %>
@@ -59,5 +61,16 @@
 </select>
 
 <% @cash_flow.each do |i| %>
-  <p><%= "Day: #{i.day_of_month} | #{i.amount}"%></p>
+  <br>
+  <span><%= "Day: #{i.day_of_month} | #{i.amount}"%></span>
+  <% if @tag_index[i.id] %>
+    <%= @tag_index[i.id].map(&:name) %>
+  <% end %>
+  <form action="/transaction_tags" method="post" name="transaction_#{i.id}_tag_form">
+    <label for="name">Tag this transaction</label>
+    <input name="name" type="text" />
+    <input name="transaction_id" value="<%= i.id %>" hidden />
+    <input type="submit" />
+  </form>
 <% end %>
+
