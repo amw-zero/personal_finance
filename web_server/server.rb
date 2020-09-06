@@ -12,6 +12,12 @@ get '/' do
                  []
                end
   @tag_index = application.tag_index
+  @filtered_tag = params[:transaction_tag]
+  @tagged_transactions = if params[:transaction_tag]
+                           application.transactions_for_tag(params[:transaction_tag])
+                         else
+                           []
+                         end
 
   erb :home
 end

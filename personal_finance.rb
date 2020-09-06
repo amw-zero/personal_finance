@@ -3,7 +3,6 @@ require 'bmg'
 require 'pg'
 require 'bmg/sequel'
 require_relative 'postgres/postgres'
-require 'pry'
 
 module Types
   include Dry::Types()
@@ -126,11 +125,10 @@ module PersonalFinance
     def transactions_for_tag(tag)
       transactions = relation(:transactions)
       tags = relation(:transaction_tags)
-      transactions.join(tags.restrict(name: tag), { id: :transaction_id }).map do |data|
-        # TODO: Remove this duiplication each time a transaction is mapped from the db
-        data[:currency] = data[:currency].to_sym
-        Transaction.new(data)
-      end
+      to_models(
+        tags.restrict(name: tag).join(transactions, { transaction_id: :id }),
+        Transaction
+      )
     end
 
     def tag_index

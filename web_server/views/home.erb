@@ -73,4 +73,21 @@
     <input type="submit" />
   </form>
 <% end %>
+<br>
+<select id="tagselect" name="transaction_tag" form="tagform">
+  <% @tag_index.values.flatten.uniq.each do |a| %>
+    <option value="<%= a.name %>"><%= a.name %></option>
+  <% end %>
+</select>
 
+<form id="tagform">
+  <input type="submit">Filter to this tag</input>
+</form>
+
+<% if @filtered_tag %>
+  <h3><%= "Tag: #{@filtered_tag}" %></h3>
+  <% @tagged_transactions.each do |t| %>
+    <%= "Amount: #{t.amount} | account id: #{t.account_id} | day: #{t.day_of_month}" %>
+    <br>
+  <% end %>
+<% end %>

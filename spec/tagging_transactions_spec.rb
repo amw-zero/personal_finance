@@ -23,12 +23,6 @@ describe 'Tagging transactions' do
     expect(subject.transactions_for_tag('income').map(&:day_of_month)).to eq([1, 15])
   end
 
-  describe 'listing all tags' do
-    it do
-      expect(subject.transaction_tags.map(&:name)).to eq(['income'])
-    end
-  end
-
   describe 'tags for transaction' do
     it do 
       expect(subject.tag_index.transform_values { |tag| tag.map(&:name) }).to eq({
