@@ -203,4 +203,6 @@ module PersonalFinance
   private_constant :Person
   private_constant :Account
   private_constant :LinkedAccount
+  private_constant :Transaction
+  private_constant :TransactionTag
 end
