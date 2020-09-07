@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sinatra'
 require_relative '../personal_finance'
 
@@ -61,4 +63,3 @@ post '/transaction_tags' do
 
   redirect '/'
 end
- 
