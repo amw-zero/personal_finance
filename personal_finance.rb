@@ -22,8 +22,8 @@ module PersonalFinance
       @ids = Hash.new(1)
     end
 
-    def relation_of(r)
-      @relations[r]
+    def relation_of(rel_name)
+      @relations[rel_name]
     end
 
     def persist(relation, data)
@@ -48,15 +48,13 @@ module PersonalFinance
       relation.insert(data)
     end
 
-    def relation_of(r)
-      Bmg.sequel(r, @db)
+    def relation_of(rel_name)
+      Bmg.sequel(rel_name, @db)
     end
   end
 
   # The top-level Personal Finance application
   class Application
-    attr_reader :accounts, :linked_accounts
-
     def initialize(persistence: PostgresPersistence.new)
       @accounts = []
       @linked_accounts = []
@@ -162,15 +160,15 @@ module PersonalFinance
       end.uniq(&:name)
     end
 
-    def relation(r)
-      @persistence.relation_of(r)
+    def relation(name)
+      @persistence.relation_of(name)
     end
 
-    def persistable_transation(t)
+    def persistable_transation(transaction)
       # TODO: the attributes are mutable here, and this is surprising and confusing
       # Persisting this later one modifies the attributes which modifies the struct.
       # Terrifying.
-      t.attributes.merge!({ currency: t.currency.to_s })
+      transaction.attributes.merge!({ currency: transaction.currency.to_s })
     end
 
     def to_models(relation, model_klass)
