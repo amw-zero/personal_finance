@@ -13,6 +13,6 @@ describe 'Calculating sum of transaction amounts' do
   end
 
   it do
-    expect(subject.transactions_for_tag('tag').sum).to eq(250.0)
+    expect(subject.transactions_for_tags(['tag'], subject.tag_index).sum).to eq(250.0)
   end
 end

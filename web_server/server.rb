@@ -13,8 +13,13 @@ get '/' do
                end
   @tag_index = application.tag_index
   @filtered_tag = params[:transaction_tag]
+  @is_tag_intersection = params[:intersection] == 'on'
   @tagged_transactions = if params[:transaction_tag]
-                           application.transactions_for_tag(params[:transaction_tag])
+                           application.transactions_for_tags(
+                             params[:transaction_tag],
+                             @tag_index,
+                             intersection: params[:intersection] == 'on'
+                           )
                          else
                            []
                          end

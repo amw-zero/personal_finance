@@ -77,21 +77,25 @@
 <% end %>
 
 <h1>Tags</h1>
-<select id="tagselect" name="transaction_tag" form="tagform">
+<select id="tagselect" name="transaction_tag[]" form="tagform" multiple>
   <% @tag_index.values.flatten.map(&:name).uniq.each do |a| %>
     <option value="<%= a %>"><%= a %></option>
   <% end %>
 </select>
 
 <form id="tagform">
+  <label for="intersection">Intersection</label>
+  <input name="intersection" type="checkbox" />
   <input type="submit">Filter to this tag</input>
 </form>
 
 <% if @filtered_tag %>
   <h3><%= "Tag: #{@filtered_tag}" %></h3>
+  <h4><%= @is_tag_intersection ? 'intersection of tags' : 'union of tags' %></h4>
   <% @tagged_transactions.transactions.each do |t| %>
     <%= "#{t.name} | Amount: #{t.amount} | account id: #{t.account_id} | day: #{t.day_of_month}" %>
     <br>
   <% end %>
   <p>Sum: <%= @tagged_transactions.sum %></p>
 <% end %>
+

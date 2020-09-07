@@ -125,13 +125,21 @@ module PersonalFinance
       ).sort_by(&:day_of_month)
     end
 
-    def transactions_for_tag(tag)
-      transactions = relation(:transactions)
-      tags = relation(:transaction_tags).restrict(name: tag).rename(name: :tag_name)
-      transactions = to_models(
-        tags.join(transactions, { transaction_id: :id }),
-        Transaction
-      )
+    def transactions_for_tags(tags, tag_index, intersection: false)
+      transaction_relation = if intersection
+                               transaction_ids = tag_index.select do |_, t| 
+                                 (t.map(&:name) & tags).count == tags.count
+                               end.keys
+                               relation(:transactions).restrict(id: transaction_ids)
+                             else
+                               transactions = relation(:transactions)
+                               tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
+                               tags.join(transactions, { transaction_id: :id })
+                             end
+
+      transactions = to_models(transaction_relation, Transaction)
+      
+
       TransactionSet.new(transactions: transactions)
     end
 

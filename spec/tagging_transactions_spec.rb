@@ -19,8 +19,25 @@ describe 'Tagging transactions' do
     subject.tag_transaction(semi_monthly_income2.id, tag: 'income')
   end
 
-  it do
-    expect(subject.transactions_for_tag('income').transactions.map(&:day_of_month)).to eq([1, 15])
+  context 'when searching for the union of tags' do
+    it 'returns transactions that have any of the specified tags' do
+      expect(subject.transactions_for_tags(['income'], subject.tag_index).transactions.map(&:day_of_month)).to eq([1, 15])
+    end
+  end
+
+  context 'when searching for the intersection of tags' do
+    before do
+      subject.tag_transaction(semi_monthly_income1.id, tag: 'second_tag')
+    end
+
+    it 'returns transactions that are tagged with all of the specified tags' do
+      expect(
+        subject.transactions_for_tags(
+          ['income', 'second_tag'],
+          subject.tag_index,
+          intersection: true
+        ).transactions.map(&:day_of_month)).to eq([1])
+    end
   end
 
   describe 'tags for transaction' do
