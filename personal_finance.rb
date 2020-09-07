@@ -172,6 +172,7 @@ module PersonalFinance
     end
 
     def to_models(relation, model_klass)
+      puts relation.to_sql if relation.is_a?(Bmg::Sql::Relation)
       case model_klass.to_s
       when 'PersonalFinance::Transaction'
         relation.map do |data|
