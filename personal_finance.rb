@@ -111,7 +111,7 @@ module PersonalFinance
       @persistence.relation_of(:transactions).map do |data|
         data[:currency] = data[:currency].to_sym
         Transaction.new(data)
-      end
+      end.sort_by(&:day_of_month)
     end
 
     def cash_flow(account_id)

@@ -14,8 +14,23 @@ describe 'Creating Transactions' do
   end
 
   it do
-#    expect(subject.transactions.first.account).to eq(account)
+    expect(subject.transactions.first.account_id).to eq(account.id)
     expect(subject.transactions.first.amount).to eq(100.0)
     expect(subject.transactions.first.name).to eq('T1')
+  end
+end
+
+describe 'Retrieving Transactions' do
+  subject { test_application }
+
+  let(:account) { subject.create_account('Checking') }
+
+  before do
+    subject.create_transaction(name: 'T1', account_id: account.id, amount: 100.0, currency: :usd, day_of_month: 2)
+    subject.create_transaction(name: 'T2', account_id: account.id, amount: 100.0, currency: :usd, day_of_month: 1)
+  end
+
+  it 'returns the transactions ordered by their date of occurrence' do
+    expect(subject.transactions.map(&:name)).to eq(['T2', 'T1'])
   end
 end
