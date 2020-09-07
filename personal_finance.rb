@@ -190,6 +190,7 @@ module PersonalFinance
     attribute? :account, Account
     attribute :account_id, Types::Integer
     attribute :amount, Types::Float
+    attribute :name, Types::String
     attribute :currency, Types::Value(:usd)
     attribute :day_of_month, Types::Integer
   end

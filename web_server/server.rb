@@ -9,7 +9,7 @@ get '/' do
   @cash_flow = if params[:account]
                  application.cash_flow(params[:account].to_i)
                else
-                 []
+                 application.transactions
                end
   @tag_index = application.tag_index
   @filtered_tag = params[:transaction_tag]

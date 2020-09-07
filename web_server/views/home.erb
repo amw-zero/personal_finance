@@ -60,9 +60,9 @@
   <% end %>
 </select>
 
+<h1>Transactions</h1>
 <% @cash_flow.each do |i| %>
-  <br>
-  <span><%= "Day: #{i.day_of_month} | #{i.amount}"%></span>
+  <span><%= "Name: #{i.name} | Day: #{i.day_of_month} | #{i.amount}"%></span>
   <% if @tag_index[i.id] %>
     <%= @tag_index[i.id].map(&:name) %>
   <% end %>
@@ -73,7 +73,8 @@
     <input type="submit" />
   </form>
 <% end %>
-<br>
+
+<h1>Tags</h1>
 <select id="tagselect" name="transaction_tag" form="tagform">
   <% @tag_index.values.flatten.uniq.each do |a| %>
     <option value="<%= a.name %>"><%= a.name %></option>

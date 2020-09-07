@@ -23,6 +23,7 @@ DB.create_table :transactions do
   foreign_key :account_id, :accounts
   Float :amount
   String :currency
+  String :name
   Integer :day_of_month
 end
 
