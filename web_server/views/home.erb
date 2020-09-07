@@ -85,7 +85,11 @@
 
 <form id="tagform">
   <label for="intersection">Intersection</label>
-  <input name="intersection" type="checkbox" />
+  <% if @is_tag_intersection %>
+    <input name="intersection" type="checkbox" checked />
+  <% else %>
+    <input name="intersection" type="checkbox" />
+  <% end %>
   <input type="submit">Filter to this tag</input>
 </form>
 
@@ -98,5 +102,3 @@
   <% end %>
   <p>Sum: <%= @tagged_transactions.sum %></p>
 <% end %>
-
-<!-- Next, want to be able to show results of multiple tag filters and calculate ratios between them, i.e. 50/30/20 rule for needs / wants / financial goals  -->
