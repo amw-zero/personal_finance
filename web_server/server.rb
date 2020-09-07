@@ -41,6 +41,7 @@ post '/transactions' do
   # Can keep the same API internally with the above as an "anti-corruption" wrapper
   # which handles web concerns
   application.create_transaction(
+    name: params[:name],
     account_id: params[:account_id].to_i,
     amount: params[:amount].to_f,
     currency: params[:currency].to_sym,

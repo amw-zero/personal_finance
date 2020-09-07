@@ -74,8 +74,9 @@ module PersonalFinance
       end
     end
 
-    def create_transaction(account_id:, amount:, currency:, day_of_month:)
+    def create_transaction(name:, account_id:, amount:, currency:, day_of_month:)
       Transaction.new(
+        name: name,
         account_id: account_id,
         amount: amount, 
         currency: currency, 
