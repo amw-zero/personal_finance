@@ -96,31 +96,33 @@ module PersonalFinance
     end
 
     def people
-      @persistence.relation_of(:people).map do |data|
-        Person.new(data)
-      end
+      to_models(
+        relation(:people),
+        Person
+      )
     end
 
     def accounts
-      @persistence.relation_of(:accounts).map do |data|
-        Account.new(data)
-      end
+      to_models(
+        relation(:accounts),
+        Account
+      )
     end
 
     def transactions
-      @persistence.relation_of(:transactions).map do |data|
-        data[:currency] = data[:currency].to_sym
-        Transaction.new(data)
-      end.sort_by(&:day_of_month)
+      to_models(
+        relation(:transactions),
+        Transaction
+      ).sort_by(&:day_of_month)
     end
 
     def cash_flow(account_id)
-      transactions = @persistence.relation_of(:transactions)
-      accounts = @persistence.relation_of(:accounts).restrict(id: account_id)
-      transactions.join(accounts, { account_id: :id }).map do |data|
-        data[:currency] = data[:currency].to_sym
-        Transaction.new(data)
-      end.sort_by(&:day_of_month)
+      transactions = relation(:transactions)
+      accounts = relation(:accounts).restrict(id: account_id)
+      to_models(
+        transactions.join(accounts, { account_id: :id }),
+        Transaction
+      ).sort_by(&:day_of_month)
     end
 
     def transactions_for_tag(tag)
