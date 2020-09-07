@@ -127,9 +127,9 @@ module PersonalFinance
 
     def transactions_for_tag(tag)
       transactions = relation(:transactions)
-      tags = relation(:transaction_tags)
+      tags = relation(:transaction_tags).restrict(name: tag).rename(name: :tag_name)
       transactions = to_models(
-        tags.restrict(name: tag).join(transactions, { transaction_id: :id }),
+        tags.join(transactions, { transaction_id: :id }),
         Transaction
       )
       TransactionSet.new(transactions: transactions)

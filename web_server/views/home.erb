@@ -90,7 +90,7 @@
 <% if @filtered_tag %>
   <h3><%= "Tag: #{@filtered_tag}" %></h3>
   <% @tagged_transactions.transactions.each do |t| %>
-    <%= "Amount: #{t.amount} | account id: #{t.account_id} | day: #{t.day_of_month}" %>
+    <%= "#{t.name} | Amount: #{t.amount} | account id: #{t.account_id} | day: #{t.day_of_month}" %>
     <br>
   <% end %>
   <p>Sum: <%= @tagged_transactions.sum %></p>
