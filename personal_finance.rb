@@ -126,10 +126,11 @@ module PersonalFinance
     def transactions_for_tag(tag)
       transactions = relation(:transactions)
       tags = relation(:transaction_tags)
-      to_models(
+      transactions = to_models(
         tags.restrict(name: tag).join(transactions, { transaction_id: :id }),
         Transaction
       )
+      TransactionSet.new(transactions: transactions)
     end
 
     def tag_index
@@ -200,6 +201,14 @@ module PersonalFinance
     attribute? :id, Types::Integer
     attribute :transaction_id, Types::Integer
     attribute :name, Types::String
+  end
+
+  class TransactionSet < Dry::Struct
+    attribute :transactions, Types::Array(Transaction)
+
+    def sum
+      transactions.map(&:amount).sum.round(2)
+    end
   end
 
   private_constant :Person

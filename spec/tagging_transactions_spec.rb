@@ -20,7 +20,7 @@ describe 'Tagging transactions' do
   end
 
   it do
-    expect(subject.transactions_for_tag('income').map(&:day_of_month)).to eq([1, 15])
+    expect(subject.transactions_for_tag('income').transactions.map(&:day_of_month)).to eq([1, 15])
   end
 
   describe 'tags for transaction' do
