@@ -1,14 +1,19 @@
+# frozen_string_literal: true
+
 require 'dry-struct'
 require 'bmg'
 require 'pg'
 require 'bmg/sequel'
 require_relative 'postgres/postgres'
 
+# Bring Dry::Struct types into scope
 module Types
   include Dry::Types()
 end
 
+# The top-level module for the Personal Finance app
 module PersonalFinance
+  # Store relations in memory
   class MemoryPersistence
     attr_reader :people
 
@@ -28,6 +33,7 @@ module PersonalFinance
     end
   end
 
+  # Store relations in postgres
   class PostgresPersistence
     def initialize
       @db = Sequel.connect(Postgres::SERVER_URL)
@@ -47,6 +53,7 @@ module PersonalFinance
     end
   end
 
+  # The top-level Personal Finance application
   class Application
     attr_reader :accounts, :linked_accounts
 
@@ -78,8 +85,8 @@ module PersonalFinance
       Transaction.new(
         name: name,
         account_id: account_id,
-        amount: amount, 
-        currency: currency, 
+        amount: amount,
+        currency: currency,
         day_of_month: day_of_month
       ).tap do |i|
         @persistence.persist(:transactions, persistable_transation(i))
@@ -127,7 +134,7 @@ module PersonalFinance
 
     def transactions_for_tags(tags, tag_index, intersection: false)
       transaction_relation = if intersection
-                               transaction_ids = tag_index.select do |_, t| 
+                               transaction_ids = tag_index.select do |_, t|
                                  (t.map(&:name) & tags).count == tags.count
                                end.keys
                                relation(:transactions).restrict(id: transaction_ids)
@@ -138,7 +145,6 @@ module PersonalFinance
                              end
 
       transactions = to_models(transaction_relation, Transaction)
-      
 
       TransactionSet.new(transactions: transactions)
     end
@@ -147,7 +153,7 @@ module PersonalFinance
       to_models(
         relation(:transaction_tags),
         TransactionTag
-      ).group_by { |t| t.transaction_id }
+      ).group_by(&:transaction_id)
     end
 
     def transaction_tags
@@ -182,21 +188,25 @@ module PersonalFinance
     end
   end
 
+  # A person
   class Person < Dry::Struct
     attribute? :id, Types::Integer
     attribute :name, Types::String
   end
 
+  # A finance account
   class Account < Dry::Struct
     attribute? :id, Types::Integer
     attribute :name, Types::String
   end
 
+  # A relationship between a Person and an Account
   class LinkedAccount < Dry::Struct
     attribute :person, Person
     attribute :account, Account
   end
 
+  # A financial transaction, e.g. an expense or an income
   class Transaction < Dry::Struct
     attribute? :id, Types::Integer
     attribute? :account, Account
@@ -207,12 +217,14 @@ module PersonalFinance
     attribute :day_of_month, Types::Integer
   end
 
+  # A categorization of a transaction, e.g. "debt" or "house"
   class TransactionTag < Dry::Struct
     attribute? :id, Types::Integer
     attribute :transaction_id, Types::Integer
     attribute :name, Types::String
   end
 
+  # A set of transactions
   class TransactionSet < Dry::Struct
     attribute :transactions, Types::Array(Transaction)
 

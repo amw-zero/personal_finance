@@ -11,6 +11,7 @@ source 'https://rubygems.org' do
     gem 'rspec'
     gem 'rack-test'
     gem 'pry'
+    gem 'rubocop'
   end
 end
 
