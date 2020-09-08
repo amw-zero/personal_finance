@@ -1,0 +1,18 @@
+<div class="max-w-sm w-full lg:max-w-full lg:flex">
+  <div class="border-r border-b border-l border-gray-400 lg:border-l-0 lg:border-t lg:border-gray-400 bg-white rounded-b lg:rounded-b-none lg:rounded-r p-4 leading-normal">
+    <div class="text-gray-900 font-bold text-xl mb-2">
+      <%= transaction.name %>
+    </div>
+    <p class="text-gray-700 text-base"><%= "$#{transaction.amount} on day #{transaction.day_of_month}"%></p>
+    <% if @tag_index[transaction.id] %>
+      <% @tag_index[transaction.id].map(&:name).each do |tag_name| %>
+        <span class="inline-block border border-blue-500 rounded py-1 px-3 bg-teal-500 text-white"><%= tag_name %></span>
+      <% end %>
+    <% end %>
+    <form action="/transaction_tags" method="post" name="transaction_#{i.id}_tag_form">
+      <%= erb :input, locals: { name: 'name', label: 'Tag', type: 'text' } %>
+      <input name="transaction_id" value="<%= transaction.id %>" hidden />
+      <%= erb :form_submit_button, locals: { title: 'Add Tag' } %>
+    </form>
+  </div>
+</div>

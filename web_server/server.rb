@@ -63,3 +63,9 @@ post '/transaction_tags' do
 
   redirect '/'
 end
+
+helpers do
+  def input_classes
+    'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
+  end
+end

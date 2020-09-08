@@ -1,0 +1,15 @@
+<div class="mb-4">
+  <%= erb :label, locals: { name: name, label: label } %>
+  <% if type.to_sym == :float %>
+    <input 
+      name="<%= name %>" 
+      type="number" 
+      step="0.01"
+      class="<%= input_classes %>" />
+  <% else %>
+    <input 
+      name="<%= name %>" 
+      type="<%= type %>" 
+      class="<%= input_classes %>" />
+  <% end %>
+</div>
