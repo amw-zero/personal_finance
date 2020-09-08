@@ -65,9 +65,11 @@
 </div>
 
 <h1>Transactions</h1>
-<% @cash_flow.each do |transaction| %>
-  <%= erb :transaction, locals: { transaction: transaction } %>
-<% end %>
+<div class="grid grid-cols-4 gap-4">
+  <% @cash_flow.each do |transaction| %>
+    <%= erb :transaction, locals: { transaction: transaction } %>
+  <% end %>
+</div>
 
 <h1>Tags</h1>
 <select id="tagselect" name="transaction_tag[]" form="tagform" multiple>
