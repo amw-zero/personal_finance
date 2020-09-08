@@ -1,20 +1,25 @@
-<div class="max-w-sm w-full lg:max-w-full ">
-  <div class="border-r border-b border-l border-gray-400 lg:border-l-0 lg:border-t lg:border-gray-400 bg-white rounded-b lg:rounded-b-none lg:rounded-r p-4 leading-normal">
-    <div class="text-gray-900 font-bold text-xl mb-2">
+<div class="m-4">
+  <div class="border border-gray-400 lg:border-gray-400 bg-white rounded p-4 leading-normal">
+    <span class="text-gray-900 font-bold text-xl mb-2">
       <%= transaction.name %>
-    </div>
-    <p class="text-gray-700 text-base mb-4"><%= "$#{transaction.amount} on day #{transaction.day_of_month}"%></p>
+    </span>
+    <span class="text-gray-700 text-base mb-4 ml-4 mr-4"><%= "$#{transaction.amount} on day #{transaction.day_of_month}"%></span>
     <% if @tag_index[transaction.id] %>
-      <div class="overflow-auto whitespace-no-wrap h-auto mb-4">
+      <span class="overflow-auto whitespace-no-wrap h-auto mb-4">
         <% @tag_index[transaction.id].map(&:name).each do |tag_name| %>
           <span class="inline-block border border-blue-500 rounded py-1 px-3 bg-teal-500 text-white"><%= tag_name %></span>
         <% end %>
-      </div>
+      </span>
     <% end %>
-    <form action="/transaction_tags" method="post" name="transaction_#{i.id}_tag_form">
-      <%= erb :input, locals: { name: 'name', label: 'Tag', type: 'text' } %>
-      <input name="transaction_id" value="<%= transaction.id %>" hidden />
-      <%= erb :form_submit_button, locals: { title: 'Add Tag' } %>
-    </form>
+    <span>
+      <form action="/transaction_tags" method="post" name="transaction_#{i.id}_tag_form" class="flex">
+        <div class="mr-4">
+          <label for="name" class="<%= label_classes %>">Tag</label>
+          <input name='name' class="<%= input_classes %>" />
+        </div>
+        <input name="transaction_id" value="<%= transaction.id %>" hidden />
+        <%= erb :form_submit_button, locals: { title: 'Add Tag' } %>
+      </form>
+    </span>
   </div>
 </div>
