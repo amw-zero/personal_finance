@@ -40,7 +40,6 @@
   <% end %>
 </select>
 
-
 <div class="w-full max-w-xs">
   <form action="/transactions" method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
     <h2 class="text-lg font-bold m-8">Create transaction</h2>
@@ -64,14 +63,13 @@
   </form>
 </div>
 
-<h1>Transactions</h1>
-<div class="grid grid-cols-3">
-  <% @cash_flow.each do |transaction| %>
-    <%= erb :transaction, locals: { transaction: transaction } %>
-  <% end %>
-</div>
+<h1 class="<%= header_text %>">Transactions</h1>
+<% @cash_flow.each do |transaction| %>
+  <%= erb :transaction, locals: { transaction: transaction } %>
+<% end %>
 
-<h1>Tags</h1>
+<h1 class="<%= header_text %>">Tags</h1>
+
 <select id="tagselect" name="transaction_tag[]" form="tagform" multiple>
   <% @tag_index.values.flatten.map(&:name).uniq.each do |a| %>
     <option value="<%= a %>"><%= a %></option>
@@ -92,8 +90,13 @@
   <h3><%= "Tag: #{@filtered_tag}" %></h3>
   <h4><%= @is_tag_intersection ? 'intersection of tags' : 'union of tags' %></h4>
   <% @tagged_transactions.transactions.each do |t| %>
-    <%= "#{t.name} | Amount: #{t.amount} | account id: #{t.account_id} | day: #{t.day_of_month}" %>
-    <br>
+    <%= erb :transaction, locals: { transaction: t } %>
   <% end %>
   <p>Sum: <%= @tagged_transactions.sum %></p>
 <% end %>
+
+<div class="grid grid-cols-3">
+  <% @cash_flow.each do |transaction| %>
+    <%= erb :tagged_transaction, locals: { transaction: transaction } %>
+  <% end %>
+</div>

@@ -1,0 +1,25 @@
+<div class="m-4">
+  <div class="border border-gray-400 lg:border-gray-400 bg-white rounded p-4 leading-normal">
+    <span class="<%= bold_text %> mb-2">
+      <%= transaction.name %>
+    </span>
+    <span class="<%= supporting_text %> mb-4 ml-4 mr-4"><%= "$#{transaction.amount} on day #{transaction.day_of_month}"%></span>
+    <% if @tag_index[transaction.id] %>
+      <span class="overflow-auto whitespace-no-wrap h-auto mb-4">
+        <% @tag_index[transaction.id].map(&:name).each do |tag_name| %>
+          <span class="inline-block border border-blue-500 rounded py-1 px-3 bg-teal-500 text-white"><%= tag_name %></span>
+        <% end %>
+      </span>
+    <% end %>
+    <span>
+      <form action="/transaction_tags" method="post" name="transaction_#{i.id}_tag_form" class="flex">
+        <div class="mr-4">
+          <label for="name" class="<%= label_classes %>">Tag</label>
+          <input name='name' class="<%= input_classes %>" />
+        </div>
+        <input name="transaction_id" value="<%= transaction.id %>" hidden />
+        <%= erb :form_submit_button, locals: { title: 'Add Tag' } %>
+      </form>
+    </span>
+  </div>
+</div>

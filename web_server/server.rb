@@ -72,4 +72,16 @@ helpers do
   def label_classes
     'block text-gray-700 text-sm font-bold mb-2'
   end
+
+  def bold_text
+    'text-gray-900 font-bold text-xl'
+  end
+
+  def supporting_text
+    'text-gray-700 text-base'
+  end
+
+  def header_text
+    'text-grey-900 text-4xl text-center'
+  end
 end
