@@ -139,7 +139,7 @@ module PersonalFinance
                              else
                                transactions = relation(:transactions)
                                tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
-                               tags.join(transactions, { transaction_id: :id })
+                               tags.join(transactions.rename(id: :transaction_id), [:transaction_id])
                              end
 
       transactions = to_models(transaction_relation, Transaction)
