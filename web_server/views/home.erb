@@ -96,27 +96,27 @@
 </form>
 
 <% if @tagged_transactions %>
-    <% @tagged_transactions.each do |tagged_transaction| %>
-        <h3><%= "#{tagged_transaction[:title]}" %></h3>
-        <h3><%= tagged_transaction[:tags] %></h3>
-        <h4><%= @is_tag_intersection ? 'intersection of tags' : 'union of tags' %></h4>
-        <% tagged_transaction[:transaction_set].transactions.each do |t| %>
-            <%= "#{t.name} | Amount: #{t.amount} | account id: #{t.account_id} | day: #{t.day_of_month}" %>
-            <br>
-        <% end %>
-        <p>Sum: <%= tagged_transaction[:transaction_set].sum %></p>
+  <% @tagged_transactions.each do |tagged_transaction| %>
+    <h3><%= "#{tagged_transaction[:title]}" %></h3>
+    <h3><%= tagged_transaction[:tags] %></h3>
+    <h4><%= @is_tag_intersection ? 'intersection of tags' : 'union of tags' %></h4>
+    <% tagged_transaction[:transaction_set].transactions.each do |t| %>
+      <%= "#{t.name} | Amount: #{t.amount} | account id: #{t.account_id} | day: #{t.day_of_month}" %>
+      <br>
+    <% end %>
+    <p>Sum: <%= tagged_transaction[:transaction_set].sum %></p>
     <% end %>
 <% end %>
 
 <h1>Tag Sets</h1>
 
 <form id="tagsetform">
-    <select id="tagsettagselect" name="transaction_tag_set[]" form="tagsetform" multiple>
-        <% @tag_sets.each do |tag_set| %>
-            <option value="<%= tag_set.id %>"><%= tag_set.title %></option>
-        <% end %>
-    </select>
-    <input type="submit">Filter to these tag sets</input>
+  <select id="tagsettagselect" name="transaction_tag_set[]" form="tagsetform" multiple>
+    <% @tag_sets.each do |tag_set| %>
+      <option value="<%= tag_set.id %>"><%= tag_set.title %></option>
+    <% end %>
+  </select>
+  <input type="submit">Filter to these tag sets</input>
 </form>
 
 
