@@ -55,10 +55,15 @@ module PersonalFinance
 
   # The top-level Personal Finance application
   class Application
+    attr_reader :endpoints
+
     def initialize(persistence: PostgresPersistence.new)
       @accounts = []
       @linked_accounts = []
       @persistence = persistence
+      @endpoints = {
+        tag_sets_post: { path: '/transaction_tag_sets', action: ->(params) { create_transaction_tag_set(params) } }
+      }
     end
 
     def create_person(name)
@@ -100,6 +105,15 @@ module PersonalFinance
       end
     end
 
+    def create_transaction_tag_set(params)
+      title = params[:title]
+      tags = params[:transaction_tag]
+      TransactionTagSet.new(title: title, tags: tags).tap do |t|
+        t.attributes[:tags] = t.attributes[:tags].join(',')
+        @persistence.persist(:transaction_tag_sets, t.attributes)
+      end
+    end
+
     def people
       to_models(
         relation(:people),
@@ -137,14 +151,35 @@ module PersonalFinance
                                end.keys
                                relation(:transactions).restrict(id: transaction_ids)
                              else
-                               transactions = relation(:transactions)
-                               tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
-                               tags.join(transactions.rename(id: :transaction_id), [:transaction_id])
+                               _transaction_for_tags(tags)
                              end
 
       transactions = to_models(transaction_relation, Transaction)
 
-      TransactionSet.new(transactions: transactions)
+      [{ title: 'Current Tag', tags: tags, transaction_set: TransactionSet.new(transactions: transactions) }]
+    end
+
+    def _transaction_for_tags(tags)
+      transactions = relation(:transactions)
+      tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
+      tags.join(transactions.rename(id: :transaction_id), [:transaction_id])
+    end
+
+    def transactions_for_tag_sets(tag_set_ids)
+      tag_sets = to_models(
+        relation(:transaction_tag_sets).restrict(id: tag_set_ids),
+        TransactionTagSet
+      )
+
+      tag_sets.map do |tag_set|
+        {
+          title: tag_set.title,
+          tags: tag_set.tags,
+          transaction_set: TransactionSet.new(
+            transactions: to_models(_transaction_for_tags(tag_set.tags), Transaction)
+          )
+        }
+      end
     end
 
     def tag_index
@@ -159,6 +194,16 @@ module PersonalFinance
         TransactionTag.new(data)
       end.uniq(&:name)
     end
+
+    def transaction_tag_sets(ids)
+      to_models(relation(:transaction_tag_sets).restrict(id: ids), TransactionTagSet)
+    end
+
+    def all_transaction_tag_sets
+      to_models(relation(:transaction_tag_sets), TransactionTagSet)
+    end
+
+    private
 
     def relation(name)
       @persistence.relation_of(name)
@@ -177,6 +222,11 @@ module PersonalFinance
       when 'PersonalFinance::Transaction'
         relation.map do |data|
           data[:currency] = data[:currency].to_sym
+          model_klass.new(data)
+        end
+      when 'PersonalFinance::TransactionTagSet'
+        relation.map do |data|
+          data[:tags] = data[:tags].split(',')
           model_klass.new(data)
         end
       else
@@ -232,9 +282,17 @@ module PersonalFinance
     end
   end
 
+  # A set of transaction tags
+  class TransactionTagSet < Dry::Struct
+    attribute? :id, Types::Integer
+    attribute :title, Types::String
+    attribute :tags, Types::Array(Types::String)
+  end
+
   private_constant :Person
   private_constant :Account
   private_constant :LinkedAccount
   private_constant :Transaction
   private_constant :TransactionTag
+  private_constant :TransactionTagSet
 end

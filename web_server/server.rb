@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'sinatra'
+require 'ostruct'
 require_relative '../personal_finance'
 
 application = PersonalFinance::Application.new
@@ -14,7 +15,6 @@ get '/' do
                  application.transactions
                end
   @tag_index = application.tag_index
-  @filtered_tag = params[:transaction_tag]
   @is_tag_intersection = params[:intersection] == 'on'
   @tagged_transactions = if params[:transaction_tag]
                            application.transactions_for_tags(
@@ -22,9 +22,13 @@ get '/' do
                              @tag_index,
                              intersection: params[:intersection] == 'on'
                            )
+                         elsif params[:transaction_tag_set]
+                           application.transactions_for_tag_sets(params[:transaction_tag_set])
                          else
-                           []
+                           nil
                          end
+
+  @tag_sets = application.all_transaction_tag_sets
 
   erb :home
 end
@@ -60,6 +64,12 @@ end
 
 post '/transaction_tags' do
   application.tag_transaction(params[:transaction_id].to_i, tag: params[:name])
+
+  redirect '/'
+end
+
+post application.endpoints[:tag_sets_post][:path] do
+  application.endpoints[:tag_sets_post][:action].call(params)
 
   redirect '/'
 end
