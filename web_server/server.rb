@@ -33,43 +33,13 @@ get '/' do
   erb :home
 end
 
-post '/people' do
-  application.create_person(params[:name])
+application.endpoints.each do |name, endpoint|
+  case endpoint[:method]
+  when :post
+    post endpoint[:path] do
+      endpoint[:action].call(params)
 
-  redirect '/'
-end
-
-post '/accounts' do
-  application.create_account(params[:name])
-
-  redirect '/'
-end
-
-post '/transactions' do
-  # TODO: These type coercions can be a source of bugs
-  # add to application kernel, should only be:
-  # application.create_transaction(params)
-  # Can keep the same API internally with the above as an "anti-corruption" wrapper
-  # which handles web concerns
-  application.create_transaction(
-    name: params[:name],
-    account_id: params[:account_id].to_i,
-    amount: params[:amount].to_f,
-    currency: params[:currency].to_sym,
-    day_of_month: params[:day_of_month].to_i
-  )
-
-  redirect '/'
-end
-
-post '/transaction_tags' do
-  application.tag_transaction(params[:transaction_id].to_i, tag: params[:name])
-
-  redirect '/'
-end
-
-post application.endpoints[:tag_sets_post][:path] do
-  application.endpoints[:tag_sets_post][:action].call(params)
-
-  redirect '/'
+      redirect '/'
+    end
+  end
 end

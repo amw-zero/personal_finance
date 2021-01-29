@@ -62,7 +62,48 @@ module PersonalFinance
       @linked_accounts = []
       @persistence = persistence
       @endpoints = {
-        tag_sets_post: { path: '/transaction_tag_sets', action: ->(params) { create_transaction_tag_set(params) } }
+        tag_sets_post: {
+          method: :post,
+          path: '/transaction_tag_sets',
+          action: ->(params) { create_transaction_tag_set(params) }
+        },
+        transaction_tags_post: {
+          method: :post,
+          path: '/transaction_tags',
+          action: ->(params) { tag_transaction(params[:transaction_id].to_i, tag: params[:name]) }
+        },
+        transactions_post: {
+          method: :post,
+          path: '/transactions',
+          action: ->(params) do
+            # TODO: These type coercions can be a source of bugs
+            # add to application kernel, should only be:
+            # application.create_transaction(params)
+            # Can keep the same API internally with the above as an "anti-corruption" wrapper
+            # which handles web concerns
+            create_transaction(
+              name: params[:name],
+              account_id: params[:account_id].to_i,
+              amount: params[:amount].to_f,
+              currency: params[:currency].to_sym,
+              day_of_month: params[:day_of_month].to_i
+            )
+          end
+        },
+        accounts_post: {
+          method: :post,
+          path: '/accounts',
+          action: ->(params) do
+            create_account(params[:name])
+          end
+        },
+        people_post: {
+          method: :post,
+          path: '/people',
+          action: ->(params) do
+            create_person(params[:name])
+          end
+        },
       }
     end
 
