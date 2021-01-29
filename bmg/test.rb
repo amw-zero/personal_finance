@@ -20,7 +20,7 @@ restricted = relation.restrict(Predicate.neq(name: 'Test'))
 pp relation.union(Bmg::Relation.new([{ id: 3, name: 'Newest' }])).to_a
 
 empty = Bmg::Relation.new([])
-pp empty.union(Bmg::Relation.new([{ test: 5}])).to_a
+pp empty.union(Bmg::Relation.new([{ test: 5 }])).to_a
 
 suppliers = Bmg::Relation.new([
                                 { sid: 'S1', name: 'Smith', status: 20, city: 'London' },
@@ -39,7 +39,7 @@ pp suppliers.count
 pp suppliers.page(%i[name asc], 1, page_size: suppliers.count).to_a
 
 accounts = Bmg::Relation.new([
-                               { id: 1, name: 'Checking '},
+                               { id: 1, name: 'Checking ' },
                                { id: 2, name: 'Savings' }
                              ])
 
