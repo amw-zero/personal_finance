@@ -17,7 +17,7 @@ restricted = relation.restrict(Predicate.neq(name: 'Test'))
 # puts "Group"
 # pp JSON.pretty_generate(relation.group([:name, :id], :group))
 
-pp relation.union(Bmg::Relation.new([{ id: 3, name: 'Newest'}])).to_a
+pp relation.union(Bmg::Relation.new([{ id: 3, name: 'Newest' }])).to_a
 
 empty = Bmg::Relation.new([])
 pp empty.union(Bmg::Relation.new([{test: 5}])).to_a
