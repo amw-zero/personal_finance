@@ -1,3 +1,5 @@
+require_relative 'test_application'
+
 describe 'Saving TransactionTagSets' do
   subject { test_application }
 
@@ -18,9 +20,9 @@ describe 'Saving TransactionTagSets' do
     subject.tag_transaction(semi_monthly_income1.id, tag: 'special')
     subject.tag_transaction(semi_monthly_income2.id, tag: 'income')
   end
-trans
+
   context 'when querying transaction tags' do
-    let(:tags_in_set) { subject.transaction_tag_set(tag_set.id).tags }
+    let(:tags_in_set) { subject.transaction_tag_sets(tag_set.id).flat_map(&:tags) }
 
     it 'returns them' do
       expect(tags_in_set).to eq(['income', 'special'])
