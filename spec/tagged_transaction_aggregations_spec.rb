@@ -1,4 +1,5 @@
 require_relative 'test_application'
+require 'pry'
 
 describe 'Calculating sum of transaction amounts' do
   subject { test_application }
@@ -12,7 +13,11 @@ describe 'Calculating sum of transaction amounts' do
     subject.tag_transaction(transaction2.id, tag: 'tag')
   end
 
+  let(:transactions) do
+    subject.transactions_for_tags(['tag'], subject.tag_index)
+  end
+
   it do
-    expect(subject.transactions_for_tags(['tag'], subject.tag_index).sum).to eq(250.0)
+    expect(transactions.reduce(0) { |sum, data| sum + data[:transaction_set].sum }).to eq(250.0)
   end
 end
