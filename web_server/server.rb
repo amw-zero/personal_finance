@@ -31,13 +31,21 @@ get '/' do
   erb :home
 end
 
-application.endpoints.each do |_name, endpoint|
-  case endpoint[:method]
-  when :post
-    post endpoint[:path] do
-      endpoint[:action].call(params)
+application.use_cases.each do |_name, use_case|
+  use_case.endpoints.each do |endpoint|
+    case endpoint[:method]
+    when :get
+      post endpoint[:path] do
+        endpoint[:action].call(params)
 
-      redirect '/'
+        redirect '/'
+      end
+    when :post
+      post endpoint[:path] do
+        endpoint[:action].call(params)
+
+        redirect '/'
+      end
     end
   end
 end

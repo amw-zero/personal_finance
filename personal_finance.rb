@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'dry-struct'
+require 'forwardable'
 require 'bmg'
 require 'pg'
 require 'bmg/sequel'
@@ -53,71 +54,241 @@ module PersonalFinance
     end
   end
 
+  class DataInteractor
+    def initialize(persistence)
+      @persistence = persistence
+    end
+
+    def relation(name)
+      @persistence.relation_of(name)
+    end
+
+    def to_models(relation, model_klass)
+#      log relation.to_sql if relation.is_a?(Bmg::Sql::Relation)
+      case model_klass.to_s
+      when 'PersonalFinance::Transaction'
+        relation.map do |data|
+          data[:currency] = data[:currency].to_sym
+          model_klass.new(data)
+        end
+      when 'PersonalFinance::TransactionTagSet'
+        relation.map do |data|
+          data[:tags] = data[:tags].split(',')
+          model_klass.new(data)
+        end
+      else
+        relation.map do |data|
+          model_klass.new(data)
+        end
+      end
+    end
+  end
+
+  module UseCase
+    class Accounts
+      extend Forwardable
+      def_delegators :@data_interactor, :to_models, :relation
+
+      def initialize(persistence: PostgresPersistence.new)
+        @persistence = persistence
+        @data_interactor = DataInteractor.new(persistence)
+      end
+
+      def endpoints
+        [
+          {
+            method: :post,
+            path: '/accounts',
+            action: lambda do |params|
+              create_account(params[:name])
+            end
+          }
+        ]
+      end
+
+      def create_account(name)
+        Account.new(name: name).tap do |a|
+          @persistence.persist(:accounts, a.attributes)
+        end
+      end
+
+      def accounts
+        to_models(
+          relation(:accounts),
+          Account
+        )
+      end
+    end
+
+    class People
+      extend Forwardable
+      def_delegators :@data_interactor, :to_models, :relation
+
+      def initialize(persistence: PostgresPersistence.new)
+        @persistence = persistence
+        @data_interactor = DataInteractor.new(persistence)
+      end
+
+      def endpoints
+        [
+          {
+            method: :post,
+            path: '/people',
+            action: lambda do |params|
+              create_person(params[:name])
+            end
+          }
+        ]
+      end
+
+      def create_person(name)
+        Person.new(name: name).tap do |p|
+          @persistence.persist(:people, p.attributes)
+        end
+      end
+    end
+
+    class TransactionTags
+      extend Forwardable
+      def_delegators :@data_interactor, :to_models, :relation
+
+      def initialize(persistence: PostgresPersistence.new)
+        @persistence = persistence
+        @data_interactor = DataInteractor.new(persistence)
+      end
+
+      def endpoints
+        [
+          {
+            method: :post,
+            path: '/transaction_tags',
+            action: ->(params) { tag_transaction(params[:transaction_id].to_i, tag: params[:name]) }
+          }
+        ]
+      end
+
+      def tag_transaction(transaction_id, tag:)
+        TransactionTag.new(
+          transaction_id: transaction_id,
+          name: tag
+        ).tap do |i|
+          @persistence.persist(:transaction_tags, i.attributes)
+        end
+      end
+    end
+
+    class TransactionTagSets
+      extend Forwardable
+      def_delegators :@data_interactor, :to_models, :relation
+
+      def initialize(persistence: PostgresPersistence.new)
+        @persistence = persistence
+        @data_interactor = DataInteractor.new(persistence)
+      end
+
+      def endpoints
+        [
+          {
+            method: :post,
+            path: '/transaction_tag_sets',
+            action: ->(params) { create_transaction_tag_set(params) }
+          }
+        ]
+      end
+
+      def create_transaction_tag_set(params)
+        title = params[:title]
+        tags = params[:transaction_tag]
+        TransactionTagSet.new(title: title, tags: tags).tap do |t|
+          t.attributes[:tags] = t.attributes[:tags].join(',')
+          @persistence.persist(:transaction_tag_sets, t.attributes)
+        end
+      end
+    end
+
+    class Transactions
+      extend Forwardable
+      def_delegators :@data_inteactor, :to_models, :relation
+
+      def initialize(persistence: PostgresPersistence.new)
+        @persistence = persistence
+        @data_interactor = DataInteractor.new(persistence)
+      end
+
+      def endpoints
+        [
+          {
+            method: :post,
+            path: '/transactions',
+            action: lambda do |params|
+              # TODO: These type coercions can be a source of bugs
+              # add to application kernel, should only be:
+              # application.create_transaction(params)
+              # Can keep the same API internally with the above as an "anti-corruption" wrapper
+              # which handles web concerns
+              create_transaction(
+                name: params[:name],
+                account_id: params[:account_id].to_i,
+                amount: params[:amount].to_f,
+                currency: params[:currency].to_sym,
+                day_of_month: params[:day_of_month].to_i
+              )
+            end
+          }
+        ]
+      end
+
+      def create_transaction(name:, account_id:, amount:, currency:, day_of_month:)
+        Transaction.new(
+          name: name,
+          account_id: account_id,
+          amount: amount,
+          currency: currency,
+          day_of_month: day_of_month
+        ).tap do |i|
+          @persistence.persist(:transactions, persistable_transation(i))
+        end
+      end
+
+      private
+
+      def persistable_transation(transaction)
+        # TODO: the attributes are mutable here, and this is surprising and confusing
+        # Persisting this later one modifies the attributes which modifies the struct.
+        # Terrifying.
+        transaction.attributes.merge!({ currency: transaction.currency.to_s })
+      end
+    end
+  end
+
   # The top-level Personal Finance application
   class Application
-    attr_reader :endpoints
+    extend Forwardable
+    def_delegators :@data_interactor, :to_models, :relation
+
+    attr_reader :endpoints, :use_cases
 
     def initialize(log_level: :quiet, persistence: PostgresPersistence.new)
       @accounts = []
       @linked_accounts = []
       @persistence = persistence
+      @data_interactor = DataInteractor.new(persistence)
       @log_level = log_level ? log_level.to_sym : :quiet
-      @endpoints = {
-        tag_sets_post: {
-          method: :post,
-          path: '/transaction_tag_sets',
-          action: ->(params) { create_transaction_tag_set(params) }
-        },
-        transaction_tags_post: {
-          method: :post,
-          path: '/transaction_tags',
-          action: ->(params) { tag_transaction(params[:transaction_id].to_i, tag: params[:name]) }
-        },
-        transactions_post: {
-          method: :post,
-          path: '/transactions',
-          action: lambda do |params|
-            # TODO: These type coercions can be a source of bugs
-            # add to application kernel, should only be:
-            # application.create_transaction(params)
-            # Can keep the same API internally with the above as an "anti-corruption" wrapper
-            # which handles web concerns
-            create_transaction(
-              name: params[:name],
-              account_id: params[:account_id].to_i,
-              amount: params[:amount].to_f,
-              currency: params[:currency].to_sym,
-              day_of_month: params[:day_of_month].to_i
-            )
-          end
-        },
-        accounts_post: {
-          method: :post,
-          path: '/accounts',
-          action: lambda do |params|
-            create_account(params[:name])
-          end
-        },
-        people_post: {
-          method: :post,
-          path: '/people',
-          action: lambda do |params|
-            create_person(params[:name])
-          end
-        }
+      @use_cases = {
+        accounts: UseCase::Accounts.new(persistence: persistence),
+        people: UseCase::People.new(persistence: persistence),
+        transactions: UseCase::Transactions.new(persistence: persistence),
+        transaction_tags: UseCase::TransactionTags.new(persistence: persistence),
+        transaction_tag_sets: UseCase::TransactionTagSets.new(persistence: persistence)
       }
     end
 
     def create_person(name)
-      Person.new(name: name).tap do |p|
-        @persistence.persist(:people, p.attributes)
-      end
+      @use_cases[:people].create_person(name)
     end
 
     def create_account(name)
-      Account.new(name: name).tap do |a|
-        @persistence.persist(:accounts, a.attributes)
-      end
+      @use_cases[:accounts].create_account(name)
     end
 
     def link_account(person:, account:)
@@ -127,33 +298,22 @@ module PersonalFinance
     end
 
     def create_transaction(name:, account_id:, amount:, currency:, day_of_month:)
-      Transaction.new(
-        name: name,
-        account_id: account_id,
-        amount: amount,
-        currency: currency,
-        day_of_month: day_of_month
-      ).tap do |i|
-        @persistence.persist(:transactions, persistable_transation(i))
-      end
+      @use_cases[:transactions]
+        .create_transaction(
+          name: name, 
+          account_id: account_id, 
+          amount: amount, 
+          currency: currency, 
+          day_of_month: day_of_month
+        )
     end
 
     def tag_transaction(transaction_id, tag:)
-      TransactionTag.new(
-        transaction_id: transaction_id,
-        name: tag
-      ).tap do |i|
-        @persistence.persist(:transaction_tags, i.attributes)
-      end
+      @use_cases[:transaction_tags].tag_transaction(transaction_id, tag: tag)
     end
 
     def create_transaction_tag_set(params)
-      title = params[:title]
-      tags = params[:transaction_tag]
-      TransactionTagSet.new(title: title, tags: tags).tap do |t|
-        t.attributes[:tags] = t.attributes[:tags].join(',')
-        @persistence.persist(:transaction_tag_sets, t.attributes)
-      end
+      @use_cases[:transaction_tag_sets].create_transaction_tag_set(params)
     end
 
     def people
@@ -164,10 +324,7 @@ module PersonalFinance
     end
 
     def accounts
-      to_models(
-        relation(:accounts),
-        Account
-      )
+      @use_cases[:accounts].accounts
     end
 
     def transactions
@@ -247,40 +404,9 @@ module PersonalFinance
 
     private
 
-    def relation(name)
-      @persistence.relation_of(name)
-    end
-
-    def persistable_transation(transaction)
-      # TODO: the attributes are mutable here, and this is surprising and confusing
-      # Persisting this later one modifies the attributes which modifies the struct.
-      # Terrifying.
-      transaction.attributes.merge!({ currency: transaction.currency.to_s })
-    end
-
     def log(msg)
       puts msg if @log_level == :verbose
-    end
-
-    def to_models(relation, model_klass)
-      log relation.to_sql if relation.is_a?(Bmg::Sql::Relation)
-      case model_klass.to_s
-      when 'PersonalFinance::Transaction'
-        relation.map do |data|
-          data[:currency] = data[:currency].to_sym
-          model_klass.new(data)
-        end
-      when 'PersonalFinance::TransactionTagSet'
-        relation.map do |data|
-          data[:tags] = data[:tags].split(',')
-          model_klass.new(data)
-        end
-      else
-        relation.map do |data|
-          model_klass.new(data)
-        end
-      end
-    end
+    end    
   end
 
   # A person
@@ -334,11 +460,4 @@ module PersonalFinance
     attribute :title, Types::String
     attribute :tags, Types::Array(Types::String)
   end
-
-  private_constant :Person
-  private_constant :Account
-  private_constant :LinkedAccount
-  private_constant :Transaction
-  private_constant :TransactionTag
-  private_constant :TransactionTagSet
 end
