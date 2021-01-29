@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ENV['APP_ENV'] = 'test'
 
 require_relative '../web_server/server'
@@ -20,6 +22,6 @@ describe 'The Personal Finance Web Server' do
     post '/people', 'name' => 'Test Person'
 
     expect(last_response.status).to eq(302)
-#    expect(last_response.headers['Location']).to eq(app.base_url)
+    #    expect(last_response.headers['Location']).to eq(app.base_url)
   end
 end

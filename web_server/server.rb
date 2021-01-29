@@ -24,8 +24,6 @@ get '/' do
                            )
                          elsif params[:transaction_tag_set]
                            application.transactions_for_tag_sets(params[:transaction_tag_set])
-                         else
-                           nil
                          end
 
   @tag_sets = application.all_transaction_tag_sets
@@ -33,7 +31,7 @@ get '/' do
   erb :home
 end
 
-application.endpoints.each do |name, endpoint|
+application.endpoints.each do |_name, endpoint|
   case endpoint[:method]
   when :post
     post endpoint[:path] do

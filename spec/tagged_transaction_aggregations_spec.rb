@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'test_application'
 
 describe 'Calculating sum of transaction amounts' do

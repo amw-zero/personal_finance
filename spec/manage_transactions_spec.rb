@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'test_application'
 
 describe 'Creating Transactions' do
@@ -31,6 +33,6 @@ describe 'Retrieving Transactions' do
   end
 
   it 'returns the transactions ordered by their date of occurrence' do
-    expect(subject.transactions.map(&:name)).to eq(['T2', 'T1'])
+    expect(subject.transactions.map(&:name)).to eq(%w[T2 T1])
   end
 end

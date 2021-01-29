@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'test_application'
 
 describe 'Saving TransactionTagSets' do
@@ -13,7 +15,7 @@ describe 'Saving TransactionTagSets' do
   let(:other_transaction) do
     subject.create_transaction(name: 'Expense', account_id: checking_account.id, amount: 200.0, currency: :usd, day_of_month: 11)
   end
-  let(:tag_set) { subject.create_transaction_tag_set({ title: 'Income + Special', transaction_tag: ['income', 'special'] }) }
+  let(:tag_set) { subject.create_transaction_tag_set({ title: 'Income + Special', transaction_tag: %w[income special] }) }
 
   before do
     subject.tag_transaction(semi_monthly_income1.id, tag: 'income')
@@ -25,7 +27,7 @@ describe 'Saving TransactionTagSets' do
     let(:tags_in_set) { subject.transaction_tag_sets(tag_set.id).flat_map(&:tags) }
 
     it 'returns them' do
-      expect(tags_in_set).to eq(['income', 'special'])
+      expect(tags_in_set).to eq(%w[income special])
     end
   end
 end

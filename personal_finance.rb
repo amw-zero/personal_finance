@@ -75,7 +75,7 @@ module PersonalFinance
         transactions_post: {
           method: :post,
           path: '/transactions',
-          action: ->(params) do
+          action: lambda do |params|
             # TODO: These type coercions can be a source of bugs
             # add to application kernel, should only be:
             # application.create_transaction(params)
@@ -93,17 +93,17 @@ module PersonalFinance
         accounts_post: {
           method: :post,
           path: '/accounts',
-          action: ->(params) do
+          action: lambda do |params|
             create_account(params[:name])
           end
         },
         people_post: {
           method: :post,
           path: '/people',
-          action: ->(params) do
+          action: lambda do |params|
             create_person(params[:name])
           end
-        },
+        }
       }
     end
 

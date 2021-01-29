@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'test_application'
 
 describe 'Viewing cash flow' do

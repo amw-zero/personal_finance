@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'test_application'
 
 describe 'Tagging transactions' do
@@ -36,7 +38,7 @@ describe 'Tagging transactions' do
 
     let(:transactions) do
       subject.transactions_for_tags(
-        ['income', 'second_tag'],
+        %w[income second_tag],
         subject.tag_index,
         intersection: true
       )
@@ -44,16 +46,17 @@ describe 'Tagging transactions' do
 
     it 'returns transactions that are tagged with all of the specified tags' do
       expect(
-        transactions.flat_map { |t| t[:transaction_set].transactions }.map(&:day_of_month)).to eq([1])
+        transactions.flat_map { |t| t[:transaction_set].transactions }.map(&:day_of_month)
+      ).to eq([1])
     end
   end
 
   describe 'tags for transaction' do
-    it do 
+    it do
       expect(subject.tag_index.transform_values { |tag| tag.map(&:name) }).to eq({
-        semi_monthly_income1.id => ['income'],
-        semi_monthly_income2.id => ['income'] 
-      })
+                                                                                   semi_monthly_income1.id => ['income'],
+                                                                                   semi_monthly_income2.id => ['income']
+                                                                                 })
     end
   end
 end
