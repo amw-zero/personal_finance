@@ -1,5 +1,4 @@
 require_relative 'test_application'
-require 'pry'
 
 describe 'Calculating sum of transaction amounts' do
   subject { test_application }
