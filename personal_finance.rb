@@ -57,10 +57,11 @@ module PersonalFinance
   class Application
     attr_reader :endpoints
 
-    def initialize(persistence: PostgresPersistence.new)
+    def initialize(log_level: :quiet, persistence: PostgresPersistence.new)
       @accounts = []
       @linked_accounts = []
       @persistence = persistence
+      @log_level = log_level ? log_level.to_sym : :quiet
       @endpoints = {
         tag_sets_post: {
           method: :post,
@@ -257,8 +258,12 @@ module PersonalFinance
       transaction.attributes.merge!({ currency: transaction.currency.to_s })
     end
 
+    def log(msg)
+      puts msg if @log_level == :verbose
+    end
+
     def to_models(relation, model_klass)
-      puts relation.to_sql if relation.is_a?(Bmg::Sql::Relation)
+      log relation.to_sql if relation.is_a?(Bmg::Sql::Relation)
       case model_klass.to_s
       when 'PersonalFinance::Transaction'
         relation.map do |data|

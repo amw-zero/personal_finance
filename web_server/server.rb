@@ -4,7 +4,7 @@ require 'sinatra'
 require 'ostruct'
 require_relative '../personal_finance'
 
-application = PersonalFinance::Application.new
+application = PersonalFinance::Application.new(log_level: ENV['LOG_LEVEL'])
 
 get '/' do
   @people = application.people
