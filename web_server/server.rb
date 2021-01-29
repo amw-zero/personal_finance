@@ -35,10 +35,10 @@ application.use_cases.each do |_name, use_case|
   use_case.endpoints.each do |endpoint|
     case endpoint[:method]
     when :get
-      post endpoint[:path] do
+      get endpoint[:path] do
         endpoint[:action].call(params)
 
-        redirect '/'
+        erb use_case.name
       end
     when :post
       post endpoint[:path] do
