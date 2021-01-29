@@ -94,6 +94,10 @@ module PersonalFinance
         @data_interactor = DataInteractor.new(persistence)
       end
 
+      def name
+        :accounts
+      end
+
       def endpoints
         [
           {
@@ -102,6 +106,11 @@ module PersonalFinance
             action: lambda do |params|
               create_account(params[:name])
             end
+          },
+          {
+            method: :get,
+            path: '/accounts',
+            action: lambda { |_| accounts }
           }
         ]
       end
@@ -208,11 +217,15 @@ module PersonalFinance
 
     class Transactions
       extend Forwardable
-      def_delegators :@data_inteactor, :to_models, :relation
+      def_delegators :@data_interactor, :to_models, :relation
 
       def initialize(persistence: PostgresPersistence.new)
         @persistence = persistence
         @data_interactor = DataInteractor.new(persistence)
+      end
+
+      def name
+        :transactions
       end
 
       def endpoints
@@ -234,6 +247,17 @@ module PersonalFinance
                 day_of_month: params[:day_of_month].to_i
               )
             end
+          },
+          {
+            method: :get,
+            path: '/transactions',
+            action: lambda do |params|
+              if params[:account]
+                cash_flow(params[:account].to_i)
+              else
+                transactions
+              end
+            end
           }
         ]
       end
@@ -248,6 +272,22 @@ module PersonalFinance
         ).tap do |i|
           @persistence.persist(:transactions, persistable_transation(i))
         end
+      end
+
+      def transactions
+        to_models(
+          relation(:transactions),
+          Transaction
+        ).sort_by(&:day_of_month)
+      end
+
+      def cash_flow(account_id)
+        transactions = relation(:transactions)
+        accounts = relation(:accounts).restrict(id: account_id)
+        to_models(
+          transactions.join(accounts, { account_id: :id }),
+          Transaction
+        ).sort_by(&:day_of_month)
       end
 
       private
@@ -328,20 +368,13 @@ module PersonalFinance
     end
 
     def transactions
-      to_models(
-        relation(:transactions),
-        Transaction
-      ).sort_by(&:day_of_month)
+      @use_cases[:transactions].transactions
     end
 
     def cash_flow(account_id)
-      transactions = relation(:transactions)
-      accounts = relation(:accounts).restrict(id: account_id)
-      to_models(
-        transactions.join(accounts, { account_id: :id }),
-        Transaction
-      ).sort_by(&:day_of_month)
+      @use_cases[:transactions].cash_flow(account_id)
     end
+
 
     def transactions_for_tags(tags, tag_index, intersection: false)
       transaction_relation = if intersection
