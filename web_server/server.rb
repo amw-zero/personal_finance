@@ -58,6 +58,11 @@ get '/transactions/create' do
   erb :transaction_form
 end
 
+get '/transactions/:id/tags/create' do
+  @transaction = application.transactions.find { |t| t.id == params[:id].to_i }
+  erb :transaction_tag_form
+end
+
 application.use_cases.each do |_name, use_case|
   use_case.endpoints.each do |endpoint|
     case endpoint[:method]
