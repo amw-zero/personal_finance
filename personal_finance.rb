@@ -7,6 +7,9 @@ require 'pg'
 require 'bmg/sequel'
 require_relative 'postgres/postgres'
 
+# Thoughts: It is easier to never build nested data. Using the pattern like the 
+# tag_index, you can pull the associated data when you need.
+
 # Bring Dry::Struct types into scope
 module Types
   include Dry::Types()
@@ -260,7 +263,7 @@ module PersonalFinance
                   intersection: params[:intersection] == 'on'
                 )
               elsif params[:transaction_tag_set]
-                ransactions_for_tag_sets(params[:transaction_tag_set])
+                transactions_for_tag_sets(params[:transaction_tag_set])
               elsif params[:account]
                 cash_flow(params[:account].to_i)
               else
@@ -421,6 +424,9 @@ module PersonalFinance
     def _transaction_for_tags(tags)
       transactions = relation(:transactions)
       tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
+
+      # TODO: Bug here - calling to_models on this will caus the Transaction to get the id of the 
+      # TransactionTag because of the rename
       tags.join(transactions.rename(id: :transaction_id), [:transaction_id])
     end
 
