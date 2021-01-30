@@ -27,18 +27,21 @@ get '/' do
                          end
 
   @tag_sets = application.all_transaction_tag_sets
+  @page = :dashboard
 
   erb :home
 end
 
 application.use_cases.each do |_name, use_case|
+  # Implement HATEOAS
   use_case.endpoints.each do |endpoint|
     case endpoint[:method]
     when :get
       get endpoint[:path] do
-        endpoint[:action].call(params)
+        values = endpoint[:action].call(params)
 
-        erb use_case.name
+        @page = use_case.name
+        erb use_case.name, locals: { data: values, tag_index: application.tag_index }
       end
     when :post
       post endpoint[:path] do

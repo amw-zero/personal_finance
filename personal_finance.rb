@@ -252,7 +252,15 @@ module PersonalFinance
             method: :get,
             path: '/transactions',
             action: lambda do |params|
-              if params[:account]
+              if params[:transaction_tag]
+                transactions_for_tags(
+                  params[:transaction_tag],
+                  @tag_index,
+                  intersection: params[:intersection] == 'on'
+                )
+              elsif params[:transaction_tag_set]
+                ransactions_for_tag_sets(params[:transaction_tag_set])
+              elsif params[:account]
                 cash_flow(params[:account].to_i)
               else
                 transactions
@@ -297,6 +305,25 @@ module PersonalFinance
         # Persisting this later one modifies the attributes which modifies the struct.
         # Terrifying.
         transaction.attributes.merge!({ currency: transaction.currency.to_s })
+      end
+
+      def transactions_for_tags(tags, tag_index, intersection: false)
+        transaction_relation = if intersection
+                                 transaction_ids = tag_index.select do |_, t|
+                                   (t.map(&:name) & tags).count == tags.count
+                                 end.keys
+                                 relation(:transactions).restrict(id: transaction_ids)
+                               else
+                                 _transaction_for_tags(tags)
+                               end
+  
+        to_models(transaction_relation, Transaction)
+      end
+  
+      def _transaction_for_tags(tags)
+        transactions = relation(:transactions)
+        tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
+        tags.join(transactions.rename(id: :transaction_id), [:transaction_id])
       end
     end
   end
@@ -374,7 +401,6 @@ module PersonalFinance
     def cash_flow(account_id)
       @use_cases[:transactions].cash_flow(account_id)
     end
-
 
     def transactions_for_tags(tags, tag_index, intersection: false)
       transaction_relation = if intersection
