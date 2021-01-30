@@ -5,7 +5,6 @@ require 'forwardable'
 require 'bmg'
 require 'pg'
 require 'bmg/sequel'
-require_relative 'postgres/postgres'
 
 # Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
@@ -34,26 +33,6 @@ module PersonalFinance
       data[:id] = @ids[relation]
       @ids[relation] += 1
       @relations[relation] = @relations[relation].union(Bmg::Relation.new([data]))
-    end
-  end
-
-  # Store relations in postgres
-  class PostgresPersistence
-    def initialize
-      @db = Sequel.connect(Postgres::SERVER_URL)
-    end
-
-    def relation
-      Bmg.sequel(:people, @db)
-    end
-
-    def persist(relation, data)
-      relation = Bmg.sequel(relation, @db)
-      relation.insert(data)
-    end
-
-    def relation_of(rel_name)
-      Bmg.sequel(rel_name, @db)
     end
   end
 
@@ -92,7 +71,7 @@ module PersonalFinance
       extend Forwardable
       def_delegators :@data_interactor, :to_models, :relation
 
-      def initialize(persistence: PostgresPersistence.new)
+      def initialize(persistence: MemoryPersistence.new)
         @persistence = persistence
         @data_interactor = DataInteractor.new(persistence)
       end
@@ -136,7 +115,7 @@ module PersonalFinance
       extend Forwardable
       def_delegators :@data_interactor, :to_models, :relation
 
-      def initialize(persistence: PostgresPersistence.new)
+      def initialize(persistence: MemoryPersistence.new)
         @persistence = persistence
         @data_interactor = DataInteractor.new(persistence)
       end
@@ -164,7 +143,7 @@ module PersonalFinance
       extend Forwardable
       def_delegators :@data_interactor, :to_models, :relation
 
-      def initialize(persistence: PostgresPersistence.new)
+      def initialize(persistence: MemoryPersistence.new)
         @persistence = persistence
         @data_interactor = DataInteractor.new(persistence)
       end
@@ -194,7 +173,7 @@ module PersonalFinance
       extend Forwardable
       def_delegators :@data_interactor, :to_models, :relation
 
-      def initialize(persistence: PostgresPersistence.new)
+      def initialize(persistence: MemoryPersistence.new)
         @persistence = persistence
         @data_interactor = DataInteractor.new(persistence)
       end
@@ -223,7 +202,7 @@ module PersonalFinance
       extend Forwardable
       def_delegators :@data_interactor, :to_models, :relation
 
-      def initialize(persistence: PostgresPersistence.new)
+      def initialize(persistence: MemoryPersistence.new)
         @persistence = persistence
         @data_interactor = DataInteractor.new(persistence)
       end
@@ -340,7 +319,7 @@ module PersonalFinance
 
     attr_reader :endpoints, :use_cases
 
-    def initialize(log_level: :quiet, persistence: PostgresPersistence.new)
+    def initialize(log_level: :quiet, persistence: MemoryPersistence.new)
       @accounts = []
       @linked_accounts = []
       @persistence = persistence
