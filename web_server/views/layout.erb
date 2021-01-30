@@ -10,45 +10,16 @@
     <strong class="navbar-item">
       Personal Finance
     </strong>
-
-    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </a>
   </div>
 
   <div id="navbarBasicExample" class="navbar-menu">
     <div class="navbar-start">
-      <a class="navbar-item">
-        Home
+    <a class="navbar-item is-tab <%='is-active' if @page == :dashboard %>" href="/">
+        Dashboard
       </a>
-
-      <a class="navbar-item">
-        Documentation
+      <a class="navbar-item is-tab <%='is-active' if @page == :transactions %>" href="/transactions">
+        Transactions
       </a>
-
-      <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
-          More
-        </a>
-
-        <div class="navbar-dropdown">
-          <a class="navbar-item">
-            About
-          </a>
-          <a class="navbar-item">
-            Jobs
-          </a>
-          <a class="navbar-item">
-            Contact
-          </a>
-          <hr class="navbar-divider">
-          <a class="navbar-item">
-            Report an issue
-          </a>
-        </div>
-      </div>
     </div>
 
     <div class="navbar-end">
@@ -66,4 +37,6 @@
   </div>
 </nav>
 
-<%= yield %>
+<div class="container">
+    <%= yield %>
+</div>

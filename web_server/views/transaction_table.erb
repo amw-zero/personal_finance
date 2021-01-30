@@ -1,0 +1,26 @@
+<div class="container">
+<table class="table is-fullwidth">
+  <thead>
+    <th>Name</th>
+    <th>Amount</th>
+    <th>Due On</th>
+    <th>Tags</th>
+  </thead>
+  <tbody>
+    <% transactions.each do |transaction| %>
+      <tr>
+        <td><%= transaction.name %></td>
+        <td><%= transaction.amount %></td>
+        <td><%= transaction.day_of_month %></td>
+        <td>
+          <% if tag_index[transaction.id] %>
+            <% tag_index[transaction.id].each do |tag| %>
+              <span class="tag"><%= tag.name %></span>
+            <% end %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+</div>

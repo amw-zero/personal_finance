@@ -1,0 +1,13 @@
+<div class="tabs">
+  <ul>
+    <li class="<%= 'is-active' if active_tab == :accounts %>">
+      <a href="/accounts" >Accounts</a>
+    </li>
+    <li class="<%= 'is-active' if active_tab == :transactions %>">
+      <a href="/transactions">Transactions</a>
+    </li>
+    <li class="<%= 'is-active' if active_tab == :tags %>">
+      <a>Tags</a>
+    </li>
+  </ul>
+</div>
