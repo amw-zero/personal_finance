@@ -32,6 +32,11 @@ get '/' do
   erb :home
 end
 
+get '/transactions/create' do
+  @accounts = application.accounts
+  erb :transaction_form
+end
+
 application.use_cases.each do |_name, use_case|
   # Implement HATEOAS
   use_case.endpoints.each do |endpoint|
@@ -41,13 +46,13 @@ application.use_cases.each do |_name, use_case|
         values = endpoint[:action].call(params)
 
         @page = use_case.name
-        erb use_case.name, locals: { data: values, tag_index: application.tag_index }
+        erb use_case.name, locals: { data: values, tag_index: application.tag_index, accounts: application.accounts }
       end
     when :post
       post endpoint[:path] do
         endpoint[:action].call(params)
 
-        redirect '/'
+        redirect endpoint[:path]
       end
     end
   end
