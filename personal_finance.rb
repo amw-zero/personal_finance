@@ -7,7 +7,7 @@ require 'pg'
 require 'bmg/sequel'
 require_relative 'postgres/postgres'
 
-# Thoughts: It is easier to never build nested data. Using the pattern like the 
+# Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
 
 # Bring Dry::Struct types into scope
@@ -67,7 +67,7 @@ module PersonalFinance
     end
 
     def to_models(relation, model_klass)
-#      log relation.to_sql if relation.is_a?(Bmg::Sql::Relation)
+      #      log relation.to_sql if relation.is_a?(Bmg::Sql::Relation)
       case model_klass.to_s
       when 'PersonalFinance::Transaction'
         relation.map do |data|
@@ -113,7 +113,7 @@ module PersonalFinance
           {
             method: :get,
             path: '/accounts',
-            action: lambda { |_| accounts }
+            action: ->(_) { accounts }
           }
         ]
       end
@@ -320,10 +320,10 @@ module PersonalFinance
                                else
                                  _transaction_for_tags(tags)
                                end
-  
+
         to_models(transaction_relation, Transaction)
       end
-  
+
       def _transaction_for_tags(tags)
         transactions = relation(:transactions)
         tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
@@ -371,10 +371,10 @@ module PersonalFinance
     def create_transaction(name:, account_id:, amount:, currency:, day_of_month:)
       @use_cases[:transactions]
         .create_transaction(
-          name: name, 
-          account_id: account_id, 
-          amount: amount, 
-          currency: currency, 
+          name: name,
+          account_id: account_id,
+          amount: amount,
+          currency: currency,
           day_of_month: day_of_month
         )
     end
@@ -425,7 +425,7 @@ module PersonalFinance
       transactions = relation(:transactions)
       tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
 
-      # TODO: Bug here - calling to_models on this will caus the Transaction to get the id of the 
+      # TODO: Bug here - calling to_models on this will caus the Transaction to get the id of the
       # TransactionTag because of the rename
       tags.join(transactions.rename(id: :transaction_id), [:transaction_id])
     end
@@ -472,7 +472,7 @@ module PersonalFinance
 
     def log(msg)
       puts msg if @log_level == :verbose
-    end    
+    end
   end
 
   # A person
