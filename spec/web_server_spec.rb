@@ -2,7 +2,7 @@
 
 ENV['APP_ENV'] = 'test'
 
-require_relative '../web_server/server'
+# require_relative '../web_server/server'
 require 'rack/test'
 
 describe 'The Personal Finance Web Server' do
