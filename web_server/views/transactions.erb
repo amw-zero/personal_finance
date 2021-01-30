@@ -24,5 +24,34 @@
         </div>
       </div>
     </div>
+    <div class="tile is-child">
+      <div class="field">
+        <label class="label">Select Multiple Tags (union default)</label>
+        <div class="select is-multiple">
+          <select id="tagselect" name="transaction_tag[]" form="tagform" multiple>
+            <% tag_index.values.flatten.map(&:name).uniq.each do |a| %>
+              <option value="<%= a %>"><%= a %></option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+
+      <form id="tagform">
+        <div class="field">
+          <label class="checkbox" for="intersection">Intersection</label>
+          <% if @is_tag_intersection %>
+            <input name="intersection" type="checkbox" checked />
+          <% else %>
+            <input name="intersection" type="checkbox" />
+          <% end %>
+        </div>
+
+        <button class="button mb-6" type="submit">Filter to these tags</button>
+        <div class="field">
+          <input type="text" name="title"></input>
+          <button type="submit" formaction="/transaction_tag_sets" formmethod="POST"> Save as Tag Set</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
