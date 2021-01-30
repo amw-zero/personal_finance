@@ -171,6 +171,7 @@ module PersonalFinance
           {
             method: :post,
             path: '/transaction_tags',
+            return: '/transactions',
             action: ->(params) { tag_transaction(params[:transaction_id].to_i, tag: params[:name]) }
           }
         ]

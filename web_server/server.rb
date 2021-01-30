@@ -38,7 +38,6 @@ get '/transactions/create' do
 end
 
 application.use_cases.each do |_name, use_case|
-  # Implement HATEOAS
   use_case.endpoints.each do |endpoint|
     case endpoint[:method]
     when :get
@@ -52,7 +51,7 @@ application.use_cases.each do |_name, use_case|
       post endpoint[:path] do
         endpoint[:action].call(params)
 
-        redirect endpoint[:path]
+        redirect endpoint[:return] ? endpoint[:return] : endpoint[:path]
       end
     end
   end
