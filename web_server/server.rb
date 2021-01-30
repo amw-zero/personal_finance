@@ -45,14 +45,14 @@ application.use_cases.each do |_name, use_case|
         values = endpoint[:action].call(params)
 
         @page = use_case.name
-        
+
         erb use_case.name, locals: { data: values, tag_index: application.tag_index, accounts: application.accounts }
       end
     when :post
       post endpoint[:path] do
         endpoint[:action].call(params)
 
-        redirect endpoint[:return] ? endpoint[:return] : endpoint[:path]
+        redirect endpoint[:return] || endpoint[:path]
       end
     end
   end
