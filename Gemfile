@@ -14,5 +14,6 @@ source 'https://rubygems.org' do
     gem 'rack-test'
     gem 'rspec'
     gem 'rubocop'
+    gem 'hypothesis-specs', '0.6.0'
   end
 end

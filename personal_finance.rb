@@ -302,15 +302,6 @@ module PersonalFinance
         ).sort_by(&:day_of_month)
       end
 
-      private
-
-      def persistable_transation(transaction)
-        # TODO: the attributes are mutable here, and this is surprising and confusing
-        # Persisting this later one modifies the attributes which modifies the struct.
-        # Terrifying.
-        transaction.attributes.merge!({ currency: transaction.currency.to_s })
-      end
-
       def transactions_for_tags(tags, tag_index, intersection: false)
         transaction_relation = if intersection
                                  transaction_ids = tag_index.select do |_, t|
@@ -324,10 +315,20 @@ module PersonalFinance
         to_models(transaction_relation, Transaction)
       end
 
+      private
+
+      def persistable_transation(transaction)
+        # TODO: the attributes are mutable here, and this is surprising and confusing
+        # Persisting this later one modifies the attributes which modifies the struct.
+        # Terrifying.
+        transaction.attributes.merge!({ currency: transaction.currency.to_s })
+      end
+
       def _transaction_for_tags(tags)
-        transactions = relation(:transactions)
-        tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
-        tags.join(transactions.rename(id: :transaction_id), [:transaction_id])
+        transactions = relation(:transactions).rename(id: :transaction_id)
+        tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name, id: :tag_id)
+
+        tags.join(transactions, [:transaction_id]).rename(transaction_id: :id)
       end
     end
   end

@@ -35,6 +35,9 @@ GEM
       dry-equalizer (~> 0.3)
       dry-inflector (~> 0.1, >= 0.1.2)
       dry-logic (~> 1.0, >= 1.0.2)
+    hypothesis-specs (0.6.0)
+      rake (>= 10.0, < 13.0)
+      rutie (~> 0.0.3)
     ice_nine (0.11.2)
     method_source (1.0.0)
     mustermann (1.1.1)
@@ -55,6 +58,7 @@ GEM
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
     rainbow (3.0.0)
+    rake (12.3.3)
     regexp_parser (1.7.1)
     rexml (3.2.4)
     rspec (3.9.0)
@@ -83,6 +87,7 @@ GEM
       parser (>= 2.7.1.4)
     ruby-progressbar (1.10.1)
     ruby2_keywords (0.0.2)
+    rutie (0.0.4)
     sequel (5.35.0)
     sexpr (0.6.0)
     sinatra (2.0.8.1)
@@ -99,6 +104,7 @@ PLATFORMS
 DEPENDENCIES
   bmg!
   dry-struct!
+  hypothesis-specs (= 0.6.0)!
   pg!
   pry!
   rack-test!
