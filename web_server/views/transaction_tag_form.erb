@@ -1,0 +1,12 @@
+<h1 class="title">Transaction: <%= @transaction.name %></h1>
+<form action="/transaction_tags" method="post">
+  <div class="field">
+    <label class="label" for="name">Tag Name</label>
+    <input class="label" name="name" type="text" />
+  </div>
+
+  <div class="field">
+    <input class="input is-hidden" name="transaction_id" value="<%= @transaction.id %>"></input>
+    <button class="button is-primary" type="submit">Tag Transaction</button>
+  </div>
+</form>
