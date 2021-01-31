@@ -10,10 +10,10 @@ describe 'Hypothesis' do
   specify do
     x = 0
     hypothesis(max_valid_test_cases: 1_000) do
-      puts "Iteration: #{x}"
-      x += 1
       puts;puts;
       puts "---- Start block ----"
+      puts "Iteration: #{x}"
+      x += 1
 
       test_app = test_application
 
@@ -68,6 +68,8 @@ describe 'Hypothesis' do
         same_tags = tags & possible_tags
         expect(same_tags.length).to be > 0
       end
+
+      expect(Set.new(filtered_transactions).to_a).to eq(filtered_transactions)
     end
   end
 end
