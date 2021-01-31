@@ -1,0 +1,7 @@
+.transaction-table-tag-data {
+  max-width: 150px;
+}
+
+.transaction-table-tag-data .tag {
+  margin-bottom: 2px
+}
