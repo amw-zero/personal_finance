@@ -72,7 +72,12 @@ application.use_cases.each do |_name, use_case|
 
         @page = use_case.name
 
-        erb use_case.name, locals: { data: values, tag_index: application.tag_index, accounts: application.accounts }
+        erb use_case.name, locals: {
+          data: values,
+          tag_index: application.tag_index,
+          accounts: application.accounts,
+          params: params
+        }
       end
     when :post
       post endpoint[:path] do

@@ -31,17 +31,21 @@
         </form>
       </div>
 
-      <div class="panel-block">
-        <div class="field">
-          <div class="select is-multiple">
-            <select id="tagselect" name="transaction_tag[]" form="tagform" multiple size="10">
-              <% tag_index.values.flatten.map(&:name).uniq.sort.each do |a| %>
-                <option value="<%= a %>"><%= a %></option>
-              <% end %>
-            </select>
-          </div>
+      <% tag_index.values.flatten.map(&:name).uniq.sort.each do |tag| %>
+        <div class="panel-block">
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              name="transaction_tag[]"
+              form="tagform"
+              value="<%= tag %>"
+              <%= 'checked' if params[:transaction_tag]&.include?(tag) %>
+            >
+            </input>
+            <%= tag %>
+          </label>
         </div>
-      </div>
+      <% end %>
 
       <div class="panel-block">
         <form action="/transaction_tag_sets" formmethod="POST">
