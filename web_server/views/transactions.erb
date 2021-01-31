@@ -9,7 +9,28 @@
       <p class="panel-heading">
         Tags
       </p>
+
       <a class="panel-block has-text-danger" href="/transactions">Clear Tags</a>
+
+      <div class="panel-block">
+        <form id="tagform">
+          <div class="field">
+            <button class="button is-link is-small" type="submit">Filter to these tags</button>
+          </div>
+
+          <div class="field">
+            <label class="radio" for="union">Union</label>
+            <input type="radio" name="intersection" value="false" checked />
+            <label class="radio" for="intersection">Intersection</label>
+            <% if @is_tag_intersection %>
+              <input type="radio" name="intersection" value="true" checked />
+            <% else %>
+              <input type="radio" name="intersection" value="true" />
+            <% end %>
+          </div>
+        </form>
+      </div>
+
       <div class="panel-block">
         <div class="field">
           <div class="select is-multiple">
@@ -21,22 +42,7 @@
           </div>
         </div>
       </div>
-      <div class="panel-block">
-        <form id="tagform">
-          <div class="field">
-            <label class="radio" for="union">Union</label>
-            <input type="radio" name="intersection" value="false" checked />
-            <label class="radio" for="intersection">Intersection</label>
-            <% if @is_tag_intersection %>
-              <input type="radio" name="intersection" value="true" checked />
-            <% else %>
-              <input type="radio" name="intersection" value="true" />
-            <% end %>
-          </div>
 
-          <button class="button is-link is-small" type="submit">Filter to these tags</button>          
-        </form>
-      </div>
       <div class="panel-block">
         <form action="/transaction_tag_sets" formmethod="POST">
           <div class="field">

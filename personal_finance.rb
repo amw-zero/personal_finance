@@ -235,6 +235,7 @@ module PersonalFinance
             method: :get,
             path: '/transactions',
             action: lambda do |params|
+              # Push logic down into transactions API
               if params[:transaction_tag]
                 transactions_for_tags(
                   params[:transaction_tag],
