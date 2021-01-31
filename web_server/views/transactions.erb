@@ -10,9 +10,9 @@
       Tags
     </p>
     <a class="panel-block has-text-danger" href="/transactions">Clear Tags</a>
-    <% tag_index.values.flatten.uniq(&:name).each do |tag| %>
-      <a class="panel-block has-text-link" href="/transactions?transaction_tag=<%= tag.name %>">
-        <%= tag.name %>
+    <% tag_index.values.flatten.map(&:name).uniq.sort.each do |tag| %>
+      <a class="panel-block has-text-link" href="/transactions?transaction_tag=<%= tag %>">
+        <%= tag %>
       </a>
     <% end %>
     </nav>
