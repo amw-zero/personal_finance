@@ -288,7 +288,7 @@ module PersonalFinance
                                  end.keys
                                  relation(:transactions).restrict(id: transaction_ids)
                                else
-                                 _transaction_for_tags(tags)
+                                 _transactions_for_tags(tags)
                                end
 
         to_models(transaction_relation, Transaction)
@@ -303,11 +303,13 @@ module PersonalFinance
         transaction.attributes.merge!({ currency: transaction.currency.to_s })
       end
 
-      def _transaction_for_tags(tags)
-        transactions = relation(:transactions).rename(id: :transaction_id)
-        tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name, id: :tag_id)
+      def _transactions_for_tags(tags)
+        transaction_ids = relation(:transaction_tags)
+          .restrict(name: tags)
+          .map { |tag| tag[:transaction_id] }
 
-        tags.join(transactions, [:transaction_id]).rename(transaction_id: :id)
+
+        relation(:transactions).restrict(id: transaction_ids)
       end
     end
   end
