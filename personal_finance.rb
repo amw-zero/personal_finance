@@ -239,7 +239,7 @@ module PersonalFinance
               if params[:transaction_tag]
                 transactions_for_tags(
                   params[:transaction_tag],
-                  @tag_index,
+                  tag_index,
                   intersection: params[:intersection] == 'true'
                 )
               elsif params[:transaction_tag_set]
@@ -311,6 +311,13 @@ module PersonalFinance
 
 
         relation(:transactions).restrict(id: transaction_ids)
+      end
+
+      def tag_index
+        to_models(
+          relation(:transaction_tags),
+          TransactionTag
+        ).group_by(&:transaction_id)
       end
     end
   end
