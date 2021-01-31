@@ -24,11 +24,13 @@
       <div class="panel-block">
         <form id="tagform">
           <div class="field">
-            <label class="checkbox" for="intersection">Intersection</label>
+            <label class="radio" for="union">Union</label>
+            <input type="radio" name="intersection" value="false" checked />
+            <label class="radio" for="intersection">Intersection</label>
             <% if @is_tag_intersection %>
-              <input name="intersection" type="checkbox" checked />
+              <input type="radio" name="intersection" value="true" checked />
             <% else %>
-              <input name="intersection" type="checkbox" />
+              <input type="radio" name="intersection" value="true" />
             <% end %>
           </div>
 

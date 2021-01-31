@@ -239,7 +239,7 @@ module PersonalFinance
                 transactions_for_tags(
                   params[:transaction_tag],
                   @tag_index,
-                  intersection: params[:intersection] == 'on'
+                  intersection: params[:intersection] == 'true'
                 )
               elsif params[:transaction_tag_set]
                 transactions_for_tag_sets(params[:transaction_tag_set])
