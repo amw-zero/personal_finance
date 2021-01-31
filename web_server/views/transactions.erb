@@ -20,15 +20,19 @@
         </div>
 
         <div class="panel-block">
-          <div class="field">
-            <label class="radio" for="union">Union</label>
-            <input type="radio" name="intersection" value="false" checked />
-            <label class="radio" for="intersection">Intersection</label>
-            <% if @is_tag_intersection %>
-              <input type="radio" name="intersection" value="true" checked />
-            <% else %>
-              <input type="radio" name="intersection" value="true" />
-            <% end %>
+          <div class="control">
+            <label class="radio">
+              <input type="radio" name="intersection" value="false" checked />
+              Union
+            </label>
+            <label class="radio">
+              <% if params[:intersection] == 'true' %>
+                <input type="radio" name="intersection" value="true" checked />
+              <% else %>
+                <input type="radio" name="intersection" value="true" />
+              <% end %>
+              Intersection
+            </label>
           </div>
         </div>
 
