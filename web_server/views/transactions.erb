@@ -1,8 +1,9 @@
-<div class="container">
-  <a href="/transactions/create" class="button is-child is-primary">New Transaction</a>
+<div class="level-left mt-4">
+  <a href="/transactions/create" class="button is-primary">New Transaction</a>
 </div>
 
-<div class="columns">
+<div class="columns mt-4">
+
   <div class="column is-one-fifth">
     <nav class="panel">
     <p class="panel-heading">
@@ -16,6 +17,7 @@
     <% end %>
     </nav>
   </div>
+
   <div class="column is-one-fifth">
     <nav class="panel">
       <p class="panel-heading">
@@ -52,6 +54,7 @@
       </div>
     </nav>
   </div>
+  
   <div class="column">
     <%= erb :transaction_table, locals: { transactions: data, tag_index: tag_index } %>
   </div>
