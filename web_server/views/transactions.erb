@@ -1,57 +1,58 @@
-<div class="tile is-ancestor">
-  <div class="tile is-vertical is-parent">
-    <div class="container">
-      <a href="/transactions/create" class="button is-child is-primary">New Transaction</a>
-    </div>
-    <div class="tile is-child">
-      <div class="tile is-parent mt-6">
-        <div class="tile is-3 is-child pr-6">
-          <nav class="panel">
-            <p class="panel-heading">
-              Tags
-            </p>
-            <a class="panel-block has-text-danger" href="/transactions">Clear Tags</a>
-            <% tag_index.values.flatten.uniq(&:name).each do |tag| %>
-              <a class="panel-block is-active" href="/transactions?transaction_tag=<%= tag.name %>">
-                <%= tag.name %>
-              </a>
-            <% end %>
-          </nav>
-        </div>
-         
-        <div class="tile is-child">
-          <%= erb :transaction_table, locals: { transactions: data, tag_index: tag_index } %>
+<div class="container">
+  <a href="/transactions/create" class="button is-child is-primary">New Transaction</a>
+</div>
+
+<div class="columns">
+  <div class="column is-one-fifth">
+    <nav class="panel">
+    <p class="panel-heading">
+      Tags
+    </p>
+    <a class="panel-block has-text-danger" href="/transactions">Clear Tags</a>
+    <% tag_index.values.flatten.uniq(&:name).each do |tag| %>
+      <a class="panel-block has-text-link" href="/transactions?transaction_tag=<%= tag.name %>">
+        <%= tag.name %>
+      </a>
+    <% end %>
+    </nav>
+  </div>
+  <div class="column is-one-fifth">
+    <nav class="panel">
+      <p class="panel-heading">
+        Multiple Tags
+      </p>
+      <div class="panel-block">
+        <div class="field">
+          <div class="select is-multiple">
+            <select id="tagselect" name="transaction_tag[]" form="tagform" multiple>
+              <% tag_index.values.flatten.map(&:name).uniq.each do |a| %>
+                <option value="<%= a %>"><%= a %></option>
+              <% end %>
+            </select>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="tile is-child">
-      <div class="field">
-        <label class="label">Select Multiple Tags (union default)</label>
-        <div class="select is-multiple">
-          <select id="tagselect" name="transaction_tag[]" form="tagform" multiple>
-            <% tag_index.values.flatten.map(&:name).uniq.each do |a| %>
-              <option value="<%= a %>"><%= a %></option>
+      <div class="panel-block">
+        <form id="tagform">
+          <div class="field">
+            <label class="checkbox" for="intersection">Intersection</label>
+            <% if @is_tag_intersection %>
+              <input name="intersection" type="checkbox" checked />
+            <% else %>
+              <input name="intersection" type="checkbox" />
             <% end %>
-          </select>
-        </div>
+          </div>
+
+          <button class="button mb-6 is-link" type="submit">Filter to these tags</button>
+          <div class="field">
+            <input type="text" name="title"></input>
+            <button type="submit" formaction="/transaction_tag_sets" formmethod="POST"> Save as Tag Set</button>
+          </div>
+        </form>
       </div>
-
-      <form id="tagform">
-        <div class="field">
-          <label class="checkbox" for="intersection">Intersection</label>
-          <% if @is_tag_intersection %>
-            <input name="intersection" type="checkbox" checked />
-          <% else %>
-            <input name="intersection" type="checkbox" />
-          <% end %>
-        </div>
-
-        <button class="button mb-6 is-primary" type="submit">Filter to these tags</button>
-        <div class="field">
-          <input type="text" name="title"></input>
-          <button type="submit" formaction="/transaction_tag_sets" formmethod="POST"> Save as Tag Set</button>
-        </div>
-      </form>
-    </div>
+    </nav>
+  </div>
+  <div class="column">
+    <%= erb :transaction_table, locals: { transactions: data, tag_index: tag_index } %>
   </div>
 </div>
