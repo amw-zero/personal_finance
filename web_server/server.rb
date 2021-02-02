@@ -39,7 +39,7 @@ get '/transactions/create' do
 end
 
 get '/transactions/:id/tags/create' do
-  @transaction = application.transactions.find { |t| t.id == params[:id].to_i }
+  @transaction = application.all_transactions.find { |t| t.id == params[:id].to_i }
   erb :transaction_tag_form
 end
 
