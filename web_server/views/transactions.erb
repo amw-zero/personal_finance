@@ -7,67 +7,24 @@
   <div class="column is-one-fifth">
     <nav class="panel">
       <p class="panel-heading">
-        Tags
+        Filters
       </p>
 
-      <a class="panel-block has-text-danger" href="/transactions">Clear Tags</a>
+      <div class="panel-tabs">
+        <a class="<%= 'is-active' if @page == :transactions %>" href="/transactions">Tags</a>
+        <a class="<%= 'is-active' if @page == :transactions_tag_sets %>" href="/transactions/tag_sets">Tag Sets</a>
+      </div>
 
-      <form id="tagform">
-        <div class="panel-block">
-          <div class="field">
-            <button class="button is-link is-small" type="submit">Filter to these tags</button>
-          </div>
-        </div>
+      <% if @page == :transactions %>
+        <%= erb :transaction_filters_tags, locals: { params: params, tag_index: data[:tag_index], accounts: accounts } %>
+      <% elsif @page == :transactions_tag_sets %>
+        <%= erb :transaction_filters_tag_sets, locals: { params: params, tag_sets: data[:tag_sets] } %>
+      <% end %>
 
-        <div class="panel-block">
-          <div class="control">
-            <label class="radio">
-              <input type="radio" name="intersection" value="false" checked />
-              Union
-            </label>
-            <label class="radio">
-              <input type="radio" name="intersection" value="true" <%= 'checked' if params[:intersection] == 'true' %> />
-              Intersection
-            </label>
-          </div>
-        </div>
-
-        <% tag_index.values.flatten.map(&:name).uniq.sort.each do |tag| %>
-          <div class="panel-block">
-            <label class="checkbox">
-              <input
-                type="checkbox"
-                name="transaction_tag[]"
-                form="tagform"
-                value="<%= tag %>"
-                <%= 'checked' if params[:transaction_tag]&.include?(tag) %>
-              >
-              </input>
-              <%= tag %>
-            </label>
-          </div>
-        <% end %>
-
-        <div class="panel-block is-flex-direction-column">
-          <form action="/transaction_tag_sets" formmethod="POST">
-            <div class="field">
-              <label class="label" for="title">Tag Set Name</label>
-              <div class="control">
-                <input class="input" type="text" name="title" />
-              </div>
-            </div>
-            <div class="field">
-              <button class="button is-primary is-small" type="submit">
-                Save as Tag Set
-              </button>
-            </div>
-          </form>
-        </div>
-      </form>
     </nav>
   </div>
   
   <div class="column">
-    <%= erb :transaction_table, locals: { transactions: data, tag_index: tag_index } %>
+    <%= erb :transaction_table, locals: { transactions: data[:transactions], tag_index: data[:tag_index] } %>
   </div>
 </div>

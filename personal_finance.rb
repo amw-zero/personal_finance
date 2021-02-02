@@ -183,6 +183,7 @@ module PersonalFinance
           {
             method: :post,
             path: '/transaction_tag_sets',
+            return: '/transactions',
             action: ->(params) { create_transaction_tag_set(params) }
           }
         ]
@@ -233,22 +234,27 @@ module PersonalFinance
           },
           {
             method: :get,
+            # Coupling here - /transactions is referred to in view
+            # It should reference the use case path probably
+            # Try and change this route and see what breaks
             path: '/transactions',
             action: lambda do |params|
-              # Push logic down into transactions API
-              if params[:transaction_tag]
-                transactions_for_tags(
-                  params[:transaction_tag],
-                  tag_index,
-                  intersection: params[:intersection] == 'true'
-                )
-              elsif params[:transaction_tag_set]
-                transactions_for_tag_sets(params[:transaction_tag_set])
-              elsif params[:account]
-                cash_flow(params[:account].to_i)
-              else
-                transactions
-              end
+              {
+                tag_index: tag_index,
+                transactions: transactions(params),
+              }
+            end
+          },
+          {
+            method: :get,
+            page: :transactions_tag_sets,
+            path: '/transactions/tag_sets',
+            action: lambda do |params|
+              {
+                tag_index: tag_index,
+                tag_sets: all_transaction_tag_sets,
+                transactions: transactions(params)
+              }
             end
           }
         ]
@@ -266,11 +272,23 @@ module PersonalFinance
         end
       end
 
-      def transactions
-        to_models(
-          relation(:transactions),
-          Transaction
-        ).sort_by(&:day_of_month)
+      def transactions(params)
+        if params[:transaction_tag]
+          transactions_for_tags(
+            params[:transaction_tag],
+            tag_index,
+            intersection: params[:intersection] == 'true'
+          )
+        elsif params[:transaction_tag_set]
+          transactions_for_tag_sets(params[:transaction_tag_set])
+        elsif params[:account]
+          cash_flow(params[:account].to_i)
+        else
+          to_models(
+            relation(:transactions),
+            Transaction
+          ).sort_by(&:day_of_month)
+        end
       end
 
       def cash_flow(account_id)
@@ -295,7 +313,23 @@ module PersonalFinance
         to_models(transaction_relation, Transaction)
       end
 
+      def all_transaction_tag_sets
+        to_models(relation(:transaction_tag_sets), TransactionTagSet)
+      end
+
       private
+
+      def transactions_for_tag_sets(tag_set_ids)
+        tag_sets = to_models(
+          relation(:transaction_tag_sets).restrict(id: tag_set_ids),
+          TransactionTagSet
+        )
+
+        to_models(
+          _transactions_for_tags(tag_sets.first.tags),
+          Transaction
+        )
+      end
 
       def persistable_transation(transaction)
         # TODO: the attributes are mutable here, and this is surprising and confusing
@@ -388,8 +422,8 @@ module PersonalFinance
       @use_cases[:accounts].accounts
     end
 
-    def transactions
-      @use_cases[:transactions].transactions
+    def all_transactions
+      @use_cases[:transactions].transactions({})
     end
 
     def cash_flow(account_id)
@@ -421,20 +455,7 @@ module PersonalFinance
     end
 
     def transactions_for_tag_sets(tag_set_ids)
-      tag_sets = to_models(
-        relation(:transaction_tag_sets).restrict(id: tag_set_ids),
-        TransactionTagSet
-      )
-
-      tag_sets.map do |tag_set|
-        {
-          title: tag_set.title,
-          tags: tag_set.tags,
-          transaction_set: TransactionSet.new(
-            transactions: to_models(_transaction_for_tags(tag_set.tags), Transaction)
-          )
-        }
-      end
+      @use_case[:transactions].transactions_for_tag_sets(tag_set_ids)
     end
 
     def tag_index
@@ -455,7 +476,7 @@ module PersonalFinance
     end
 
     def all_transaction_tag_sets
-      to_models(relation(:transaction_tag_sets), TransactionTagSet)
+      @use_cases[:transactions].all_transaction_tag_sets
     end
 
     private

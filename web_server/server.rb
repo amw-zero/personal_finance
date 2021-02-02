@@ -13,7 +13,7 @@ get '/' do
   @cash_flow = if params[:account]
                  application.cash_flow(params[:account].to_i)
                else
-                 application.transactions
+                 application.all_transactions
                end
   @tag_index = application.tag_index
   @is_tag_intersection = params[:intersection] == 'on'
@@ -48,13 +48,12 @@ application.use_cases.each do |_name, use_case|
     case endpoint[:method]
     when :get
       get endpoint[:path] do
-        values = endpoint[:action].call(params)
+        data = endpoint[:action].call(params)
 
-        @page = use_case.name
+        @page = endpoint[:page] || use_case.name
 
         erb use_case.name, locals: {
-          data: values,
-          tag_index: application.tag_index,
+          data: data,
           accounts: application.accounts,
           params: params
         }
