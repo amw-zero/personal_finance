@@ -18,7 +18,7 @@ describe 'Hypothesis' do
       test_app = test_application
 
       action = element_of([:create_account, :create_transaction, :create_tag])
-      actions = any(arrays(of: action, min_size: 5, max_size: 100), name: 'Actions'), name: 'Actions'
+      actions = any(arrays(of: action, min_size: 5, max_size: 100), name: 'Actions')
 
       actions.each do |a|
         puts "Performing: #{a}"
