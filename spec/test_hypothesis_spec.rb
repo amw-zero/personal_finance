@@ -17,13 +17,13 @@ describe 'Hypothesis' do
 
       test_app = test_application
 
-      actions = [:create_account, :create_transaction, :create_tag]
-      indexes = any arrays(of: integers(min: 0, max: actions.length - 1), max_size: 100), name: 'Action indexes'
+      action = element_of([:create_account, :create_transaction, :create_tag])
+      actions = any(arrays(of: action, min_size: 5, max_size: 100), name: 'Actions'), name: 'Actions'
 
-      indexes.each do |i|
-        puts "Performing: #{actions[i]}"
+      actions.each do |a|
+        puts "Performing: #{a}"
 
-        case actions[i]
+        case a
         when :create_account
           account_name = any strings, name: 'Account Name'
           test_app.create_account(account_name)
@@ -39,9 +39,9 @@ describe 'Hypothesis' do
             day_of_month: any(integers(min: 1, max: 31))
           )
         when :create_tag
-          next if test_app.transactions.empty?
+          next if test_app.all_transactions.empty?
 
-          transaction = any(element_of(test_app.transactions))
+          transaction = any(element_of(test_app.all_transactions))
           test_app.tag_transaction(transaction.id, tag: any(strings))
         end
       end
