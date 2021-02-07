@@ -19,22 +19,13 @@ describe 'Transactions by Tag' do
       test_actions,
       fresh_application: -> { test_application }
     ).check! do |test_app|
-      max_count = if test_app.transaction_tags.count == 0
-                    2
-                  else
-                    test_app.transaction_tags.count
-                  end
-      tag_sample_count = any integers(min: 1, max: max_count)
-      possible_tags = test_app.transaction_tags.sample(tag_sample_count).map(&:name)
+      next if test_app.transaction_tags.empty?
 
-      # puts "Sampled #{tag_sample_count} tags: #{possible_tags}"
-
+      possible_tags = any(arrays(of: element_of(test_app.transaction_tags))).map(&:name)
       filtered_transactions = test_app
                               .use_cases[:transactions]
                               .transactions({ transaction_tag: possible_tags })
                               .transactions
-
-      # puts "Got #{filtered_transactions.count} filtered transactions"
 
       expect(
         Propositions.FilteredTransactionsRespectTags(
