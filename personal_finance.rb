@@ -281,6 +281,8 @@ module PersonalFinance
               intersection: params[:intersection] == 'true'
             )
           elsif params[:transaction_tag_set]
+            return TransactionSet.new(transactions: []) if params[:transaction_tag_set].empty?
+
             transactions_for_tag_sets(params[:transaction_tag_set])
           elsif params[:account]
             cash_flow(params[:account].to_i)
@@ -328,6 +330,8 @@ module PersonalFinance
           relation(:transaction_tag_sets).restrict(id: tag_set_ids),
           TransactionTagSet
         )
+
+        return [] if tag_sets.empty?
 
         to_models(
           _transactions_for_tags(tag_sets.first.tags),

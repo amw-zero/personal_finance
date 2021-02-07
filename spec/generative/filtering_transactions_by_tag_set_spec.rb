@@ -28,18 +28,18 @@ describe 'Transactions by Tag Set' do
 
       next if tag_sets.empty?
 
-      tag_set_subject = any(arrays(of: element_of(tag_sets)))
+      tag_set_subject = any(arrays(of: element_of(tag_sets)), name: 'Tag Set Subject')
 
       transactions = test_app
         .use_cases[:transactions]
         .transactions({
-                        transaction_tagset: tag_set_subject
+                        transaction_tag_set: tag_set_subject
                       }).transactions
 
-      tags = tag_set_subject.tags
+      tags = tag_set_subject.flat_map(&:tags)
 
       expect(
-        Proposition::FilteredTransactionsRespectTags(
+        Propositions::FilteredTransactionsRespectTags(
           transactions,
           tags,
           test_app
