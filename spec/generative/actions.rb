@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'hypothesis'
 
 module ApplicationActions
@@ -70,7 +72,7 @@ module ApplicationActions
         tags = test_app.transaction_tags.map(&:name)
         return if tags.empty?
 
-        bad_inputs = ['jkl', 'randM']
+        bad_inputs = %w[jkl randM]
         tag_inputs = from(element_of(tags), element_of(bad_inputs))
 
         params = any(
