@@ -16,9 +16,9 @@ describe 'Creating Transactions' do
   end
 
   it do
-    expect(subject.all_transactions.first.account_id).to eq(account.id)
-    expect(subject.all_transactions.first.amount).to eq(100.0)
-    expect(subject.all_transactions.first.name).to eq('T1')
+    expect(subject.all_transactions.transactions.first.account_id).to eq(account.id)
+    expect(subject.all_transactions.transactions.first.amount).to eq(100.0)
+    expect(subject.all_transactions.transactions.first.name).to eq('T1')
   end
 end
 
@@ -33,6 +33,6 @@ describe 'Retrieving Transactions' do
   end
 
   it 'returns the transactions ordered by their date of occurrence' do
-    expect(subject.all_transactions.map(&:name)).to eq(%w[T2 T1])
+    expect(subject.all_transactions.transactions.map(&:name)).to eq(%w[T2 T1])
   end
 end

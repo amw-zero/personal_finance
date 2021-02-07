@@ -256,6 +256,13 @@ module PersonalFinance
                 transactions: transactions(params)
               }
             end
+          },
+          {
+            method: :get,
+            path: '/transactions/:id/edit',
+            action: lambda do |params|
+              4
+            end
           }
         ]
       end
@@ -284,10 +291,12 @@ module PersonalFinance
         elsif params[:account]
           cash_flow(params[:account].to_i)
         else
-          to_models(
+          transactions = to_models(
             relation(:transactions),
             Transaction
           ).sort_by(&:day_of_month)
+
+          TransactionSet.new(transactions: transactions)
         end
       end
 
@@ -310,7 +319,8 @@ module PersonalFinance
                                  _transactions_for_tags(tags)
                                end
 
-        to_models(transaction_relation, Transaction)
+        transactions = to_models(transaction_relation, Transaction)
+        TransactionSet.new(transactions: transactions)
       end
 
       def all_transaction_tag_sets
