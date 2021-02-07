@@ -10,10 +10,10 @@ source 'https://rubygems.org' do
   gem 'sinatra'
 
   group :development do
+    gem 'hypothesis-specs', '0.6.0'
     gem 'pry'
     gem 'rack-test'
     gem 'rspec'
     gem 'rubocop'
-    gem 'hypothesis-specs', '0.6.0'
   end
 end

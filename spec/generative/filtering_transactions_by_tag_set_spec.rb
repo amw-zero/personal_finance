@@ -16,7 +16,7 @@ describe 'Transactions by Tag Set' do
       ApplicationActions::CREATE_ACCOUNT,
       ApplicationActions::CREATE_TRANSACTION,
       ApplicationActions::CREATE_TAG,
-      ApplicationActions::CREATE_TAG_SET,
+      ApplicationActions::CREATE_TAG_SET
     ]
 
     ApplicationActions::Sequences.new(
@@ -30,12 +30,10 @@ describe 'Transactions by Tag Set' do
       tag_set_subject = any(arrays(of: element_of(tag_sets)))
 
       transactions = test_app.use_cases[:transactions].transactions({
-        transaction_tagset: tag_set_subject
-      }).transactions
+                                                                      transaction_tagset: tag_set_subject
+                                                                    }).transactions
 
-      if (tag_set_subject & tag_sets)
-        expect(transactions.count).to_not be(0)
-      end
+      expect(transactions.count).to_not be(0) if tag_set_subject & tag_sets
     end
   end
 end

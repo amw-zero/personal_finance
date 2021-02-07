@@ -241,7 +241,7 @@ module PersonalFinance
             action: lambda do |params|
               {
                 tag_index: tag_index,
-                transactions: transactions(params),
+                transactions: transactions(params)
               }
             end
           },
@@ -256,7 +256,7 @@ module PersonalFinance
                 transactions: transactions(params)
               }
             end
-          },
+          }
         ]
       end
 
@@ -344,9 +344,8 @@ module PersonalFinance
 
       def _transactions_for_tags(tags)
         transaction_ids = relation(:transaction_tags)
-          .restrict(name: tags)
-          .map { |tag| tag[:transaction_id] }
-
+                          .restrict(name: tags)
+                          .map { |tag| tag[:transaction_id] }
 
         relation(:transactions).restrict(id: transaction_ids)
       end
