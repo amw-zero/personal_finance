@@ -268,7 +268,7 @@ module PersonalFinance
           currency: currency,
           day_of_month: day_of_month
         ).tap do |i|
-          @persistence.persist(:transactions, persistable_transation(i))
+          @persistence.persist(:transactions, persistable_transaction(i))
         end
       end
 
@@ -339,7 +339,7 @@ module PersonalFinance
         )
       end
 
-      def persistable_transation(transaction)
+      def persistable_transaction(transaction)
         # TODO: the attributes are mutable here, and this is surprising and confusing
         # Persisting this later one modifies the attributes which modifies the struct.
         # Terrifying.
