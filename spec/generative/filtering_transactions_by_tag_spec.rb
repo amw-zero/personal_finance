@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'test_application'
+require_relative '../test_application'
+require_relative './actions'
 require 'hypothesis'
 
 describe 'Hypothesis' do
@@ -11,31 +12,16 @@ describe 'Hypothesis' do
     hypothesis(max_valid_test_cases: 1_000) do
       test_app = test_application
 
-      action = element_of([:create_account, :create_transaction, :create_tag])
+      test_actions = [
+        ApplicationActions::CREATE_ACCOUNT, 
+        ApplicationActions::CREATE_TRANSACTION, 
+        ApplicationActions::CREATE_TAG,
+      ]
+      action = element_of(test_actions)
       actions = any(arrays(of: action, min_size: 5, max_size: 100), name: 'Actions')
 
-      actions.each do |a|
-        case a
-        when :create_account
-          account_name = any strings, name: 'Account Name'
-          test_app.create_account(account_name)
-        when :create_transaction
-          next if test_app.accounts.empty?
-          account = any element_of(test_app.accounts), name: 'Transaction Account'
-          amount = any integers(min: 1, max: 500), name: 'Transaction Amount'
-          test_app.create_transaction(
-            name: any(strings),
-            account_id: account.id,
-            amount: amount.to_f,
-            currency: :usd,
-            day_of_month: any(integers(min: 1, max: 31))
-          )
-        when :create_tag
-          next if test_app.all_transactions.transactions.empty?
-
-          transaction = any(element_of(test_app.all_transactions.transactions))
-          test_app.tag_transaction(transaction.id, tag: any(strings))
-        end
+      actions.each do |action|
+        ApplicationActions.handle(action, in_app: test_app)
       end
 
       max_count = if test_app.transaction_tags.count == 0

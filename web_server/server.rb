@@ -13,7 +13,7 @@ get '/' do
   @cash_flow = if params[:account]
                  application.cash_flow(params[:account].to_i)
                else
-                 application.all_transactions
+                 application.all_transactions.transactions
                end
   @tag_index = application.tag_index
   @is_tag_intersection = params[:intersection] == 'on'
@@ -39,7 +39,7 @@ get '/transactions/create' do
 end
 
 get '/transactions/:id/tags/create' do
-  @transaction = application.all_transactions.find { |t| t.id == params[:id].to_i }
+  @transaction = application.all_transactions.transactions.find { |t| t.id == params[:id].to_i }
   erb :transaction_tag_form
 end
 
