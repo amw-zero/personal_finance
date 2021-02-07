@@ -28,8 +28,12 @@ describe 'Transactions by Tag' do
 
       # puts "Sampled #{tag_sample_count} tags: #{possible_tags}"
 
-      filtered_transactions = test_app.use_cases[:transactions].transactions_for_tags(possible_tags, nil).transactions
-      # puts "Got #{filtered_transactions.count} filtered transactions"
+      filtered_transactions = test_app
+        .use_cases[:transactions]
+        .transactions({ transaction_tag: possible_tags })
+        .transactions
+
+        # puts "Got #{filtered_transactions.count} filtered transactions"
 
       filtered_transactions.each do |transaction|
         transaction_tags = test_app.tag_index[transaction.id]
