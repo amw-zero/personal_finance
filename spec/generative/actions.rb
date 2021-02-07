@@ -7,7 +7,10 @@ module ApplicationActions
   CREATE_ACCOUNT = :create_account
   CREATE_TRANSACTION = :create_transaction
   CREATE_TAG = :create_tag
+  CREATE_TAG_SET = :create_tag_set
 
+  # TODO: Eventually turn into class so the actual executed sequence
+  # of actions can be displayed
   def self.execute(action, in_app:)
     test_app = in_app
     case action
@@ -31,6 +34,27 @@ module ApplicationActions
 
       transaction = any(element_of(test_app.all_transactions.transactions))
       test_app.tag_transaction(transaction.id, tag: any(strings))
+    when :create_tag_set
+      # params = {
+      #   transaction_tag: [String]
+      # }
+      # use_case = [String] -> [TransactionTag] -> ApplicationState
+      # Would be good to have a domain constraint, i.e. "Strings are valid TransactionTags"
+
+      tags = test_app.transaction_tags.map(&:name)
+      return if tags.empty?
+
+      bad_inputs = ['jkl', 'randM']
+      tag_inputs = from(element_of(tags), element_of(bad_inputs))
+
+      params = any(
+        hashes_of_shape(
+          title: strings,
+          transaction_tag: arrays(of: tag_inputs)
+        )
+      )
+
+      test_app.create_transaction_tag_set(params)
     end
   end
 end
