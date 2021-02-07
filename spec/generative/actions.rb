@@ -1,14 +1,14 @@
 require 'hypothesis'
 
 module ApplicationActions 
+  extend Hypothesis
+  extend Hypothesis::Possibilities
+
   CREATE_ACCOUNT = :create_account
   CREATE_TRANSACTION = :create_transaction
   CREATE_TAG = :create_tag
 
-  def self.handle(action, in_app:)
-    include Hypothesis
-    include Hypothesis::Possibilities
-
+  def self.execute(action, in_app:)
     test_app = in_app
     case action
     when :create_account

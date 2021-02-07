@@ -4,7 +4,7 @@ require_relative '../test_application'
 require_relative './actions'
 require 'hypothesis'
 
-describe 'Hypothesis' do
+describe 'Transactions by Tag Set' do
   include Hypothesis
   include Hypothesis::Possibilities
 
@@ -21,7 +21,7 @@ describe 'Hypothesis' do
       actions = any(arrays(of: action, min_size: 5, max_size: 100), name: 'Actions')
 
       actions.each do |action|
-        ApplicationActions.handle(action, in_app: test_app)
+        ApplicationActions.execute(action, in_app: test_app)
       end
 
       max_count = if test_app.transaction_tags.count == 0
