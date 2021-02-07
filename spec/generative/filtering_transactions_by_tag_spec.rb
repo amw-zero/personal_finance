@@ -26,10 +26,10 @@ describe 'Transactions by Tag' do
       tag_sample_count = any integers(min: 1, max: max_count)
       possible_tags = test_app.transaction_tags.sample(tag_sample_count).map(&:name)
 
-      puts "Sampled #{tag_sample_count} tags: #{possible_tags}"
+      # puts "Sampled #{tag_sample_count} tags: #{possible_tags}"
 
       filtered_transactions = test_app.use_cases[:transactions].transactions_for_tags(possible_tags, nil).transactions
-      puts "Got #{filtered_transactions.count} filtered transactions"
+      # puts "Got #{filtered_transactions.count} filtered transactions"
 
       filtered_transactions.each do |transaction|
         transaction_tags = test_app.tag_index[transaction.id]
