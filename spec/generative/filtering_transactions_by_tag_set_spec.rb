@@ -2,6 +2,9 @@
 
 require_relative '../test_application'
 require_relative './actions'
+
+# TODO: Would be nice to have hypothesis abstracted
+# by ApplicationActions::Sequences
 require 'hypothesis'
 
 describe 'Transactions by Tag Set' do
@@ -9,27 +12,17 @@ describe 'Transactions by Tag Set' do
   include Hypothesis::Possibilities
 
   specify do
-    hypothesis(max_valid_test_cases: 100, phases: Phase.excluding(:shrink)) do
-      test_app = test_application
+    test_actions = [
+      ApplicationActions::CREATE_ACCOUNT,
+      ApplicationActions::CREATE_TRANSACTION,
+      ApplicationActions::CREATE_TAG,
+      ApplicationActions::CREATE_TAG_SET,
+    ]
 
-      test_actions = [
-        ApplicationActions::CREATE_ACCOUNT, 
-        ApplicationActions::CREATE_TRANSACTION, 
-        ApplicationActions::CREATE_TAG,
-        ApplicationActions::CREATE_TAG_SET,
-      ]
-
-      any(
-        arrays(
-          of: element_of(test_actions),
-          min_size: 5,
-          max_size: 100
-        ), 
-        name: 'Actions'
-      ).each do |action|
-        ApplicationActions.execute(action, in_app: test_app)
-      end
-
+    ApplicationActions::Sequences.new(
+      test_actions,
+      fresh_application: -> { test_application }
+    ).check! do |test_app|
       tag_sets = test_app.all_transaction_tag_sets
 
       next if tag_sets.empty?

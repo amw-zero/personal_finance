@@ -9,21 +9,15 @@ describe 'Transactions by Tag' do
   include Hypothesis::Possibilities
 
   specify do
-    hypothesis(max_valid_test_cases: 1_000) do
-      test_app = test_application
-
-      test_actions = [
-        ApplicationActions::CREATE_ACCOUNT, 
-        ApplicationActions::CREATE_TRANSACTION, 
-        ApplicationActions::CREATE_TAG,
-      ]
-      action = element_of(test_actions)
-      actions = any(arrays(of: action, min_size: 5, max_size: 100), name: 'Actions')
-
-      actions.each do |action|
-        ApplicationActions.execute(action, in_app: test_app)
-      end
-
+    test_actions = [
+      ApplicationActions::CREATE_ACCOUNT,
+      ApplicationActions::CREATE_TRANSACTION,
+      ApplicationActions::CREATE_TAG,
+    ]
+    ApplicationActions::Sequences.new(
+      test_actions,
+      fresh_application: -> { test_application }
+    ).check! do |test_app|
       max_count = if test_app.transaction_tags.count == 0
           2
       else
