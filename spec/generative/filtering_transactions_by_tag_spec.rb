@@ -2,6 +2,7 @@
 
 require_relative '../test_application'
 require_relative './actions'
+require_relative './propositions'
 require 'hypothesis'
 
 describe 'Transactions by Tag' do
@@ -35,15 +36,13 @@ describe 'Transactions by Tag' do
 
       # puts "Got #{filtered_transactions.count} filtered transactions"
 
-      filtered_transactions.each do |transaction|
-        transaction_tags = test_app.tag_index[transaction.id]
-
-        expect(transaction_tags).to_not be_nil
-
-        tags = transaction_tags.map(&:name)
-        same_tags = tags & possible_tags
-        expect(same_tags.length).to be > 0
-      end
+      expect(
+        Propositions.FilteredTransactionsRespectTags(
+          filtered_transactions,
+          possible_tags,
+          test_app,
+        )
+      ).to be(true)
 
       expect(Set.new(filtered_transactions).to_a).to eq(filtered_transactions)
     end

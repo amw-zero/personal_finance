@@ -2,6 +2,7 @@
 
 require_relative '../test_application'
 require_relative './actions'
+require_relative './propositions'
 
 # TODO: Would be nice to have hypothesis abstracted
 # by ApplicationActions::Sequences
@@ -29,11 +30,21 @@ describe 'Transactions by Tag Set' do
 
       tag_set_subject = any(arrays(of: element_of(tag_sets)))
 
-      transactions = test_app.use_cases[:transactions].transactions({
-                                                                      transaction_tagset: tag_set_subject
-                                                                    }).transactions
+      transactions = test_app
+        .use_cases[:transactions]
+        .transactions({
+                        transaction_tagset: tag_set_subject
+                      }).transactions
 
-      expect(transactions.count).to_not be(0) if tag_set_subject & tag_sets
+      tags = tag_set_subject.tags
+
+      expect(
+        Proposition::FilteredTransactionsRespectTags(
+          transactions,
+          tags,
+          test_app
+        )
+      ).to be(true)
     end
   end
 end
