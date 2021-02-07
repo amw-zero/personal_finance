@@ -4,7 +4,7 @@ require_relative '../test_application'
 require_relative './actions'
 require 'hypothesis'
 
-describe 'Transactions by Tag Set' do
+describe 'Transactions by Tag' do
   include Hypothesis
   include Hypothesis::Possibilities
 

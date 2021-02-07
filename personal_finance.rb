@@ -328,10 +328,12 @@ module PersonalFinance
           TransactionTagSet
         )
 
-        to_models(
+        transactions = to_models(
           _transactions_for_tags(tag_sets.first.tags),
           Transaction
         )
+
+        TransactionSet.new(transactions: transactions)
       end
 
       def persistable_transation(transaction)
@@ -458,7 +460,7 @@ module PersonalFinance
     end
 
     def transactions_for_tag_sets(tag_set_ids)
-      @use_case[:transactions].transactions_for_tag_sets(tag_set_ids)
+      @use_cases[:transactions].transactions_for_tag_sets(tag_set_ids)
     end
 
     def tag_index
