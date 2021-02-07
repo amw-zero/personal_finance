@@ -273,24 +273,26 @@ module PersonalFinance
       end
 
       def transactions(params)
-        if params[:transaction_tag]
-          transactions_for_tags(
-            params[:transaction_tag],
-            tag_index,
-            intersection: params[:intersection] == 'true'
-          )
-        elsif params[:transaction_tag_set]
-          transactions_for_tag_sets(params[:transaction_tag_set])
-        elsif params[:account]
-          cash_flow(params[:account].to_i)
-        else
-          transactions = to_models(
-            relation(:transactions),
-            Transaction
-          ).sort_by(&:day_of_month)
+        applicable_transactions =
+          if params[:transaction_tag]
+            transactions_for_tags(
+              params[:transaction_tag],
+              tag_index,
+              intersection: params[:intersection] == 'true'
+            )
+          elsif params[:transaction_tag_set]
+            transactions_for_tag_sets(params[:transaction_tag_set])
+          elsif params[:account]
+            cash_flow(params[:account].to_i)
+          else
+            transactions = to_models(
+              relation(:transactions),
+              Transaction
+            ).sort_by(&:day_of_month)
 
-          TransactionSet.new(transactions: transactions)
-        end
+          end
+
+        TransactionSet.new(transactions: applicable_transactions)
       end
 
       def cash_flow(account_id)
@@ -302,6 +304,12 @@ module PersonalFinance
         ).sort_by(&:day_of_month)
       end
 
+      def all_transaction_tag_sets
+        to_models(relation(:transaction_tag_sets), TransactionTagSet)
+      end
+
+      private
+
       def transactions_for_tags(tags, tag_index, intersection: false)
         transaction_relation = if intersection
                                  transaction_ids = tag_index.select do |_, t|
@@ -312,15 +320,8 @@ module PersonalFinance
                                  _transactions_for_tags(tags)
                                end
 
-        transactions = to_models(transaction_relation, Transaction)
-        TransactionSet.new(transactions: transactions)
+        to_models(transaction_relation, Transaction)
       end
-
-      def all_transaction_tag_sets
-        to_models(relation(:transaction_tag_sets), TransactionTagSet)
-      end
-
-      private
 
       def transactions_for_tag_sets(tag_set_ids)
         tag_sets = to_models(
@@ -328,12 +329,10 @@ module PersonalFinance
           TransactionTagSet
         )
 
-        transactions = to_models(
+        to_models(
           _transactions_for_tags(tag_sets.first.tags),
           Transaction
         )
-
-        TransactionSet.new(transactions: transactions)
       end
 
       def persistable_transation(transaction)
