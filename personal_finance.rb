@@ -257,13 +257,6 @@ module PersonalFinance
               }
             end
           },
-          {
-            method: :get,
-            path: '/transactions/:id/edit',
-            action: lambda do |params|
-              4
-            end
-          }
         ]
       end
 
