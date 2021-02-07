@@ -81,6 +81,8 @@ module ApplicationActions
         )
 
         test_app.create_transaction_tag_set(params)
+      else
+        raise "Attempted to execute unknown action: #{action}"
       end
     end
 
