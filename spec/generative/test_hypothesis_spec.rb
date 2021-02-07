@@ -8,21 +8,13 @@ describe 'Hypothesis' do
   include Hypothesis::Possibilities
 
   specify do
-    x = 0
     hypothesis(max_valid_test_cases: 1_000) do
-      puts;puts;
-      puts "---- Start block ----"
-      puts "Iteration: #{x}"
-      x += 1
-
       test_app = test_application
 
       action = element_of([:create_account, :create_transaction, :create_tag])
       actions = any(arrays(of: action, min_size: 5, max_size: 100), name: 'Actions')
 
       actions.each do |a|
-        puts "Performing: #{a}"
-
         case a
         when :create_account
           account_name = any strings, name: 'Account Name'
@@ -39,9 +31,9 @@ describe 'Hypothesis' do
             day_of_month: any(integers(min: 1, max: 31))
           )
         when :create_tag
-          next if test_app.all_transactions.empty?
+          next if test_app.all_transactions.transactions.empty?
 
-          transaction = any(element_of(test_app.all_transactions))
+          transaction = any(element_of(test_app.all_transactions.transactions))
           test_app.tag_transaction(transaction.id, tag: any(strings))
         end
       end
@@ -56,7 +48,7 @@ describe 'Hypothesis' do
 
       puts "Sampled #{tag_sample_count} tags: #{possible_tags}"
 
-      filtered_transactions = test_app.use_cases[:transactions].transactions_for_tags(possible_tags, nil)
+      filtered_transactions = test_app.use_cases[:transactions].transactions_for_tags(possible_tags, nil).transactions
       puts "Got #{filtered_transactions.count} filtered transactions"
 
       filtered_transactions.each do |transaction|
