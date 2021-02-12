@@ -31,7 +31,7 @@ describe 'Transactions by Tag' do
         Propositions.FilteredTransactionsRespectTags(
           filtered_transactions,
           possible_tags,
-          test_app,
+          test_app
         )
       ).to be(true)
 

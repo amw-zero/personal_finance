@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Propositions
   def self.FilteredTransactionsRespectTags(transactions, possible_tags, test_app)
     transactions.all? do |transaction|
@@ -8,7 +10,7 @@ module Propositions
       tags = transaction_tags.map(&:name)
       same_tags = tags & possible_tags
 
-      same_tags.length > 0
+      !same_tags.empty?
     end
   end
 end

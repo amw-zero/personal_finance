@@ -7,13 +7,16 @@ describe 'Tagging transactions' do
 
   let(:checking_account) { subject.create_account('Checking') }
   let(:semi_monthly_income1) do
-    subject.create_transaction(name: 'Income 1', account_id: checking_account.id, amount: 100.0, currency: :usd, day_of_month: 1)
+    subject.create_transaction(name: 'Income 1', account_id: checking_account.id, amount: 100.0, currency: :usd,
+                               day_of_month: 1)
   end
   let(:semi_monthly_income2) do
-    subject.create_transaction(name: 'Income 2', account_id: checking_account.id, amount: 100.0, currency: :usd, day_of_month: 15)
+    subject.create_transaction(name: 'Income 2', account_id: checking_account.id, amount: 100.0, currency: :usd,
+                               day_of_month: 15)
   end
   let(:other_transaction) do
-    subject.create_transaction(name: 'Expense', account_id: checking_account.id, amount: 200.0, currency: :usd, day_of_month: 11)
+    subject.create_transaction(name: 'Expense', account_id: checking_account.id, amount: 200.0, currency: :usd,
+                               day_of_month: 11)
   end
 
   before do
