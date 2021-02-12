@@ -22,7 +22,7 @@ end
 
 DB.create_table :transactions do
   primary_key :id
-  foreign_key :account_id, :accounts
+  foreign_key :account_id, :accounts, on_delete: :cascade
   Float :amount
   String :currency
   String :name
@@ -31,7 +31,7 @@ end
 
 DB.create_table :transaction_tags do
   primary_key :id
-  foreign_key :transaction_id, :transactions
+  foreign_key :transaction_id, :transactions, on_delete: :cascade
   String :name
 end
 
