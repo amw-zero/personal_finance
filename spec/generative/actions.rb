@@ -25,7 +25,7 @@ module ApplicationActions
           arrays(
             of: element_of(actions),
             min_size: 5,
-            max_size: 100
+            max_size: 50
           ),
           name: 'Actions'
         ).each do |action|

@@ -29,6 +29,10 @@ module PersonalFinance
       @relations[rel_name]
     end
 
+    def delete(relation, to_delete)
+      @relations[relation] = Bmg::Relation.new(@relations[relation].to_a - to_delete.to_a)
+    end
+
     def persist(relation, data)
       data[:id] = @ids[relation]
       @ids[relation] += 1
@@ -256,6 +260,15 @@ module PersonalFinance
                 transactions: transactions(params)
               }
             end
+          },
+          # TODO: Simulate HTTP in tests and test proper endpoints / paths / actions
+          {
+            method: :delete,
+            return: '/transactions',
+            path: '/transactions/:id',
+            action: lambda do |params|
+              delete_transaction(params[:id])
+            end
           }
         ]
       end
@@ -308,6 +321,10 @@ module PersonalFinance
 
       def all_transaction_tag_sets
         to_models(relation(:transaction_tag_sets), TransactionTagSet)
+      end
+
+      def delete_transaction(id)
+        @persistence.delete(:transactions, relation(:transactions).restrict(id: id))
       end
 
       private
@@ -367,6 +384,7 @@ module PersonalFinance
   class Application
     extend Forwardable
     def_delegators :@data_interactor, :to_models, :relation
+    def_delegators :transactions_use_case, :delete_transaction
 
     attr_reader :endpoints, :use_cases
 
@@ -431,6 +449,10 @@ module PersonalFinance
 
     def all_transactions
       @use_cases[:transactions].transactions({})
+    end
+
+    def transactions_use_case
+      @use_cases[:transactions]
     end
 
     def cash_flow(account_id)
