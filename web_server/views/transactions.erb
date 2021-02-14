@@ -10,6 +10,8 @@
         <a class="<%= 'is-active' if @page == :transactions_tag_sets %>" href="/transactions/tag_sets">Tag Sets</a>
       </div>      
 
+      <!-- Need to handle nesting here. transactions_schedule is nested within transactions.  -->
+      <!-- Prob need a "navigation path" -->
       <% if @page == :transactions %>
         <%= erb :transaction_filters_tags, locals: { params: params, tag_index: data[:tag_index], accounts: accounts } %>
       <% elsif @page == :transactions_tag_sets %>
