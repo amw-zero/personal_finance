@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+require 'bmg'
+require 'bmg/sequel'
 require 'dry-struct'
 require 'forwardable'
-require 'bmg'
 require 'pg'
-require 'bmg/sequel'
+require 'rrule'
+
 
 # Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
@@ -52,7 +54,7 @@ module PersonalFinance
     def to_models(relation, model_klass)
       #      log relation.to_sql if relation.is_a?(Bmg::Sql::Relation)
       case model_klass.to_s
-      when 'PersonalFinance::Transaction'
+      when 'PersonalFinance::PlannedTransaction'
         relation.map do |data|
           data[:currency] = data[:currency].to_sym
           model_klass.new(data)
@@ -221,19 +223,8 @@ module PersonalFinance
           {
             method: :post,
             path: '/transactions',
-            action: lambda do |params|
-              # TODO: These type coercions can be a source of bugs
-              # add to application kernel, should only be:
-              # application.create_transaction(params)
-              # Can keep the same API internally with the above as an "anti-corruption" wrapper
-              # which handles web concerns
-              create_transaction(
-                name: params[:name],
-                account_id: params[:account_id].to_i,
-                amount: params[:amount].to_f,
-                currency: params[:currency].to_sym,
-                day_of_month: params[:day_of_month].to_i
-              )
+            action: lambda do |params|              
+              create_transaction_from_params(params)                
             end
           },
           {
@@ -261,6 +252,24 @@ module PersonalFinance
               }
             end
           },
+          {
+            method: :get,
+            page: :transactions_schedule,
+            path: '/transactions/schedule',
+            action: lambda do |params|
+              today = Date.today
+              first_of_month = Date.new(today.year, today.month, 1)
+              end_of_month = Date.new(today.year, today.month + 1, 1) - 1
+
+              {
+                tag_index: tag_index,
+                tag_sets: all_transaction_tag_sets,
+                transactions: transactions(params.merge({
+                  within_period: first_of_month..end_of_month
+                }))
+              }
+            end
+          },
           # TODO: Simulate HTTP in tests and test proper endpoints / paths / actions
           {
             method: :delete,
@@ -273,13 +282,25 @@ module PersonalFinance
         ]
       end
 
-      def create_transaction(name:, account_id:, amount:, currency:, day_of_month:)
-        Transaction.new(
+      # TODO: Test from_params methods separately
+      # Can simply call the method to check for type check errors.
+      def create_transaction_from_params(params)
+        create_transaction(
+          name: params[:name],
+          account_id: params[:account_id].to_i,
+          amount: params[:amount].to_f,
+          currency: params[:currency].to_sym,
+          recurrence_rule: params[:recurrence_rule]
+        )
+      end
+
+      def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:)
+        PlannedTransaction.new(
           name: name,
           account_id: account_id,
           amount: amount,
           currency: currency,
-          day_of_month: day_of_month
+          recurrence_rule: recurrence_rule
         ).tap do |i|
           @persistence.persist(:transactions, persistable_transaction(i))
         end
@@ -302,10 +323,17 @@ module PersonalFinance
           else
             transactions = to_models(
               relation(:transactions),
-              Transaction
-            ).sort_by(&:day_of_month)
+              PlannedTransaction
+            ).sort_by(&:name)
 
           end
+        if params[:within_period]
+          applicable_transactions = applicable_transactions.flat_map do |transaction|
+            transaction.occurrences_within(params[:within_period]).map do |date|
+              Transaction.new(date: date.to_date.to_s, planned_transaction: transaction)
+            end
+          end.sort_by(&:date)
+        end
 
         TransactionSet.new(transactions: applicable_transactions)
       end
@@ -315,8 +343,8 @@ module PersonalFinance
         accounts = relation(:accounts).restrict(id: account_id)
         to_models(
           transactions.join(accounts, { account_id: :id }),
-          Transaction
-        ).sort_by(&:day_of_month)
+          PlannedTransaction
+        ).sort_by(&:name)
       end
 
       def all_transaction_tag_sets
@@ -339,7 +367,7 @@ module PersonalFinance
                                  _transactions_for_tags(tags)
                                end
 
-        to_models(transaction_relation, Transaction)
+        to_models(transaction_relation, PlannedTransaction)
       end
 
       def transactions_for_tag_sets(tag_set_ids)
@@ -352,7 +380,7 @@ module PersonalFinance
 
         to_models(
           _transactions_for_tags(tag_sets.first.tags),
-          Transaction
+          PlannedTransaction
         )
       end
 
@@ -360,7 +388,11 @@ module PersonalFinance
         # TODO: the attributes are mutable here, and this is surprising and confusing
         # Persisting this later one modifies the attributes which modifies the struct.
         # Terrifying.
-        transaction.attributes.merge!({ currency: transaction.currency.to_s })
+        transaction.attributes.merge!(
+          { 
+            currency: transaction.currency.to_s,
+          }
+        )
       end
 
       def _transactions_for_tags(tags)
@@ -384,7 +416,7 @@ module PersonalFinance
   class Application
     extend Forwardable
     def_delegators :@data_interactor, :to_models, :relation
-    def_delegators :transactions_use_case, :delete_transaction
+    def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction
 
     attr_reader :endpoints, :use_cases
 
@@ -415,18 +447,7 @@ module PersonalFinance
       LinkedAccount.new(person: person, account: account).tap do |la|
         @linked_accounts << la
       end
-    end
-
-    def create_transaction(name:, account_id:, amount:, currency:, day_of_month:)
-      @use_cases[:transactions]
-        .create_transaction(
-          name: name,
-          account_id: account_id,
-          amount: amount,
-          currency: currency,
-          day_of_month: day_of_month
-        )
-    end
+    end    
 
     def tag_transaction(transaction_id, tag:)
       @use_cases[:transaction_tags].tag_transaction(transaction_id, tag: tag)
@@ -469,7 +490,7 @@ module PersonalFinance
                                _transaction_for_tags(tags)
                              end
 
-      transactions = to_models(transaction_relation, Transaction)
+      transactions = to_models(transaction_relation, PlannedTransactionTransaction)
 
       [{ title: 'Current Tag', tags: tags, transaction_set: TransactionSet.new(transactions: transactions) }]
     end
@@ -478,7 +499,7 @@ module PersonalFinance
       transactions = relation(:transactions)
       tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
 
-      # TODO: Bug here - calling to_models on this will caus the Transaction to get the id of the
+      # TODO: Bug here - calling to_models on this will cause the PlannedTransaction to get the id of the
       # TransactionTag because of the rename
       tags.join(transactions.rename(id: :transaction_id), [:transaction_id])
     end
@@ -533,15 +554,44 @@ module PersonalFinance
     attribute :account, Account
   end
 
-  # A financial transaction, e.g. an expense or an income
-  class Transaction < Dry::Struct
+  # A group of classes representing recurring dates
+  module Recurrence
+    # Represents something recurring monthly
+    class Monthly < Dry::Struct
+      attribute :day, Types::Integer
+    end
+
+    class Weekly < Dry::Struct
+    end
+  end
+
+  # A financial transaction, e.g. an expense or an income. "Planned" because it
+  # is not an actual transaction between accounts, but rather can have an associated
+  # recurrence rule which represents a conceptual infinite set of Transactions.
+  class PlannedTransaction < Dry::Struct
     attribute? :id, Types::Integer
     attribute? :account, Account
     attribute :account_id, Types::Integer
     attribute :amount, Types::Float
     attribute :name, Types::String
     attribute :currency, Types::Value(:usd)
-    attribute :day_of_month, Types::Integer
+    attribute :recurrence_rule, Types::String
+
+    def occurrences_within(period)
+      start_date = period.begin.to_datetime
+      RRule::Rule.new(recurrence_rule, dtstart: start_date).between(
+        start_date,
+        period.end.to_datetime
+      )
+    end
+  end
+
+  class Transaction < Dry::Struct
+    extend Forwardable
+    def_delegators :planned_transaction, :name, :amount 
+
+    attribute :date, Types::String
+    attribute :planned_transaction, PlannedTransaction
   end
 
   # A categorization of a transaction, e.g. "debt" or "house"
@@ -552,8 +602,11 @@ module PersonalFinance
   end
 
   # A set of transactions
+  # TODO: Rename or at least alias to Budget
+  # There might be a use case for sets of Transactions that aren't
+  # semantically budgets
   class TransactionSet < Dry::Struct
-    attribute :transactions, Types::Array(Transaction)
+    attribute :transactions, Types::Array(PlannedTransaction) | Types::Array(Transaction)
 
     def sum
       transactions.map(&:amount).sum.round(2)

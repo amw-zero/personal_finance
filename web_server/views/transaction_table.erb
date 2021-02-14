@@ -3,8 +3,7 @@
   <thead>
     <th>Name</th>
     <th>Amount</th>
-    <th>Due On</th>
-    <th>Tags</th>
+    <th>Date</th>
     <th/>
   </thead>
   <tbody>
@@ -12,21 +11,7 @@
       <tr>
         <td><%= transaction.name %></td>
         <td><%= transaction.amount %></td>
-        <td><%= transaction.day_of_month %></td>
-        <td class="transaction-table-tag-data">
-          <% if tag_index[transaction.id] %>
-            <% tag_index[transaction.id].each do |tag| %>
-              <span class="tag"><%= tag.name %></span>
-            <% end %>
-          <% end %>
-        </td>
-        <td>
-          <form action="/transactions/<%= transaction.id %>" method="POST">
-            <button type="submit" class="button is-small is-danger is-pulled-right">Delete</button>
-            <input type="hidden" name="_method" value="DELETE">
-          </form>
-          <a class="button is-small is-primary is-pulled-right" href="/transactions/<%= transaction.id %>/tags/create">Add Tag</a>
-        </td>
+        <td><%= transaction.date %></td>
       </tr>
     <% end %>
   </tbody>

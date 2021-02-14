@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'hypothesis'
+require_relative '../../personal_finance'
 
 module ApplicationActions
   CREATE_ACCOUNT = :create_account
@@ -8,7 +9,7 @@ module ApplicationActions
   CREATE_TAG = :create_tag
   CREATE_TAG_SET = :create_tag_set
 
-  def self.execute(action, in_app: )
+  def self.execute(action, in_app:)
     extend Hypothesis
     extend Hypothesis::Possibilities
 
@@ -26,12 +27,17 @@ module ApplicationActions
       any built_as do
         account = any element_of(test_app.accounts), name: 'Transaction Account'
         amount = any integers(min: 1, max: 500), name: 'Transaction Amount'
+
+        freq = any element_of(['FREQ=MONTHLY', 'FREQ=WEEKLY'])
+        on_day = "BYMONTHDAY=#{any(integers(min: 1, max: 31))}"
+        rrule = [freq, on_day].compact.join(';')
+
         test_app.create_transaction(
           name: any(strings),
           account_id: account.id,
           amount: amount.to_f,
           currency: :usd,
-          day_of_month: any(integers(min: 1, max: 31))
+          recurrence_rule: rrule
         )
       end
     when :create_tag

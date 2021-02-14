@@ -10,7 +10,7 @@
       <label class="label" for="account_id">Account</label>
       <div class="control">
         <div class="select">
-          <select id="idk" name="account_id">
+          <select id="account_select" name="account_id">
             <% @accounts.each do |a| %>
               <option value="<%= a.id %>"><%= a.name %></option>
             <% end %>
@@ -30,8 +30,8 @@
     </div>
 
     <div class="field">
-      <label class="label" for="day_of_month">Day of month</label>
-      <input class="input"name="day_of_month" type="number" />
+      <label class="label" for="recurrence_rule">Recurrence rule (iCalendar spec)</label>
+      <input class="input"name="recurrence_rule" type="text" />
     </div>
 
     <button class="button is-primary" type="submit">Create Transaction</input>
