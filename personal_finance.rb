@@ -300,7 +300,8 @@ module PersonalFinance
           account_id: account_id,
           amount: amount,
           currency: currency,
-          recurrence_rule: recurrence_rule
+          recurrence_rule: recurrence_rule,
+          created_at: DateTime.now
         ).tap do |i|
           @persistence.persist(:transactions, persistable_transaction(i))
         end
@@ -576,10 +577,11 @@ module PersonalFinance
     attribute :name, Types::String
     attribute :currency, Types::Value(:usd)
     attribute :recurrence_rule, Types::String
+    attribute :created_at, Types.Constructor(DateTime) { |created_at| created_at }
 
     def occurrences_within(period)
       start_date = period.begin.to_datetime
-      RRule::Rule.new(recurrence_rule, dtstart: start_date).between(
+      RRule::Rule.new(recurrence_rule, dtstart: created_at).between(
         start_date,
         period.end.to_datetime
       )
