@@ -30,10 +30,10 @@ describe 'Viewing Transactions within a Period' do
 
       gen_date = ->(greater_than:) do
         built_as do
-          greater_than + any(integers(min: 0, max: 2_000))
+          greater_than + any(integers(min: 0, max: 50))
         end
       end
-      start_date = any gen_date.call(greater_than: Date.new(1900, 1, 1)), name: 'Start Date'
+      start_date = any gen_date.call(greater_than: DateTime.now), name: 'Start Date'
       end_date = any gen_date.call(greater_than: start_date), name: 'End Date'
 
       period = start_date..end_date
@@ -41,17 +41,8 @@ describe 'Viewing Transactions within a Period' do
         within_period: period
       }
 
-      # transaction = any element_of(test_app.transactions(params).transactions)
-
-      # if period.begin != period.end
-      #   expect(transaction.occurrences_within(period)).to_not be_empty
-      # end
-      
-      # expect(transaction.occurrences_within(period).all? do |date|
-      #   period.include?(date)
-      # end)
-
       transactions = test_app.transactions({ within_period: period }).transactions
+
       transactions.all? do |transaction|
         rule = RRule::Rule.new(transaction.planned_transaction.recurrence_rule)
         expected_dates = rule.between(period.begin.to_datetime, period.end.to_datetime)

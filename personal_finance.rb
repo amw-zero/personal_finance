@@ -581,7 +581,8 @@ module PersonalFinance
 
     def occurrences_within(period)
       start_date = period.begin.to_datetime
-      RRule::Rule.new(recurrence_rule, dtstart: created_at).between(
+
+      RRule.parse(recurrence_rule, dtstart: created_at).between(
         start_date,
         period.end.to_datetime
       )

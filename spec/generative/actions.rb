@@ -28,9 +28,12 @@ module ApplicationActions
         account = any element_of(test_app.accounts), name: 'Transaction Account'
         amount = any integers(min: 1, max: 500), name: 'Transaction Amount'
 
-        freq = any element_of(['FREQ=MONTHLY', 'FREQ=WEEKLY'])
-        on_day = "BYMONTHDAY=#{any(integers(min: 1, max: 31))}"
-        rrule = [freq, on_day].compact.join(';')
+        month_day = any integers(min: 1, max: 31)
+        week_day = any element_of(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])
+        rrule = any element_of([
+          "FREQ=MONTHLY;BYMONTHDAY=#{month_day}",
+          "FREQ=WEEKLY;BYDAY=#{week_day}"
+        ])
 
         test_app.create_transaction(
           name: any(strings),
@@ -85,7 +88,7 @@ module ApplicationActions
     end
 
     def check!
-      hypothesis(max_valid_test_cases: 100, phases: Phase.excluding(:shrink)) do
+      hypothesis(max_valid_test_cases: 1_000, phases: Phase.excluding(:shrink)) do
         test_app = application_block.call
 
         any(
