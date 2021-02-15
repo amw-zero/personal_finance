@@ -481,53 +481,18 @@ module PersonalFinance
       @use_cases[:transactions].cash_flow(account_id)
     end
 
-    def transactions_for_tags(tags, tag_index, intersection: false)
-      transaction_relation = if intersection
-                               transaction_ids = tag_index.select do |_, t|
-                                 (t.map(&:name) & tags).count == tags.count
-                               end.keys
-                               relation(:transactions).restrict(id: transaction_ids)
-                             else
-                               _transaction_for_tags(tags)
-                             end
-
-      transactions = to_models(transaction_relation, PlannedTransactionTransaction)
-
-      [{ title: 'Current Tag', tags: tags, transaction_set: TransactionSet.new(transactions: transactions) }]
-    end
-
-    def _transaction_for_tags(tags)
-      transactions = relation(:transactions)
-      tags = relation(:transaction_tags).restrict(name: tags).rename(name: :tag_name)
-
-      # TODO: Bug here - calling to_models on this will cause the PlannedTransaction to get the id of the
-      # TransactionTag because of the rename
-      tags.join(transactions.rename(id: :transaction_id), [:transaction_id])
-    end
-
     def transactions_for_tag_sets(tag_set_ids)
       @use_cases[:transactions].transactions_for_tag_sets(tag_set_ids)
     end
 
-    def tag_index
-      to_models(
-        relation(:transaction_tags),
-        TransactionTag
-      ).group_by(&:transaction_id)
+    def all_transaction_tag_sets
+      @use_cases[:transactions].all_transaction_tag_sets
     end
 
     def transaction_tags
       relation(:transaction_tags).map do |data|
         TransactionTag.new(data)
       end.uniq(&:name)
-    end
-
-    def transaction_tag_sets(ids)
-      to_models(relation(:transaction_tag_sets).restrict(id: ids), TransactionTagSet)
-    end
-
-    def all_transaction_tag_sets
-      @use_cases[:transactions].all_transaction_tag_sets
     end
 
     private

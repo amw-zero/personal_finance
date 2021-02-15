@@ -11,7 +11,7 @@ source 'https://rubygems.org' do
   gem 'sinatra'
 
   group :development do
-    gem 'hypothesis-specs', path: '~/code/forks/hypothesis/hypothesis-ruby'
+    gem 'hypothesis-specs', '0.6.0'
     gem 'pry'
     gem 'pry-nav'
     gem 'rack-test'

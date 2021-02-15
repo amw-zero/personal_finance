@@ -38,17 +38,17 @@
     
     <% if @page == :transactions_schedule %>
       <h1 class="title">Current Month's Transactions</h1>
+      <div class="block">
+        <p>Point out unallocated money, i.e. a non-zero  sum</p>
+        <p>Separate income / expenses</p>
+        <p>Sum: <%= data[:transactions].sum %></p>
+        <p>% Income: 50%</p>
+      </div>
       <%= erb :transaction_table, locals: { transactions: data[:transactions].transactions } %>
     <% else%>
+      <h1 class="title">All Transactions</h1>
       <%= erb :planned_transaction_table, locals: { transactions: data[:transactions].transactions, tag_index: data[:tag_index] } %>
     <% end %>
-
-    <div class="block">
-      <p>Point out unallocated money, i.e. a non-zero  sum</p>
-      <p>Separate income / expenses</p>
-      <p>Sum: <%= data[:transactions].sum %></p>
-      <p>% Income: 50%</p>
-    </div>
   </div>
 </div>
 
