@@ -8,15 +8,15 @@ describe 'Tagging transactions' do
   let(:checking_account) { subject.create_account('Checking') }
   let(:semi_monthly_income1) do
     subject.create_transaction(name: 'Income 1', account_id: checking_account.id, amount: 100.0, currency: :usd,
-                               day_of_month: 1)
+                               recurrence_rule: 'FREQ=MONTHLY')
   end
   let(:semi_monthly_income2) do
     subject.create_transaction(name: 'Income 2', account_id: checking_account.id, amount: 100.0, currency: :usd,
-                               day_of_month: 15)
+                               recurrence_rule: 'FREQ=MONTHLY')
   end
   let(:other_transaction) do
     subject.create_transaction(name: 'Expense', account_id: checking_account.id, amount: 200.0, currency: :usd,
-                               day_of_month: 11)
+                               recurrence_rule: 'FREQ=MONTHLY')
   end
 
   before do
@@ -25,12 +25,12 @@ describe 'Tagging transactions' do
   end
 
   let(:transactions) do
-    subject.transactions_for_tags(['income'], subject.tag_index)
+    subject.transactions({ transaction_tag: ['income'] }).transactions
   end
 
   context 'when searching for the union of tags' do
     it 'returns transactions that have any of the specified tags' do
-      expect(transactions.flat_map { |t| t[:transaction_set].transactions }.map(&:day_of_month)).to eq([1, 15])
+      expect(transactions.map(&:name)).to eq(['Income 1', 'Income 2'])
     end
   end
 
@@ -40,17 +40,16 @@ describe 'Tagging transactions' do
     end
 
     let(:transactions) do
-      subject.transactions_for_tags(
-        %w[income second_tag],
-        subject.tag_index,
-        intersection: true
-      )
+      subject.transactions({
+        transaction_tag: %w[income second_tag],
+        intersection: 'true'
+      }).transactions
     end
 
     it 'returns transactions that are tagged with all of the specified tags' do
       expect(
-        transactions.flat_map { |t| t[:transaction_set].transactions }.map(&:day_of_month)
-      ).to eq([1])
+        transactions.map(&:name)
+      ).to eq(['Income 1'])
     end
   end
 
