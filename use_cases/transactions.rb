@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../memory_persistence'
 require_relative '../data_interactor'
 require_relative '../types'
@@ -165,13 +167,13 @@ module UseCase
 
     def transactions_for_tags(tags, tag_index, intersection: false)
       transaction_relation = if intersection
-                              transaction_ids = tag_index.select do |_, t|
-                                (t.map(&:name) & tags).count == tags.count
-                              end.keys
-                              relation(:transactions).restrict(id: transaction_ids)
-                            else
-                              _transactions_for_tags(tags)
-                            end
+                               transaction_ids = tag_index.select do |_, t|
+                                 (t.map(&:name) & tags).count == tags.count
+                               end.keys
+                               relation(:transactions).restrict(id: transaction_ids)
+                             else
+                               _transactions_for_tags(tags)
+                             end
 
       to_models(transaction_relation, PlannedTransaction)
     end

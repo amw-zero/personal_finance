@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Store relations in memory
 class MemoryPersistence
   attr_reader :people

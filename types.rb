@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Bring Dry::Struct types into scope
 module Types
   include Dry::Types()
