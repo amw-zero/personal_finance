@@ -12,7 +12,7 @@
 
       <!-- Need to handle nesting here. transactions_schedule is nested within transactions.  -->
       <!-- Prob need a "navigation path" -->
-      <% if @page == :transactions %>
+      <% if @page == :transactions || @page == :transactions_schedule %>
         <%= erb :transaction_filters_tags, locals: { params: params, tag_index: data[:tag_index], accounts: accounts } %>
       <% elsif @page == :transactions_tag_sets %>
         <%= erb :transaction_filters_tag_sets, locals: { params: params, tag_sets: data[:tag_sets] } %>
