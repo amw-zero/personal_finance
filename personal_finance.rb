@@ -356,6 +356,13 @@ module PersonalFinance
         @persistence.delete(:transactions, relation(:transactions).restrict(id: id))
       end
 
+      def tag_index
+        to_models(
+          relation(:transaction_tags),
+          TransactionTag
+        ).group_by(&:transaction_id)
+      end
+
       private
 
       def transactions_for_tags(tags, tag_index, intersection: false)
@@ -402,14 +409,7 @@ module PersonalFinance
                           .map { |tag| tag[:transaction_id] }
 
         relation(:transactions).restrict(id: transaction_ids)
-      end
-
-      def tag_index
-        to_models(
-          relation(:transaction_tags),
-          TransactionTag
-        ).group_by(&:transaction_id)
-      end
+      end     
     end
   end
 
@@ -417,7 +417,7 @@ module PersonalFinance
   class Application
     extend Forwardable
     def_delegators :@data_interactor, :to_models, :relation
-    def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction
+    def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction, :tag_index
 
     attr_reader :endpoints, :use_cases
 
