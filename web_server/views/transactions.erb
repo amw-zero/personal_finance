@@ -30,7 +30,6 @@
             Schedule
           </a>
         </li>
-        Maybe Plan / Schedule / Analyze?
       </ul>
       <div class="level-right block">
         <a href="/transactions/create" class="button is-primary">Add Transaction</a>
@@ -38,21 +37,7 @@
     </div>
     
     <% if @page == :transactions_schedule %>
-      <div class="field">
-        <label class="label" for="period">Time Period</label>
-        <div class="control">
-          <div class="select">
-            <select name="period">
-              <option value="current_month">Current Month</option>
-              <option value="next_three_months">Next Three Months</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      Add grouping, i.e. Month / Week / Pay Period
-    <% end %>
-
-    <% if @page == :transactions_schedule %>
+      <h1 class="title">Current Month's Transactions</h1>
       <%= erb :transaction_table, locals: { transactions: data[:transactions].transactions } %>
     <% else%>
       <%= erb :planned_transaction_table, locals: { transactions: data[:transactions].transactions, tag_index: data[:tag_index] } %>
