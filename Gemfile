@@ -6,6 +6,7 @@ source 'https://rubygems.org' do
   gem 'bmg'
   gem 'dry-struct'
   gem 'pg'
+  gem 'rrule'
   gem 'sequel'
   gem 'sinatra'
 

@@ -9,12 +9,18 @@ describe 'Creating, updating, and deleting Transactions' do
   include Hypothesis
   include Hypothesis::Possibilities
 
-  # Schema - delete transaction
-  # delta Transactions
-  # t: Transaction
-  # ---------------------------------
-  # transactions' = transactions - t
-  specify do
+  specify 'Creating Transactions' do
+    hypothesis do
+      test_app = test_application
+      ApplicationActions.execute(ApplicationActions::CREATE_ACCOUNT, in_app: test_app)
+
+      new_transaction = ApplicationActions.execute(ApplicationActions::CREATE_TRANSACTION, in_app: test_app)
+
+      expect(test_app.all_transactions.transactions).to eq([new_transaction])
+    end
+  end
+
+  specify 'Deleting Transactions' do
     test_actions = [
       ApplicationActions::CREATE_ACCOUNT,
       ApplicationActions::CREATE_TRANSACTION

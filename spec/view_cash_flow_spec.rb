@@ -10,14 +10,14 @@ describe 'Viewing cash flow' do
 
   before do
     subject.create_transaction(name: 'T1', account_id: checking_account.id, amount: 100.0, currency: :usd,
-                               day_of_month: 2)
+                               recurrence_rule: 'FREQ=MONTHLY')
     subject.create_transaction(name: 'T2', account_id: checking_account.id, amount: 200.0, currency: :usd,
-                               day_of_month: 1)
+                               recurrence_rule: 'FREQ=MONTHLY')
     subject.create_transaction(name: 'T3', account_id: savings_account.id, amount: 200.0, currency: :usd,
-                               day_of_month: 1)
+                               recurrence_rule: 'FREQ=MONTHLY')
   end
 
   it do
-    expect(subject.cash_flow(checking_account.id).map(&:amount)).to eq([200, 100])
+    expect(subject.cash_flow(checking_account.id).map(&:amount)).to eq([100, 200])
   end
 end

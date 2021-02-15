@@ -1,9 +1,5 @@
 <div class="columns mt-4">
   <div class="column is-one-fifth">
-    <div class="level-left block">
-      <a href="/transactions/create" class="button is-primary">Add Transaction</a>
-    </div>
-
     <nav class="panel ">
       <p class="panel-heading">
         Filters
@@ -14,6 +10,8 @@
         <a class="<%= 'is-active' if @page == :transactions_tag_sets %>" href="/transactions/tag_sets">Tag Sets</a>
       </div>      
 
+      <!-- Need to handle nesting here. transactions_schedule is nested within transactions.  -->
+      <!-- Prob need a "navigation path" -->
       <% if @page == :transactions %>
         <%= erb :transaction_filters_tags, locals: { params: params, tag_index: data[:tag_index], accounts: accounts } %>
       <% elsif @page == :transactions_tag_sets %>
@@ -23,11 +21,34 @@
   </div>
   
   <div class="column">
-    <%= erb :transaction_table, locals: { transactions: data[:transactions].transactions, tag_index: data[:tag_index] } %>
-    <div class="block">
-      <p>Sum: <%= data[:transactions].sum %></p>
-      <p>% Income: 50%</p>
+    <div class="tabs is-toggle">
+      <ul>
+        <li class="<%= 'is-active' if @page != :transactions_schedule %>">
+          <a href="/transactions">Plan</a></li>
+        <li class="<%= 'is-active' if @page == :transactions_schedule %>">
+          <a href="/transactions/schedule">
+            Schedule
+          </a>
+        </li>
+      </ul>
+      <div class="level-right block">
+        <a href="/transactions/create" class="button is-primary">Add Transaction</a>
+      </div>
     </div>
+    
+    <% if @page == :transactions_schedule %>
+      <h1 class="title">Current Month's Transactions</h1>
+      <div class="block">
+        <p>Point out unallocated money, i.e. a non-zero  sum</p>
+        <p>Separate income / expenses</p>
+        <p>Sum: <%= data[:transactions].sum %></p>
+        <p>% Income: 50%</p>
+      </div>
+      <%= erb :transaction_table, locals: { transactions: data[:transactions].transactions } %>
+    <% else%>
+      <h1 class="title">All Transactions</h1>
+      <%= erb :planned_transaction_table, locals: { transactions: data[:transactions].transactions, tag_index: data[:tag_index] } %>
+    <% end %>
   </div>
 </div>
 

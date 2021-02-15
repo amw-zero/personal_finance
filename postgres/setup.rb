@@ -26,7 +26,8 @@ DB.create_table :transactions do
   Float :amount
   String :currency
   String :name
-  Integer :day_of_month
+  String :recurrence_rule
+  DateTime :created_at
 end
 
 DB.create_table :transaction_tags do
