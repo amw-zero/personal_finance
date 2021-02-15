@@ -555,17 +555,6 @@ module PersonalFinance
     attribute :account, Account
   end
 
-  # A group of classes representing recurring dates
-  module Recurrence
-    # Represents something recurring monthly
-    class Monthly < Dry::Struct
-      attribute :day, Types::Integer
-    end
-
-    class Weekly < Dry::Struct
-    end
-  end
-
   # A financial transaction, e.g. an expense or an income. "Planned" because it
   # is not an actual transaction between accounts, but rather can have an associated
   # recurrence rule which represents a conceptual infinite set of Transactions.
@@ -589,6 +578,9 @@ module PersonalFinance
     end
   end
 
+  # A "concrete" transaction, i.e. one that occurs on a specific date. Since
+  # PlannedTransactions are defined with recurrence rules that specify when they actually occur,
+  # Transaction is one instance of the recurrence rule.
   class Transaction < Dry::Struct
     extend Forwardable
     def_delegators :planned_transaction, :name, :amount 
