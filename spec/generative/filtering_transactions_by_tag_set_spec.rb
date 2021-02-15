@@ -37,10 +37,10 @@ describe 'Transactions by Tag Set' do
 
       expect(
         Propositions::FilteredTransactionsRespectTags(
-        transactions,
-        tags,
-        test_app
-      )
+          transactions,
+          tags,
+          test_app
+        )
       ).to be(true)
     end
   end

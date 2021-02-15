@@ -7,7 +7,6 @@ require 'forwardable'
 require 'pg'
 require 'rrule'
 
-
 # Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
 
@@ -223,8 +222,8 @@ module PersonalFinance
           {
             method: :post,
             path: '/transactions',
-            action: lambda do |params|              
-              create_transaction_from_params(params)                
+            action: lambda do |params|
+              create_transaction_from_params(params)
             end
           },
           {
@@ -265,8 +264,8 @@ module PersonalFinance
                 tag_index: tag_index,
                 tag_sets: all_transaction_tag_sets,
                 transactions: transactions(params.merge({
-                  within_period: first_of_month..end_of_month
-                }))
+                                                          within_period: first_of_month..end_of_month
+                                                        }))
               }
             end
           },
@@ -397,8 +396,8 @@ module PersonalFinance
         # Persisting this later one modifies the attributes which modifies the struct.
         # Terrifying.
         transaction.attributes.merge!(
-          { 
-            currency: transaction.currency.to_s,
+          {
+            currency: transaction.currency.to_s
           }
         )
       end
@@ -409,7 +408,7 @@ module PersonalFinance
                           .map { |tag| tag[:transaction_id] }
 
         relation(:transactions).restrict(id: transaction_ids)
-      end     
+      end
     end
   end
 
@@ -448,7 +447,7 @@ module PersonalFinance
       LinkedAccount.new(person: person, account: account).tap do |la|
         @linked_accounts << la
       end
-    end    
+    end
 
     def tag_transaction(transaction_id, tag:)
       @use_cases[:transaction_tags].tag_transaction(transaction_id, tag: tag)
@@ -548,7 +547,7 @@ module PersonalFinance
   # Transaction is one instance of the recurrence rule.
   class Transaction < Dry::Struct
     extend Forwardable
-    def_delegators :planned_transaction, :name, :amount 
+    def_delegators :planned_transaction, :name, :amount
 
     attribute :date, Types::String
     attribute :planned_transaction, PlannedTransaction

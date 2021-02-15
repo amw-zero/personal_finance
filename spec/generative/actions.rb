@@ -28,11 +28,11 @@ module ApplicationActions
       amount = any integers(min: 1, max: 500), name: 'Transaction Amount'
 
       month_day = any integers(min: 1, max: 31)
-      week_day = any element_of(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])
+      week_day = any element_of(%w[MO TU WE TH FR SA SU])
       rrule = any element_of([
-        "FREQ=MONTHLY;BYMONTHDAY=#{month_day}",
-        "FREQ=WEEKLY;BYDAY=#{week_day}"
-      ])
+                               "FREQ=MONTHLY;BYMONTHDAY=#{month_day}",
+                               "FREQ=WEEKLY;BYDAY=#{week_day}"
+                             ])
 
       test_app.create_transaction(
         name: any(strings),
@@ -98,7 +98,7 @@ module ApplicationActions
 
         yield test_app
       end
-    end    
+    end
 
     attr_reader :actions, :application_block
   end

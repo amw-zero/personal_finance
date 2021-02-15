@@ -41,9 +41,9 @@ describe 'Tagging transactions' do
 
     let(:transactions) do
       subject.transactions({
-        transaction_tag: %w[income second_tag],
-        intersection: 'true'
-      }).transactions
+                             transaction_tag: %w[income second_tag],
+                             intersection: 'true'
+                           }).transactions
     end
 
     it 'returns transactions that are tagged with all of the specified tags' do

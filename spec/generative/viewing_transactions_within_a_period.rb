@@ -14,7 +14,7 @@ describe 'Viewing Transactions within a Period' do
     # and the test will always pass
     test_actions = [
       ApplicationActions::CREATE_ACCOUNT,
-      ApplicationActions::CREATE_TRANSACTION,
+      ApplicationActions::CREATE_TRANSACTION
     ]
 
     max_transaction_count = 0
@@ -28,7 +28,7 @@ describe 'Viewing Transactions within a Period' do
 
       next if test_app.all_transactions.transactions.empty?
 
-      gen_date = ->(greater_than:) do
+      gen_date = lambda do |greater_than:|
         built_as do
           greater_than + any(integers(min: 0, max: 50))
         end
@@ -46,7 +46,9 @@ describe 'Viewing Transactions within a Period' do
       transactions.all? do |transaction|
         rule = RRule::Rule.new(transaction.planned_transaction.recurrence_rule)
         expected_dates = rule.between(period.begin.to_datetime, period.end.to_datetime)
-        associated_transactions = transactions.select { |t| t.planned_transaction.id == transaction.planned_transaction.id }
+        associated_transactions = transactions.select do |t|
+          t.planned_transaction.id == transaction.planned_transaction.id
+        end
 
         associated_transactions.all? { |at| expected_dates.include?(at.date) }
       end

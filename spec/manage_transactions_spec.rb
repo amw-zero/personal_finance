@@ -28,8 +28,10 @@ describe 'Retrieving Transactions' do
   let(:account) { subject.create_account('Checking') }
 
   before do
-    subject.create_transaction(name: 'T1', account_id: account.id, amount: 100.0, currency: :usd, recurrence_rule: 'placeholder')
-    subject.create_transaction(name: 'T2', account_id: account.id, amount: 100.0, currency: :usd, recurrence_rule: 'placeholder')
+    subject.create_transaction(name: 'T1', account_id: account.id, amount: 100.0, currency: :usd,
+                               recurrence_rule: 'placeholder')
+    subject.create_transaction(name: 'T2', account_id: account.id, amount: 100.0, currency: :usd,
+                               recurrence_rule: 'placeholder')
   end
 
   it 'returns the transactions ordered by their name' do
