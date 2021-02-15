@@ -13,7 +13,7 @@ describe 'Transactions by Tag' do
     test_actions = [
       ApplicationActions::CREATE_ACCOUNT,
       ApplicationActions::CREATE_TRANSACTION,
-      ApplicationActions::CREATE_TAG
+      ApplicationActions::CREATE_TAG,      
     ]
     ApplicationActions::Sequences.new(
       test_actions,

@@ -24,32 +24,28 @@ module ApplicationActions
     when :create_transaction
       return if test_app.accounts.empty?
 
-      any built_as do
-        account = any element_of(test_app.accounts), name: 'Transaction Account'
-        amount = any integers(min: 1, max: 500), name: 'Transaction Amount'
+      account = any element_of(test_app.accounts), name: 'Transaction Account'
+      amount = any integers(min: 1, max: 500), name: 'Transaction Amount'
 
-        month_day = any integers(min: 1, max: 31)
-        week_day = any element_of(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])
-        rrule = any element_of([
-          "FREQ=MONTHLY;BYMONTHDAY=#{month_day}",
-          "FREQ=WEEKLY;BYDAY=#{week_day}"
-        ])
+      month_day = any integers(min: 1, max: 31)
+      week_day = any element_of(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])
+      rrule = any element_of([
+        "FREQ=MONTHLY;BYMONTHDAY=#{month_day}",
+        "FREQ=WEEKLY;BYDAY=#{week_day}"
+      ])
 
-        test_app.create_transaction(
-          name: any(strings),
-          account_id: account.id,
-          amount: amount.to_f,
-          currency: :usd,
-          recurrence_rule: rrule
-        )
-      end
+      test_app.create_transaction(
+        name: any(strings),
+        account_id: account.id,
+        amount: amount.to_f,
+        currency: :usd,
+        recurrence_rule: rrule
+      )
     when :create_tag
       return if test_app.all_transactions.transactions.empty?
 
-      any built_as do
-        transaction = any(element_of(test_app.all_transactions.transactions))
-        test_app.tag_transaction(transaction.id, tag: any(strings))
-      end
+      transaction = any(element_of(test_app.all_transactions.transactions))
+      test_app.tag_transaction(transaction.id, tag: any(strings))
     when :create_tag_set
       # params = {
       #   transaction_tag: [String]
@@ -57,22 +53,20 @@ module ApplicationActions
       # use_case = [String] -> [TransactionTag] -> ApplicationState
       # Would be good to have a domain constraint, i.e. "Strings are valid TransactionTags"
 
-      any built_as do
-        tags = test_app.transaction_tags.map(&:name)
-        return if tags.empty?
+      tags = test_app.transaction_tags.map(&:name)
+      return if tags.empty?
 
-        bad_inputs = %w[jkl randM]
-        tag_inputs = from(element_of(tags), element_of(bad_inputs))
+      bad_inputs = %w[jkl randM]
+      tag_inputs = from(element_of(tags), element_of(bad_inputs))
 
-        params = any(
-          hashes_of_shape(
-            title: strings,
-            transaction_tag: arrays(of: tag_inputs)
-          )
+      params = any(
+        hashes_of_shape(
+          title: strings,
+          transaction_tag: arrays(of: tag_inputs)
         )
+      )
 
-        test_app.create_transaction_tag_set(params)
-      end
+      test_app.create_transaction_tag_set(params)
     else
       raise "Attempted to execute unknown action: #{action}"
     end
