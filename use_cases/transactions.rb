@@ -57,9 +57,9 @@ module UseCase
           page: :transactions_schedule,
           path: '/transactions/schedule',
           action: lambda do |params|
-            today = Date.today
-            first_of_month = Date.new(today.year, today.month, 1)
-            end_of_month = Date.new(today.year, today.month + 1, 1) - 1
+            today = Time.now.utc
+            first_of_month = Time.new(today.year, today.month, 1)
+            end_of_month = Time.new(today.year, today.month + 1, 1) - 1
 
             {
               tag_index: tag_index,
@@ -95,13 +95,14 @@ module UseCase
     end
 
     def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:)
+      one_thousand_weeks = (7 * 24 * 60 * 60 * 1000)
       PlannedTransaction.new(
         name: name,
         account_id: account_id,
         amount: amount,
         currency: currency,
         recurrence_rule: recurrence_rule,
-        created_at: DateTime.now
+        created_at: Time.now.utc - one_thousand_weeks
       ).tap do |i|
         @persistence.persist(:transactions, persistable_transaction(i))
       end
@@ -126,8 +127,8 @@ module UseCase
             relation(:transactions),
             PlannedTransaction
           ).sort_by(&:name)
-
         end
+
       if params[:within_period]
         applicable_transactions = applicable_transactions.flat_map do |transaction|
           transaction.occurrences_within(params[:within_period]).map do |date|

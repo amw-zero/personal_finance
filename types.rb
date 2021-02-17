@@ -37,11 +37,11 @@ class PlannedTransaction < Dry::Struct
   attribute :created_at, Types.Constructor(DateTime) { |created_at| created_at }
 
   def occurrences_within(period)
-    start_date = period.begin.to_datetime
+    start_date = period.begin.to_time.utc
 
     RRule.parse(recurrence_rule, dtstart: created_at).between(
       start_date,
-      period.end.to_datetime
+      period.end.to_time.utc
     )
   end
 end
