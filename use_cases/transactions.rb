@@ -57,9 +57,9 @@ module UseCase
           page: :transactions_schedule,
           path: '/transactions/schedule',
           action: lambda do |params|
-            today = Date.today + 30
-            first_of_month = Date.new(today.year, today.month, 1)
-            end_of_month = Date.new(today.year, today.month + 1, 1) - 1
+            today = Time.now.utc
+            first_of_month = Time.new(today.year, today.month, 1)
+            end_of_month = Time.new(today.year, today.month + 1, 1) - 1
 
             {
               tag_index: tag_index,
