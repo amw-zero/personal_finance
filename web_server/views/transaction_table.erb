@@ -1,12 +1,16 @@
 <div class="container">
   <p>Unique sums of expenses<p>
-  <br>
   <%= pay_periods.map { |p| p.transactions.sum }.uniq %>
+  <br>
+  <br>
+  <p>Unique spending</p>
+  <p>Difference: <%= pay_periods.map { |period| (period.incomes.sum + period.transactions.sum).round(2) }.uniq.sort %><p>
   <% pay_periods.each do |period| %>
     <div class="block">
       <%= "#{period.date_range.begin} - #{period.date_range.end}" %>
       <p>Sum incomes: <%= period.incomes.sum %>
       <p>Sum expenses: <%= period.transactions.sum %>
+      <p>Difference: <%= (period.incomes.sum + period.transactions.sum).round(2) %><p>
       <table class="table is-fullwidth">
         <thead>
           <th>Name</th>

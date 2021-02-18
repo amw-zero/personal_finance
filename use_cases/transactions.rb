@@ -134,7 +134,7 @@ module UseCase
           transaction.occurrences_within(params[:within_period]).map do |date|
             Transaction.new(date: date.to_date.to_s, planned_transaction: transaction)
           end
-        end.sort_by(&:date) 
+        end.sort_by(&:date)
 
         return partition_transactions_by_pay_period(applicable_transactions, in_period: params[:within_period])
       end
@@ -169,18 +169,20 @@ module UseCase
     private
 
     def partition_transactions_by_pay_period(transactions, in_period:)
-      if transactions.count < 2
-        return TransactionSet.new(transactions: transactions)
-      end
+      return TransactionSet.new(transactions: transactions) if transactions.count < 2
 
-      income_dates = transactions.select { |t| t.amount > 0 }.map(&:date)
+      income_dates = transactions.select { |t| t.amount.positive? }.map(&:date)
       all_dates = [in_period.begin] + income_dates.drop(1) + [in_period.end]
       income_periods = all_dates.each_cons(2).map { |dates| Range.new(dates[0].to_date, dates[1].to_date - 1) }
 
       income_periods.map do |period|
         PayPeriod.new(
-          incomes: TransactionSet.new(transactions: transactions.select { |t| t.amount > 0 && period.include?(t.date.to_date) }),
-          transactions: TransactionSet.new(transactions: transactions.select { |t| t.amount <= 0 && period.include?(t.date.to_date) }),
+          incomes: TransactionSet.new(transactions: transactions.select do |t|
+                                                      t.amount.positive? && period.include?(t.date.to_date)
+                                                    end),
+          transactions: TransactionSet.new(transactions: transactions.select do |t|
+                                                           t.amount <= 0 && period.include?(t.date.to_date)
+                                                         end),
           date_range: period
         )
       end

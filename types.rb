@@ -73,7 +73,7 @@ class TransactionSet < Dry::Struct
 
   def sum
     transactions.map(&:amount).sum.round(2)
-  end 
+  end
 end
 
 class PayPeriod < Dry::Struct
