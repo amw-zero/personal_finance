@@ -37,13 +37,7 @@
     </div>
     
     <% if @page == :transactions_schedule %>
-      <h1 class="title">Current Month's Transactions</h1>
-      <div class="block">
-        <p>Point out unallocated money, i.e. a non-zero  sum</p>
-        <p>Separate income / expenses</p>
-        <p>Sum: <%= 5 %></p>
-        <p>% Income: 50%</p>
-      </div>
+      <h1 class="title">Current Year</h1>
       <%= erb :transaction_table, locals: { pay_periods: data[:transactions] } %>
     <% else%>
       <h1 class="title">All Transactions</h1>

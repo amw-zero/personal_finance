@@ -57,12 +57,6 @@ class Transaction < Dry::Struct
   attribute :planned_transaction, PlannedTransaction
 end
 
-class PayPeriod < Dry::Struct
-  attribute :incomes, Types::Array(Transaction)
-  attribute :transactions, Types::Array(Transaction)
-  attribute :date_range, Types.Instance(Range)
-end
-
 # A categorization of a transaction, e.g. "debt" or "house"
 class TransactionTag < Dry::Struct
   attribute? :id, Types::Integer
@@ -80,6 +74,12 @@ class TransactionSet < Dry::Struct
   def sum
     transactions.map(&:amount).sum.round(2)
   end 
+end
+
+class PayPeriod < Dry::Struct
+  attribute :incomes, TransactionSet
+  attribute :transactions, TransactionSet
+  attribute :date_range, Types.Instance(Range)
 end
 
 # A set of transaction tags

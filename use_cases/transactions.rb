@@ -57,15 +57,13 @@ module UseCase
           page: :transactions_schedule,
           path: '/transactions/schedule',
           action: lambda do |params|
-            today = Date.today + 30
-            first_of_month = Time.new(today.year, today.month, 1)
-            end_of_month = Time.new(today.year, 12, 1) - 1
-
+            new_years = Date.new(2021, 1, 1)
+            new_years_eve = Date.new(2021, 12, 31)
             {
               tag_index: tag_index,
               tag_sets: all_transaction_tag_sets,
               transactions: transactions(params.merge({
-                                                        within_period: first_of_month..end_of_month
+                                                        within_period: new_years..new_years_eve
                                                       }))
             }
           end
@@ -177,12 +175,12 @@ module UseCase
 
       income_dates = transactions.select { |t| t.amount > 0 }.map(&:date)
       all_dates = [in_period.begin] + income_dates.drop(1) + [in_period.end]
-      income_periods = all_dates.each_cons(2).map { |dates| Range.new(dates[0].to_date, dates[1].to_date - 1, exclude_end: true) }
+      income_periods = all_dates.each_cons(2).map { |dates| Range.new(dates[0].to_date, dates[1].to_date - 1) }
 
       income_periods.map do |period|
         PayPeriod.new(
-          incomes: transactions.select { |t| t.amount > 0 && period.include?(t.date.to_date) },
-          transactions: transactions.select { |t| t.amount <= 0 && period.include?(t.date.to_date) },
+          incomes: TransactionSet.new(transactions: transactions.select { |t| t.amount > 0 && period.include?(t.date.to_date) }),
+          transactions: TransactionSet.new(transactions: transactions.select { |t| t.amount <= 0 && period.include?(t.date.to_date) }),
           date_range: period
         )
       end
