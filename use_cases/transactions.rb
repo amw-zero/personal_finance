@@ -57,9 +57,9 @@ module UseCase
           page: :transactions_schedule,
           path: '/transactions/schedule',
           action: lambda do |params|
-            today = Time.now.utc
+            today = Date.today + 30
             first_of_month = Time.new(today.year, today.month, 1)
-            end_of_month = Time.new(today.year, today.month + 1, 1) - 1
+            end_of_month = Time.new(today.year, 12, 1) - 1
 
             {
               tag_index: tag_index,
@@ -95,6 +95,8 @@ module UseCase
     end
 
     def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:)
+      # This is to be able to start the recurrence rule in the past, so that
+      # the transaction appears if you display months in the past
       one_thousand_weeks = (7 * 24 * 60 * 60 * 1000)
       PlannedTransaction.new(
         name: name,
@@ -134,7 +136,9 @@ module UseCase
           transaction.occurrences_within(params[:within_period]).map do |date|
             Transaction.new(date: date.to_date.to_s, planned_transaction: transaction)
           end
-        end.sort_by(&:date)
+        end.sort_by(&:date) 
+
+        return partition_transactions_by_pay_period(applicable_transactions, in_period: params[:within_period])
       end
 
       TransactionSet.new(transactions: applicable_transactions)
@@ -165,6 +169,24 @@ module UseCase
     end
 
     private
+
+    def partition_transactions_by_pay_period(transactions, in_period:)
+      if transactions.count < 2
+        return TransactionSet.new(transactions: transactions)
+      end
+
+      income_dates = transactions.select { |t| t.amount > 0 }.map(&:date)
+      all_dates = [in_period.begin] + income_dates.drop(1) + [in_period.end]
+      income_periods = all_dates.each_cons(2).map { |dates| Range.new(*dates.map(&:to_date), exclude_end: true) }
+
+      income_periods.map do |period|
+        PayPeriod.new(
+          incomes: transactions.select { |t| t.amount > 0 && period.include?(t.date.to_date) },
+          transactions: transactions.select { |t| t.amount <= 0 && period.include?(t.date.to_date) },
+          date_range: period
+        )
+      end
+    end
 
     def transactions_for_tags(tags, tag_index, intersection: false)
       transaction_relation = if intersection

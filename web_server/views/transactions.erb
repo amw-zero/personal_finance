@@ -41,10 +41,10 @@
       <div class="block">
         <p>Point out unallocated money, i.e. a non-zero  sum</p>
         <p>Separate income / expenses</p>
-        <p>Sum: <%= data[:transactions].sum %></p>
+        <p>Sum: <%= 5 %></p>
         <p>% Income: 50%</p>
       </div>
-      <%= erb :transaction_table, locals: { transactions: data[:transactions].transactions } %>
+      <%= erb :transaction_table, locals: { pay_periods: data[:transactions] } %>
     <% else%>
       <h1 class="title">All Transactions</h1>
       <%= erb :planned_transaction_table, locals: { transactions: data[:transactions].transactions, tag_index: data[:tag_index] } %>
