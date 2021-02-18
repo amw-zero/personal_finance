@@ -177,7 +177,7 @@ module UseCase
 
       income_dates = transactions.select { |t| t.amount > 0 }.map(&:date)
       all_dates = [in_period.begin] + income_dates.drop(1) + [in_period.end]
-      income_periods = all_dates.each_cons(2).map { |dates| Range.new(*dates.map(&:to_date), exclude_end: true) }
+      income_periods = all_dates.each_cons(2).map { |dates| Range.new(dates[0].to_date, dates[1].to_date - 1, exclude_end: true) }
 
       income_periods.map do |period|
         PayPeriod.new(
