@@ -102,7 +102,7 @@ module UseCase
         amount: amount,
         currency: currency,
         recurrence_rule: recurrence_rule,
-        created_at: Time.now.utc - one_thousand_weeks
+        created_at: Time.now - one_thousand_weeks
       ).tap do |i|
         @persistence.persist(:transactions, persistable_transaction(i))
       end
