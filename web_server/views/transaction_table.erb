@@ -8,14 +8,20 @@
       </header>
       <div class="card-content">
         <div class="content">
-          <p>Unique net cash</p>
+          <p>Net cashes</p>
           <% pay_periods
             .group_by { |period| (period.incomes.sum + period.transactions.sum).round(2) }
             .sort_by { |(net, _)| net }
             .each do |net, periods| %>
-            <strong><%= net %></strong> | <%= periods.map(&:date_range) %>
-            <br>
-            <br>
+              <div>
+                <strong><%= net %></strong> 
+                <ul>
+                  <% periods.map(&:date_range).each do |range| %>
+                    <li><%= "#{range.begin} - #{range.end}" %></li>
+                  <% end %>
+                </ul>
+              </div>
+              <br>
           <% end %>
         </div>
       </div>
