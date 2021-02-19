@@ -1,39 +1,78 @@
 <div class="container">
-  <p>Unique sums of expenses<p>
-  <%= pay_periods.map { |p| p.transactions.sum }.uniq %>
-  <br>
-  <br>
-  <p>Unique spending</p>
-  <p>Difference: <%= pay_periods.map { |period| (period.incomes.sum + period.transactions.sum).round(2) }.uniq.sort %><p>
+  <div class="block">
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title">
+          Summary
+        </p>
+      </header>
+      <div class="card-content">
+        <div class="content">
+          <p>Unique net cash</p>
+          <% pay_periods
+            .group_by { |period| (period.incomes.sum + period.transactions.sum).round(2) }
+            .sort_by { |(net, _)| net }
+            .each do |net, periods| %>
+            <strong><%= net %></strong> | <%= periods.map(&:date_range) %>
+            <br>
+            <br>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <% pay_periods.each do |period| %>
     <div class="block">
-      <%= "#{period.date_range.begin} - #{period.date_range.end}" %>
-      <p>Sum incomes: <%= period.incomes.sum %>
-      <p>Sum expenses: <%= period.transactions.sum %>
-      <p>Difference: <%= (period.incomes.sum + period.transactions.sum).round(2) %><p>
-      <table class="table is-fullwidth">
-        <thead>
-          <th>Name</th>
-          <th>Amount</th>
-          <th>Date</th>
-        </thead>
-        <tbody>          
-          <% period.incomes.transactions.each do |transaction| %>
-            <tr>
-              <td><%= transaction.name %></td>
-              <td><%= transaction.amount %></td>
-              <td><%= transaction.date %></td>
-            </tr>
-          <% end %>          
-          <% period.transactions.transactions.each do |transaction| %>
-            <tr>
-              <td><%= transaction.name %></td>
-              <td><%= transaction.amount %></td>
-              <td><%= transaction.date %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
+      <div class="card">
+        <header class="card-header">
+          <p class="card-header-title">
+            Pay period: <%= "#{period.date_range.begin} - #{period.date_range.end}" %>
+          </p>
+        </header>
+        <div class="card-content">
+          <div class="content">
+            <table class="table is-fullwidth">
+              <thead>
+                <th>Total Income</th>
+                <th>Total Expenses</th>
+                <th>Net Cash</th>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><%= period.incomes.sum %></td>
+                  <td><%= -1 * period.transactions.sum %></td>
+                  <td><%= (period.incomes.sum + period.transactions.sum).round(2) %></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table class="table is-fullwidth">
+              <thead>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </thead>
+              <tbody>
+                <% period.incomes.transactions.each do |transaction| %>
+                  <tr>
+                    <td><%= transaction.name %></td>
+                    <td><%= transaction.amount %></td>
+                    <td><%= transaction.date %></td>
+                  </tr>
+                <% end %>
+                <% period.transactions.transactions.each do |transaction| %>
+                  <tr>
+                    <td><%= transaction.name %></td>
+                    <td><%= transaction.amount %></td>
+                    <td><%= transaction.date %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   <% end %>
 </div>
