@@ -37,11 +37,11 @@ class PlannedTransaction < Dry::Struct
   attribute :created_at, Types.Constructor(DateTime) { |created_at| created_at }
 
   def occurrences_within(period)
-    start_date = period.begin.to_time.utc
+    start_date = period.begin.to_time
 
-    RRule.parse(recurrence_rule, dtstart: created_at).between(
+    RRule.parse(recurrence_rule, dtstart: created_at, tzid: Time.now.getlocal.zone).between(
       start_date,
-      period.end.to_time.utc
+      period.end.to_time
     )
   end
 end
@@ -74,6 +74,12 @@ class TransactionSet < Dry::Struct
   def sum
     transactions.map(&:amount).sum.round(2)
   end
+end
+
+class PayPeriod < Dry::Struct
+  attribute :incomes, TransactionSet
+  attribute :transactions, TransactionSet
+  attribute :date_range, Types.Instance(Range)
 end
 
 # A set of transaction tags

@@ -57,15 +57,13 @@ module UseCase
           page: :transactions_schedule,
           path: '/transactions/schedule',
           action: lambda do |params|
-            today = Time.now.utc
-            first_of_month = Time.new(today.year, today.month, 1)
-            end_of_month = Time.new(today.year, today.month + 1, 1) - 1
-
+            new_years = Date.new(2021, 1, 1)
+            new_years_eve = Date.new(2021, 12, 31)
             {
               tag_index: tag_index,
               tag_sets: all_transaction_tag_sets,
               transactions: transactions(params.merge({
-                                                        within_period: first_of_month..end_of_month
+                                                        within_period: new_years..new_years_eve
                                                       }))
             }
           end
@@ -95,6 +93,8 @@ module UseCase
     end
 
     def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:)
+      # This is to be able to start the recurrence rule in the past, so that
+      # the transaction appears if you display months in the past
       one_thousand_weeks = (7 * 24 * 60 * 60 * 1000)
       PlannedTransaction.new(
         name: name,
@@ -102,7 +102,7 @@ module UseCase
         amount: amount,
         currency: currency,
         recurrence_rule: recurrence_rule,
-        created_at: Time.now.utc - one_thousand_weeks
+        created_at: Time.now - one_thousand_weeks
       ).tap do |i|
         @persistence.persist(:transactions, persistable_transaction(i))
       end
@@ -135,6 +135,8 @@ module UseCase
             Transaction.new(date: date.to_date.to_s, planned_transaction: transaction)
           end
         end.sort_by(&:date)
+
+        return partition_transactions_by_pay_period(applicable_transactions, in_period: params[:within_period])
       end
 
       TransactionSet.new(transactions: applicable_transactions)
@@ -165,6 +167,26 @@ module UseCase
     end
 
     private
+
+    def partition_transactions_by_pay_period(transactions, in_period:)
+      return TransactionSet.new(transactions: transactions) if transactions.count < 2
+
+      income_dates = transactions.select { |t| t.amount.positive? }.map(&:date)
+      all_dates = [in_period.begin] + income_dates.drop(1) + [in_period.end]
+      income_periods = all_dates.each_cons(2).map { |dates| Range.new(dates[0].to_date, dates[1].to_date - 1) }
+
+      income_periods.map do |period|
+        PayPeriod.new(
+          incomes: TransactionSet.new(transactions: transactions.select do |t|
+                                                      t.amount.positive? && period.include?(t.date.to_date)
+                                                    end),
+          transactions: TransactionSet.new(transactions: transactions.select do |t|
+                                                           t.amount <= 0 && period.include?(t.date.to_date)
+                                                         end),
+          date_range: period
+        )
+      end
+    end
 
     def transactions_for_tags(tags, tag_index, intersection: false)
       transaction_relation = if intersection

@@ -13,7 +13,6 @@ describe 'Viewing Transactions within a Period' do
     # TODO: Meta-tests. If an account isn't created here, a transaction never will be,
     # and the test will always pass
 
-    # It should return all transactions which occur in the given period
     test_actions = [
       ApplicationActions::CREATE_ACCOUNT,
       ApplicationActions::CREATE_TRANSACTION
@@ -35,7 +34,7 @@ describe 'Viewing Transactions within a Period' do
           greater_than + any(integers(min: 0, max: 50))
         end
       end
-      start_date = any gen_date.call(greater_than: Time.new(2021, 1, 1).utc), name: 'Start Date'
+      start_date = any gen_date.call(greater_than: Time.new(2021, 1, 1)), name: 'Start Date'
       end_date = any gen_date.call(greater_than: start_date), name: 'End Date'
 
       period = start_date..end_date
