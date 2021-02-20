@@ -67,13 +67,11 @@ describe 'Viewing Transactions within a Period' do
         .group_by { |transaction| transaction.planned_transaction.id }
       .transform_values { |transactions| transactions.map { |t| t.date.to_s } }
         .each do |transaction_id, occurrences|
-          require 'pry'
-          binding.pry if occurrences != expected_occurrences[transaction_id]
           expect(occurrences).to eq(expected_occurrences[transaction_id])
         end
 
       # Transactions are grouped by pay period
-      #income_dates = d
+      # income_dates = d
       # incomes = test_app.all_transactions.transactions.select { |t| t.income? }
 
       # if incomes.count > 0 && pay_periods.any? { |p| p.is_a?(Period) }
