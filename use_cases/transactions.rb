@@ -197,8 +197,8 @@ module UseCase
       income_periods.map do |period|
         PayPeriod.new(
           incomes: TransactionSet.new(transactions: transactions.select do |t|
-                    t.income? && period.include?(t.date.to_date)
-                  end),
+                                                      t.income? && period.include?(t.date.to_date)
+                                                    end),
           transactions: TransactionSet.new(transactions: transactions.select do |t|
                                                            !t.income? && period.include?(t.date.to_date)
                                                          end),

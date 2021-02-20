@@ -65,7 +65,7 @@ describe 'Viewing Transactions within a Period' do
           end
         end
         .group_by { |transaction| transaction.planned_transaction.id }
-      .transform_values { |transactions| transactions.map { |t| t.date.to_s } }
+        .transform_values { |transactions| transactions.map { |t| t.date.to_s } }
         .each do |transaction_id, occurrences|
           expect(occurrences).to eq(expected_occurrences[transaction_id])
         end

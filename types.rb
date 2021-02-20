@@ -46,7 +46,7 @@ class PlannedTransaction < Dry::Struct
   end
 
   def income?
-    amount > 0
+    amount.positive?
   end
 end
 

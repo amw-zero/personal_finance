@@ -13,7 +13,7 @@ require_relative 'types'
 require_relative 'use_cases/transactions'
 
 # Thoughts: It is easier to never build nested data. Using the pattern like the
-# tag_index, you can pull the associated data when you need. 
+# tag_index, you can pull the associated data when you need.
 # i.e. Alloy style attributes are separate relations
 
 # The top-level module for the Personal Finance app
