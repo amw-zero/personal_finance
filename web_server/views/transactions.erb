@@ -21,30 +21,15 @@
   </div>
   
   <div class="column">
-    <div class="tabs is-toggle">
-      <ul>
-        <li class="<%= 'is-active' if @page != :transactions_schedule %>">
-          <a href="/transactions">Plan</a></li>
-        <li class="<%= 'is-active' if @page == :transactions_schedule %>">
-          <a href="/transactions/schedule">
-            Schedule
-          </a>
-        </li>
-      </ul>
-      <div class="level-right block">
-        <a href="/transactions/create" class="button is-primary">Add Transaction</a>
-      </div>
-    </div>
-    
     <% if @page == :transactions_schedule %>
-      <h1 class="title">Current Year</h1>
+      <%= erb :transaction_table_header, locals: { title: 'Scheduled Transactions' } %>
       <% if data[:transactions].first.respond_to?(:incomes) %>
         <%= erb :transactions_by_pay_period, locals: { pay_periods: data[:transactions] } %>
       <% else %>
        <%= erb :transactions_by_month, locals: { periods: data[:transactions] } %>
       <% end %>
     <% else%>
-      <h1 class="title">All Transactions</h1>
+      <%= erb :transaction_table_header, locals: { title: 'Recurring Transactions' } %>
       <%= erb :planned_transaction_table, locals: { transactions: data[:transactions].transactions, tag_index: data[:tag_index] } %>
     <% end %>
   </div>
