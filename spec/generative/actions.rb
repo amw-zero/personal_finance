@@ -25,7 +25,7 @@ module ApplicationActions
       return if test_app.accounts.empty?
 
       account = any element_of(test_app.accounts), name: 'Transaction Account'
-      amount = any integers(min: 1, max: 500), name: 'Transaction Amount'
+      amount = any integers(min: -500, max: 500), name: 'Transaction Amount'
 
       month_day = any integers(min: 1, max: 31)
       week_day = any element_of(%w[MO TU WE TH FR SA SU])

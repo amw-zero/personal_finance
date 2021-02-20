@@ -38,7 +38,11 @@
     
     <% if @page == :transactions_schedule %>
       <h1 class="title">Current Year</h1>
-      <%= erb :transaction_table, locals: { pay_periods: data[:transactions] } %>
+      <% if data[:transactions].first.respond_to?(:incomes) %>
+        <%= erb :transactions_by_pay_period, locals: { pay_periods: data[:transactions] } %>
+      <% else %>
+       <%= erb :transactions_by_month, locals: { periods: data[:transactions] } %>
+      <% end %>
     <% else%>
       <h1 class="title">All Transactions</h1>
       <%= erb :planned_transaction_table, locals: { transactions: data[:transactions].transactions, tag_index: data[:tag_index] } %>
