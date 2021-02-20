@@ -3,12 +3,11 @@
     <div class="card">
       <header class="card-header">
         <p class="card-header-title">
-          Summary
+        Net cashes
         </p>
       </header>
       <div class="card-content">
         <div class="content">
-          <p>Net cashes</p>
           <% pay_periods
             .group_by { |period| (period.incomes.sum + period.transactions.sum).round(2) }
             .sort_by { |(net, _)| net }

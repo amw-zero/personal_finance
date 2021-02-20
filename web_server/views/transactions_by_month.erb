@@ -1,0 +1,42 @@
+<% periods.each do |period| %>
+  <div class="block">
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title">
+          <%= "#{period.date_range.begin} - #{period.date_range.end}" %>
+        </p>
+      </header>
+      <div class="card-content">
+        <div class="content">
+          <table class="table is-fullwidth">
+            <thead>
+              <th>Total Expenses</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td><%= -1 * period.transactions.sum %></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table class="table is-fullwidth">
+            <thead>
+              <th>Name</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </thead>
+            <tbody>
+              <% period.transactions.transactions.each do |transaction| %>
+                <tr>
+                  <td><%= transaction.name %></td>
+                  <td><%= transaction.amount %></td>
+                  <td><%= transaction.date %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

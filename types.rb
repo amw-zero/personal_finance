@@ -44,6 +44,10 @@ class PlannedTransaction < Dry::Struct
       period.end.to_time
     )
   end
+
+  def income?
+    amount > 0
+  end
 end
 
 # A "concrete" transaction, i.e. one that occurs on a specific date. Since
@@ -51,9 +55,9 @@ end
 # Transaction is one instance of the recurrence rule.
 class Transaction < Dry::Struct
   extend Forwardable
-  def_delegators :planned_transaction, :name, :amount
+  def_delegators :planned_transaction, :name, :amount, :income?
 
-  attribute :date, Types::String
+  attribute :date, Types.Constructor(Date) { |date| date }
   attribute :planned_transaction, PlannedTransaction
 end
 
@@ -78,6 +82,11 @@ end
 
 class PayPeriod < Dry::Struct
   attribute :incomes, TransactionSet
+  attribute :transactions, TransactionSet
+  attribute :date_range, Types.Instance(Range)
+end
+
+class Period < Dry::Struct
   attribute :transactions, TransactionSet
   attribute :date_range, Types.Instance(Range)
 end

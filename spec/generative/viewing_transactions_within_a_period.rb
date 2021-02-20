@@ -34,7 +34,7 @@ describe 'Viewing Transactions within a Period' do
           greater_than + any(integers(min: 0, max: 50))
         end
       end
-      start_date = any gen_date.call(greater_than: Time.new(2021, 1, 1)), name: 'Start Date'
+      start_date = any gen_date.call(greater_than: Date.new(2021, 1, 1)), name: 'Start Date'
       end_date = any gen_date.call(greater_than: start_date), name: 'End Date'
 
       period = start_date..end_date
@@ -42,24 +42,47 @@ describe 'Viewing Transactions within a Period' do
         within_period: period
       }
 
-      transactions = test_app.transactions({ within_period: period }).transactions
+      pay_periods = test_app.transactions({ within_period: period })
 
+      # Expected occurrences are what the rrule expansion says they should be
       expected_occurrences = test_app.all_transactions.transactions.map do |transaction|
         [
           transaction.id,
           RRule
-            .parse(transaction.recurrence_rule, dtstart: period.begin.to_datetime)
-            .between(period.begin.to_datetime, period.end.to_datetime)
+            .parse(transaction.recurrence_rule, dtstart: period.begin.to_time, tzid: Time.now.getlocal.zone)
+            .between(period.begin.to_time, period.end.to_time)
             .map { |date_time| date_time.to_date.to_s }
         ]
       end.to_h
 
-      transactions
+      # All transactions get expanded into their proper occurrences
+      pay_periods
+        .flat_map do |period|
+          if period.is_a?(Period)
+            period.transactions.transactions
+          else
+            period.transactions.transactions + period.incomes.transactions
+          end
+        end
         .group_by { |transaction| transaction.planned_transaction.id }
-        .transform_values { |transactions| transactions.map(&:date) }
+      .transform_values { |transactions| transactions.map { |t| t.date.to_s } }
         .each do |transaction_id, occurrences|
+          require 'pry'
+          binding.pry if occurrences != expected_occurrences[transaction_id]
           expect(occurrences).to eq(expected_occurrences[transaction_id])
         end
+
+      # Transactions are grouped by pay period
+      #income_dates = d
+      # incomes = test_app.all_transactions.transactions.select { |t| t.income? }
+
+      # if incomes.count > 0 && pay_periods.any? { |p| p.is_a?(Period) }
+      #   require 'pry'
+      #   binding.pry
+      # end
+      # incomes.each do |income|
+      #   pay_periods.count { |period| period.incomes.transactions.include?(income) } == 1
+      # end
     end
 
     expect(max_transaction_count).to be > 0

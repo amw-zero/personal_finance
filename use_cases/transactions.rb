@@ -102,7 +102,7 @@ module UseCase
         amount: amount,
         currency: currency,
         recurrence_rule: recurrence_rule,
-        created_at: Time.now - one_thousand_weeks
+        created_at: (Time.now - one_thousand_weeks).at_midnight
       ).tap do |i|
         @persistence.persist(:transactions, persistable_transaction(i))
       end
@@ -132,11 +132,15 @@ module UseCase
       if params[:within_period]
         applicable_transactions = applicable_transactions.flat_map do |transaction|
           transaction.occurrences_within(params[:within_period]).map do |date|
-            Transaction.new(date: date.to_date.to_s, planned_transaction: transaction)
+            Transaction.new(date: date.to_date, planned_transaction: transaction)
           end
         end.sort_by(&:date)
 
-        return partition_transactions_by_pay_period(applicable_transactions, in_period: params[:within_period])
+        if applicable_transactions.any?(&:income?)
+          return partition_transactions_by_pay_period(applicable_transactions, in_period: params[:within_period])
+        else
+          return partition_transactions_by_month(applicable_transactions, in_period: params[:within_period])
+        end
       end
 
       TransactionSet.new(transactions: applicable_transactions)
@@ -168,20 +172,35 @@ module UseCase
 
     private
 
-    def partition_transactions_by_pay_period(transactions, in_period:)
-      return TransactionSet.new(transactions: transactions) if transactions.count < 2
+    def partition_transactions_by_month(transactions, in_period:)
+      raise if in_period.begin.year != in_period.end.year
 
-      income_dates = transactions.select { |t| t.amount.positive? }.map(&:date)
-      all_dates = [in_period.begin] + income_dates.drop(1) + [in_period.end]
-      income_periods = all_dates.each_cons(2).map { |dates| Range.new(dates[0].to_date, dates[1].to_date - 1) }
+      # Note - the min here was not caught by tests.
+      months = in_period.begin.month.upto([12, in_period.end.month + 1].min).map do |month|
+        Date.new(in_period.begin.year, month, 1)
+      end
+      periods = months.each_cons(2).map { |dates| Range.new(*dates, true) }
+
+      periods.map do |period|
+        Period.new(
+          transactions: TransactionSet.new(transactions: transactions.select { |t| period.include?(t.date) }),
+          date_range: period
+        )
+      end
+    end
+
+    def partition_transactions_by_pay_period(transactions, in_period:)
+      income_dates = Set.new(transactions.select(&:income?).map(&:date))
+      all_dates = Set.new([in_period.begin] + income_dates.to_a.sort.drop(1) + [in_period.end + 1])
+      income_periods = all_dates.to_a.each_cons(2).map { |dates| Range.new(dates[0].to_date, dates[1].to_date, true) }
 
       income_periods.map do |period|
         PayPeriod.new(
           incomes: TransactionSet.new(transactions: transactions.select do |t|
-                                                      t.amount.positive? && period.include?(t.date.to_date)
-                                                    end),
+                    t.income? && period.include?(t.date.to_date)
+                  end),
           transactions: TransactionSet.new(transactions: transactions.select do |t|
-                                                           t.amount <= 0 && period.include?(t.date.to_date)
+                                                           !t.income? && period.include?(t.date.to_date)
                                                          end),
           date_range: period
         )
