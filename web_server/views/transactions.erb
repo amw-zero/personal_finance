@@ -1,6 +1,8 @@
 <div class="columns mt-4">
   <div class="column is-2">
-    <nav class="panel ">
+    <a class="panel-block has-text-danger" href="/transactions">Clear Filters</a>
+
+    <nav class="panel">
       <div class="panel-tabs">
         <a class="<%= 'is-active' if @page == :transactions %>" href="/transactions">Tags</a>
         <a class="<%= 'is-active' if @page == :transactions_tag_sets %>" href="/transactions/tag_sets">Tag Sets</a>
@@ -14,6 +16,32 @@
         <%= erb :transaction_filters_tag_sets, locals: { params: params, tag_sets: data[:tag_sets] } %>
       <% end %>
     </nav>
+    <% if @page == :transactions_schedule %>
+      <form action="/transactions/schedule">
+        <div class="card">
+          <div class="card-content">
+            <h1 class="title is-5">Date period</h1>
+            <div class="field">
+              <label class="label" for="start_date">
+                Start date
+                <input class="input" type="date" value="<%= params[:start_date] %>" name="start_date">
+              </label>
+            </div>
+            <div class="field">
+              <label class="label" for="end_date">
+                End date
+                <input class="input" type="date" value="<%= params[:end_date] %>" name="end_date">
+              </label>
+            </div>
+          </div>
+          <footer class="card-footer">
+            <div class="card-footer-item">
+              <button class="button is-link is-pulled-right" type="submit">Apply</button>
+            </div>
+          </footer>
+        </div>
+      </form>
+    <% end %>
   </div>
   
   <div class="column">

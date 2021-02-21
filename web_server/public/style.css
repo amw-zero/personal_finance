@@ -5,3 +5,9 @@
 .transaction-table-tag-data .tag {
   margin-bottom: 5px
 }
+
+.tag-panel-block {
+  max-height: 400px;
+  padding: 0px;
+  overflow-y: scroll;
+}

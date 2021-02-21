@@ -57,13 +57,18 @@ module UseCase
           page: :transactions_schedule,
           path: '/transactions/schedule',
           action: lambda do |params|
-            new_years = Date.new(2021, 1, 1)
-            new_years_eve = Date.new(2021, 12, 31)
+            period = if params[:start_date] && params[:end_date]
+                       Date.parse(params[:start_date])..Date.parse(params[:end_date])
+                     else
+                       new_years = Date.new(2021, 1, 1)
+                       new_years_eve = Date.new(2021, 12, 31)
+                       new_years..new_years_eve
+                     end
             {
               tag_index: tag_index,
               tag_sets: all_transaction_tag_sets,
               transactions: transactions(params.merge({
-                                                        within_period: new_years..new_years_eve
+                                                        within_period: period
                                                       }))
             }
           end
