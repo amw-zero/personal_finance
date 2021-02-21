@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  <div class="tag-panel-block">
+  <span class="tag-panel-block">
     <% tag_index.values.flatten.map(&:name).uniq.sort.each do |tag| %>
       <div class="panel-block">
         <label class="checkbox">
@@ -34,7 +34,7 @@
         </label>
       </div>
     <% end %>
-  </div>
+  </span>
 
   <div class="panel-block is-flex-direction-column">
       <div class="field">
