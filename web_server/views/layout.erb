@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="/style.css"
 </head>
 
-<nav class="navbar" role="navigation" aria-label="main navigation">
+<nav class="navbar is-light" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <strong class="navbar-item">
       Personal Finance
@@ -15,11 +15,11 @@
 
   <div id="navbarBasicExample" class="navbar-menu">
     <div class="navbar-start">
-    <a class="navbar-item is-tab <%='is-active' if @page == :dashboard %>" href="/">
-        Dashboard
-      </a>
       <a class="navbar-item is-tab <%='is-active' if @page == :transactions %>" href="/transactions">
-        Transactions
+        Plan
+      </a>
+      <a class="navbar-item is-tab <%='is-active' if @page == :transactions_schedule %>" href="/transactions/schedule">
+        Schedule
       </a>
     </div>
 
