@@ -1,14 +1,10 @@
 <div class="columns mt-4">
-  <div class="column is-one-fifth">
+  <div class="column is-2">
     <nav class="panel ">
-      <p class="panel-heading">
-        Filters
-      </p>
-
       <div class="panel-tabs">
         <a class="<%= 'is-active' if @page == :transactions %>" href="/transactions">Tags</a>
         <a class="<%= 'is-active' if @page == :transactions_tag_sets %>" href="/transactions/tag_sets">Tag Sets</a>
-      </div>      
+      </div>
 
       <!-- Need to handle nesting here. transactions_schedule is nested within transactions.  -->
       <!-- Prob need a "navigation path" -->

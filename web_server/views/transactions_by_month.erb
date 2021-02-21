@@ -15,7 +15,7 @@
               <strong><%= net %></strong> 
               <ul>
                 <% periods.map(&:date_range).each do |range| %>
-                  <li><%= "#{range.begin} - #{range.end}" %></li>
+                  <li><%= display_date_range(range) %></li>
                 <% end %>
               </ul>
             </div>
@@ -30,7 +30,7 @@
     <div class="card">
       <header class="card-header">
         <p class="card-header-title">
-          <%= "#{period.date_range.begin} - #{period.date_range.end}" %>
+          <%= display_date_range(period.date_range) %>
         </p>
       </header>
       <div class="card-content">
@@ -46,7 +46,7 @@
             </tbody>
           </table>
 
-          <table class="table is-fullwidth">
+          <table class="table is-fullwidth is-striped">
             <thead>
               <th>Name</th>
               <th>Amount</th>

@@ -1,5 +1,5 @@
 <div class="container">
-<table class="table is-fullwidth">
+<table class="table is-fullwidth is-striped">
   <thead>
     <th>Name</th>
     <th>Amount</th>
@@ -12,7 +12,7 @@
       <tr>
         <td><%= transaction.name %></td>
         <td><%= transaction.amount %></td>
-        <td><%= transaction.recurrence_rule %></td>
+        <td><%= display_recurrence_rule(transaction.recurrence_rule) %></td>
         <td class="transaction-table-tag-data">
           <% if tag_index[transaction.id] %>
             <% tag_index[transaction.id].each do |tag| %>
@@ -21,11 +21,17 @@
           <% end %>
         </td>
         <td>
-          <form action="/transactions/<%= transaction.id %>" method="POST">
-            <button type="submit" class="button is-small is-danger is-pulled-right">Delete</button>
-            <input type="hidden" name="_method" value="DELETE">
-          </form>
-          <a class="button is-small is-primary is-pulled-right" href="/transactions/<%= transaction.id %>/tags/create">Add Tag</a>
+          <div class="columns">
+            <div class="column is-pulled-right">
+              <form action="/transactions/<%= transaction.id %>" method="POST">
+                <button type="submit" class="button is-small is-danger is-pulled-right">Delete</button>
+                <input type="hidden" name="_method" value="DELETE">
+              </form>
+            </div>
+            <div class="column is-pulled-right">
+              <a class="button is-small is-primary is-pulled-right" href="/transactions/<%= transaction.id %>/tags/create">Add Tag</a>
+              </div>
+          </div>
         </td>
       </tr>
     <% end %>
