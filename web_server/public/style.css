@@ -7,7 +7,7 @@
 }
 
 .tag-panel-block {
-  max-height: 400px;
+  max-height: 250px;
   padding: 0px;
   overflow-y: scroll;
 }
