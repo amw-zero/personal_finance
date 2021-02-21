@@ -118,7 +118,7 @@ helpers do
                     ['weeks', days[values['BYDAY']]]
                    end
                  end
-      "Every #{values['INTERVAL']} #{freq_str}, on #{on}"
+      "Every #{values['INTERVAL']} #{freq_str} on #{on}"
     else
       freq_str, on = case frequency
                         when 'MONTHLY'
