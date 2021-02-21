@@ -78,7 +78,12 @@ end
 
 helpers do
   def display_date_range(range)
-    "#{range.begin} - #{range.end - 1}"
+    start = range.begin
+    ending = range.end - 1
+
+    fmt = ->(d) { d.strftime('%b %e, %Y') }
+
+    "#{fmt.call(range.begin)} - #{fmt.call(range.end - 1)}"
   end
 
   def display_recurrence_rule(rule)
