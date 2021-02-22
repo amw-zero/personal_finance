@@ -1,12 +1,4 @@
-<a class="panel-block has-text-danger" href="/transactions">Clear Tags</a>
-
 <form id="tagform">
-  <div class="panel-block">
-    <div class="field">
-      <button class="button is-link is-small" type="submit">Filter to these tags</button>
-    </div>
-  </div>
-
   <div class="panel-block">
     <div class="control">
       <label class="radio">
@@ -14,27 +6,37 @@
         Union
       </label>
       <label class="radio">
-        <input type="radio" name="intersection" value="true" <%= 'checked' if params[:intersection] == 'true' %> />
+        <input type="radio" name="intersection" value="true"
+        <%= 'checked' if params[:intersection] == 'true' %>
+      />
         Intersection
       </label>
     </div>
   </div>
 
-  <% tag_index.values.flatten.map(&:name).uniq.sort.each do |tag| %>
-    <div class="panel-block">
-      <label class="checkbox">
-        <input
-          type="checkbox"
-          name="transaction_tag[]"
-          form="tagform"
-          value="<%= tag %>"
-          <%= 'checked' if params[:transaction_tag]&.include?(tag) %>
-        >
-        </input>
-        <%= tag %>
-      </label>
+  <div class="tag-panel-block">
+    <% tag_index.values.flatten.map(&:name).uniq.sort.each do |tag| %>
+      <div class="panel-block">
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            name="transaction_tag[]"
+            form="tagform"
+            value="<%= tag %>"
+            <%= 'checked' if params[:transaction_tag]&.include?(tag) %>
+          >
+          </input>
+          <%= tag %>
+        </label>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="panel-block is-flex-direction-column">
+    <div class="field">
+      <button class="button is-link is-small" type="submit">Filter to these tags</button>
     </div>
-  <% end %>
+  </div>
 
   <div class="panel-block is-flex-direction-column">
       <div class="field">

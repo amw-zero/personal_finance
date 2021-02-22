@@ -81,8 +81,8 @@ module ApplicationActions
       @application_block = fresh_application
     end
 
-    def check!
-      hypothesis(max_valid_test_cases: 1_000, phases: Phase.excluding(:shrink)) do
+    def check!(max_checks: 1_000)
+      hypothesis(max_valid_test_cases: max_checks, phases: Phase.excluding(:shrink)) do
         test_app = application_block.call
 
         any(
