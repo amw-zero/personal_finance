@@ -23,11 +23,12 @@ describe 'Viewing Transactions within a Period' do
     ApplicationActions::Sequences.new(
       test_actions,
       fresh_application: -> { test_application }
-    ).check! do |test_app|
-      transaction_count = test_app.all_transactions.transactions.count
+    ).check!(max_checks: 200) do |test_app|
+      all_transactions = test_app.all_transactions.transactions
+      transaction_count = all_transactions.count
       max_transaction_count = transaction_count if transaction_count > max_transaction_count
 
-      next if test_app.all_transactions.transactions.empty?
+      next if all_transactions.empty?
 
       gen_date = lambda do |greater_than:|
         built_as do
@@ -37,15 +38,39 @@ describe 'Viewing Transactions within a Period' do
       start_date = any gen_date.call(greater_than: Date.new(2021, 1, 1)), name: 'Start Date'
       end_date = any gen_date.call(greater_than: start_date), name: 'End Date'
 
-      period = start_date..end_date
-      params = {
-        within_period: period
-      }
+      params = any(element_of([
+        {
+          start_date: start_date.to_s,
+          end_date: end_date.to_s
+        },
+        {
+          date_period: 'current_month'
+        },
+        {
+          date_period: 'current_year'
+        },
+      ]), name: 'Params')
 
-      pay_periods = test_app.transactions({ within_period: period })
+      period = if params[:start_date] && params[:end_date]
+                  start_date..end_date
+                elsif params[:date_period] == 'current_month'
+                  today = Date.today
+                  first = Date.new(today.year, today.month, 1)
+                  last = Date.new(today.year, today.month + 1, 1) - 1
+
+                  first..last
+                else
+                  today = Date.today
+                  new_years = Date.new(today.year, 1, 1)
+                  new_years_eve = Date.new(today.year, 12, 31)
+
+                  new_years..new_years_eve
+                end
+
+      pay_periods = test_app.transactions(params)
 
       # Expected occurrences are what the rrule expansion says they should be
-      expected_occurrences = test_app.all_transactions.transactions.map do |transaction|
+      expected_occurrences = all_transactions.map do |transaction|
         [
           transaction.id,
           RRule
@@ -65,14 +90,15 @@ describe 'Viewing Transactions within a Period' do
           end
         end
         .group_by { |transaction| transaction.planned_transaction.id }
-        .transform_values { |transactions| transactions.map { |t| t.date.to_s } }
+        .transform_values { |transactions| transactions.map { |t| t.date } }
         .each do |transaction_id, occurrences|
-          expect(occurrences).to eq(expected_occurrences[transaction_id])
+          expect(occurrences.all? { |o| period.include?(o) }).to eq(true)
+          expect(occurrences.map(&:to_s)).to eq(expected_occurrences[transaction_id])
         end
 
-      # Transactions are grouped by pay period
+        # Transactions are grouped by pay period
       # income_dates = d
-      # incomes = test_app.all_transactions.transactions.select { |t| t.income? }
+      # incomes = all_transactions.select { |t| t.income? }
 
       # if incomes.count > 0 && pay_periods.any? { |p| p.is_a?(Period) }
       #   require 'pry'

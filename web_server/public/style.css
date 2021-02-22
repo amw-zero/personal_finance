@@ -11,3 +11,10 @@
   padding: 0px;
   overflow-y: scroll;
 }
+
+.radio-list .radio {
+    display: block;
+
+    margin-left: 0;
+    margin-top: .5em;
+}

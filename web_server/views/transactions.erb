@@ -21,6 +21,28 @@
         <div class="card">
           <div class="card-content">
             <h1 class="title is-5">Date period</h1>
+
+            <div class="control radio-list">
+              <label class="radio">
+                <input
+                  type="radio"
+                  name="date_period"
+                  value="current_month"
+                  <%= 'checked' if params[:date_period] == 'current_month' || params[:date_period].nil? %>
+                >
+                Current Month
+              </label>
+              <label class="radio">
+                <input
+                  type="radio"
+                  name="date_period"
+                  value="current_year"
+                  <%= 'checked' if params[:date_period] == 'current_year' %>
+                >
+                Current Year
+              </label>
+            </div>
+
             <div class="field">
               <label class="label" for="start_date">
                 Start date

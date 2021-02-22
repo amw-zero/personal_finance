@@ -57,19 +57,11 @@ module UseCase
           page: :transactions_schedule,
           path: '/transactions/schedule',
           action: lambda do |params|
-            period = if params[:start_date] && params[:end_date]
-                       Date.parse(params[:start_date])..Date.parse(params[:end_date])
-                     else
-                       new_years = Date.new(2021, 1, 1)
-                       new_years_eve = Date.new(2021, 12, 31)
-                       new_years..new_years_eve
-                     end
+            params = { date_period: 'current_month' } if params.keys.empty?
             {
               tag_index: tag_index,
               tag_sets: all_transaction_tag_sets,
-              transactions: transactions(params.merge({
-                                                        within_period: period
-                                                      }))
+              transactions: transactions(params)
             }
           end
         },
@@ -114,6 +106,22 @@ module UseCase
     end
 
     def transactions(params)
+      period = if params[:start_date] && !params[:start_date].empty? && params[:end_date] && !params[:end_date].empty?
+                 Date.parse(params[:start_date])..Date.parse(params[:end_date])
+               elsif params[:date_period] == 'current_year'
+                 today = Date.today
+                 new_years = Date.new(today.year, 1, 1)
+                 new_years_eve = Date.new(today.year, 12, 31)
+
+                 new_years..new_years_eve
+               elsif params[:date_period] == 'current_month'
+                 today = Date.today
+                 first = Date.new(today.year, today.month, 1)
+                 last = Date.new(today.year, today.month + 1, 1) - 1
+
+                 first..last
+               end
+
       applicable_transactions =
         if params[:transaction_tag]
           transactions_for_tags(
@@ -134,17 +142,18 @@ module UseCase
           ).sort_by(&:name)
         end
 
-      if params[:within_period]
+      # This branch has to come out of here. Different types get returned from this function
+      if period
         applicable_transactions = applicable_transactions.flat_map do |transaction|
-          transaction.occurrences_within(params[:within_period]).map do |date|
+          transaction.occurrences_within(period).map do |date|
             Transaction.new(date: date.to_date, planned_transaction: transaction)
           end
         end.sort_by(&:date)
 
         if applicable_transactions.any?(&:income?)
-          return partition_transactions_by_pay_period(applicable_transactions, in_period: params[:within_period])
+          return partition_transactions_by_pay_period(applicable_transactions, in_period: period)
         else
-          return partition_transactions_by_month(applicable_transactions, in_period: params[:within_period])
+          return partition_transactions_by_month(applicable_transactions, in_period: period)
         end
       end
 
@@ -180,11 +189,13 @@ module UseCase
     def partition_transactions_by_month(transactions, in_period:)
       raise if in_period.begin.year != in_period.end.year
 
-      # Note - the min here was not caught by tests.
-      months = in_period.begin.month.upto([12, in_period.end.month + 1].min).map do |month|
-        Date.new(in_period.begin.year, month, 1)
+      months = in_period.begin.month.upto(in_period.end.month + 1).with_index.map do |month, i|
+        year_offset = month / 12
+
+        Date.new(in_period.begin.year + year_offset, month % 12 == 0 ? 12 : month % 12, 1)
       end
       periods = months.each_cons(2).map { |dates| Range.new(*dates, true) }
+      periods[-1] = periods[-1].begin..periods[-1].end
 
       periods.map do |period|
         Period.new(
