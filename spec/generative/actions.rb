@@ -30,16 +30,20 @@ module ApplicationActions
       month_day = any integers(min: 1, max: 31)
       week_day = any element_of(%w[MO TU WE TH FR SA SU])
       rrule = any element_of([
-                               "FREQ=MONTHLY;BYMONTHDAY=#{month_day}",
-                               "FREQ=WEEKLY;BYDAY=#{week_day}"
-                             ])
+                              "FREQ=MONTHLY;BYMONTHDAY=#{month_day}",
+                              "FREQ=WEEKLY;BYDAY=#{week_day}"
+                            ])
+
+      date_offset = any integers(min: -500, max: 500)
+      occurs_on = Date.today + date_offset
 
       test_app.create_transaction(
         name: any(strings),
         account_id: account.id,
         amount: amount.to_f,
         currency: :usd,
-        recurrence_rule: rrule
+        recurrence_rule: rrule,
+        occurs_on: occurs_on
       )
     when :create_tag
       return if test_app.all_transactions.transactions.empty?

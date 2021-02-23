@@ -34,12 +34,12 @@ class PlannedTransaction < Dry::Struct
   attribute :name, Types::String
   attribute :currency, Types::Value(:usd)
   attribute :recurrence_rule, Types::String
-  attribute :created_at, Types.Constructor(DateTime) { |created_at| created_at }
+  attribute :occurs_on, Types.Constructor(Date) { |occurs_on| occurs_on }
 
   def occurrences_within(period)
     start_date = period.begin.to_time
 
-    RRule.parse(recurrence_rule, dtstart: created_at, tzid: Time.now.getlocal.zone).between(
+    RRule.parse(recurrence_rule, dtstart: occurs_on.to_time, tzid: Time.now.getlocal.zone).between(
       start_date,
       period.end.to_time
     )

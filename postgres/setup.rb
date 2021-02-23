@@ -27,7 +27,7 @@ DB.create_table :transactions do
   String :currency
   String :name
   String :recurrence_rule
-  DateTime :created_at
+  Date :occurs_on
 end
 
 DB.create_table :transaction_tags do
