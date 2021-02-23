@@ -80,26 +80,29 @@ module UseCase
     # TODO: Test from_params methods separately
     # Can simply call the method to check for type check errors.
     def create_transaction_from_params(params)
+      occurs_on = params[:occurs_on].empty? ? nil : Date.parse(params[:occurs_on])
       create_transaction(
         name: params[:name],
         account_id: params[:account_id].to_i,
         amount: params[:amount].to_f,
         currency: params[:currency].to_sym,
-        recurrence_rule: params[:recurrence_rule]
+        recurrence_rule: params[:recurrence_rule],
+        occurs_on: occurs_on,
       )
     end
 
-    def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:)
+    def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:, occurs_on: Date.today)
       # This is to be able to start the recurrence rule in the past, so that
       # the transaction appears if you display months in the past
-      one_thousand_weeks = (7 * 24 * 60 * 60 * 1000)
+      occurs_on = occurs_on || Date.today
+      one_thousand_weeks = (7 * 1_000)
       PlannedTransaction.new(
         name: name,
         account_id: account_id,
         amount: amount,
         currency: currency,
         recurrence_rule: recurrence_rule,
-        created_at: (Time.now - one_thousand_weeks).at_midnight
+        occurs_on: (occurs_on - one_thousand_weeks)
       ).tap do |i|
         @persistence.persist(:transactions, persistable_transaction(i))
       end
