@@ -2,6 +2,7 @@
 
 require_relative '../test_application'
 require_relative './actions'
+require_relative '../../view'
 
 require 'hypothesis'
 
@@ -18,6 +19,7 @@ describe 'Viewing Transactions within a Period' do
 
     view = test_app.create_transaction_view
     interaction = view.create_transaction_interaction
+    
     params = interaction[:fields].map do |field|
       case field[:type]
       when 'decimal'
@@ -27,10 +29,11 @@ describe 'Viewing Transactions within a Period' do
       end
     end.to_h
 
-    params.merge!({ account_id: 1, currency: :usd, recurrence_rule: 'Testing'})
+    params.merge!({ account_id: 1, currency: :usd, recurrence_rule: 'Testing' })
 
     new_transaction = test_app.execute(interaction, params)
 
     expect(test_app.all_transactions.transactions).to eq(starting_transactions + [new_transaction])
+    expect(ErbRenderer.new(view).render).to_not be_nil
   end
 end

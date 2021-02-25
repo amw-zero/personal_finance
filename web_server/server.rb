@@ -4,6 +4,7 @@ require 'sinatra'
 require 'ostruct'
 require_relative '../personal_finance'
 require_relative '../postgres/postgres_persistence'
+require_relative '../view'
 
 application = PersonalFinance::Application.new(log_level: ENV['LOG_LEVEL'], persistence: PostgresPersistence.new)
 
@@ -45,6 +46,14 @@ end
 get '/transactions/:id/tags/create' do
   @transaction = application.all_transactions.transactions.find { |t| t.id == params[:id].to_i }
   erb :transaction_tag_form
+end
+
+get '/test/transactions' do
+  ErbRenderer.new(application.create_transaction_view).render
+end
+
+post '/test/transactions' do
+  application.execute(application.create_transaction_view.create_transaction_interaction, params)
 end
 
 application.use_cases.each do |_name, use_case|

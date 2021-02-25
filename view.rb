@@ -5,6 +5,6 @@ class ErbRenderer
 
   def render
     rhtml = ERB.new(@view.template)
-    rhtml.run(@view.get_binding)
+    rhtml.result(@view.get_binding)
   end
 end

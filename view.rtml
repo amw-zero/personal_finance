@@ -85,7 +85,9 @@ end
 interaction = view.create_something
 perform.call(interaction, { amount: 'Testing' })
 
-ErbRenderer.new(view).render
+# Catches bugs with calling wrong methods in view,
+# i.e. a type check
+puts ErbRenderer.new(view).render
 
 # Rendering template => user can perform action
 # Template can render

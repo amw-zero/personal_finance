@@ -164,7 +164,7 @@ module PersonalFinance
     def_delegators :@data_interactor, :to_models, :relation
     def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction, :tag_index
 
-    attr_reader :endpoints, :use_cases
+    attr_reader :endpoints, :use_cases, :interactions
 
     def initialize(log_level: :quiet, persistence: MemoryPersistence.new)
       @accounts = []
@@ -178,6 +178,23 @@ module PersonalFinance
         transactions: ::UseCase::Transactions.new(persistence: persistence),
         transaction_tags: UseCase::TransactionTags.new(persistence: persistence),
         transaction_tag_sets: UseCase::TransactionTagSets.new(persistence: persistence)
+      }
+      @interactions = {
+        create_transaction:  {
+          name: :'/test/transactions',
+          type: :create,
+          # Create "schema" type here using Dry::Struct?
+          fields: [
+            {
+              type: 'decimal',
+              name: 'amount'
+            },
+            {
+              type: 'string',
+              name: 'name'
+            },
+          ]
+        }
       }
     end
 
@@ -241,31 +258,27 @@ module PersonalFinance
     end
     
     class CreateTransactionView
-      def template
-        %{
-          <form action="<%= create_transaction_interaction[:name] %>">
-            <button type="submit">
-          </form>
-        }
+      attr_reader :create_transaction_interaction
+      
+      def initialize(create_transaction_interaction)
+        @create_transaction_interaction = create_transaction_interaction
+      end
+      def get_binding
+        binding
       end
 
-      def create_transaction_interaction
-        {
-          name: :'/test/transactions',
-          type: :create,
-          # Create "schema" type here using Dry::Struct?
-          fields: [
-            {
-              type: 'decimal',
-              name: 'amount'
-            },
-            {
-              type: 'string',
-              name: 'name'
-            },
-          ]
+      def template
+        %{
+          <html>
+            <body>
+              Testing
+              <form action="<%= create_transaction_interaction[:name] %>">
+                <button type="submit">
+              </form>
+            </body>
+          </html>
         }
-      end
+      end      
     end
 
     def execute(interaction, params)
@@ -279,7 +292,7 @@ module PersonalFinance
     end
 
     def create_transaction_view
-      CreateTransactionView.new
+      CreateTransactionView.new(interactions[:create_transaction])
     end
 
     private
