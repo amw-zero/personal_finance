@@ -180,8 +180,8 @@ module PersonalFinance
         transaction_tag_sets: UseCase::TransactionTagSets.new(persistence: persistence)
       }
       @interactions = {
-        create_transaction:  {
-          name: :'/test/transactions',
+        create_transaction: {
+          name: '/test/transactions',
           type: :create,
           # Create "schema" type here using Dry::Struct?
           fields: [
@@ -194,6 +194,14 @@ module PersonalFinance
               name: 'name'
             },
           ]
+        },
+        view_transaction: {
+          name: '/test/transactions',
+          type: :view
+        },
+        new_transaction: {
+          name: '/test/transactions/new',
+          type: :view
         }
       }
     end
@@ -256,13 +264,34 @@ module PersonalFinance
         TransactionTag.new(data)
       end.uniq(&:name)
     end
+
+    class TransactionsView
+      attr_reader :new_transaction_interaction
+      
+      def initialize(new_transaction_interaction)
+        @new_transaction_interaction = new_transaction_interaction
+      end
+
+      def get_binding
+        binding
+      end
+
+      def template
+        %{
+          testing
+
+          <a href="<%= new_transaction_interaction[:name] %>">New Transaction></a>
+        }
+      end
+    end
     
     class CreateTransactionView
       attr_reader :create_transaction_interaction
-      
+
       def initialize(create_transaction_interaction)
         @create_transaction_interaction = create_transaction_interaction
       end
+
       def get_binding
         binding
       end
@@ -283,9 +312,13 @@ module PersonalFinance
 
     def execute(interaction, params)
       case [interaction[:name], interaction[:type]]
-      when [:'/test/transactions', :create]
-        puts "Execute - calling with params: #{params}"
+      when ['/test/transactions', :create]
         create_transaction(**params)
+        TransactionsView.new(interactions[:new_transaction])
+      when ['/test/transactions', :view]
+        TransactionsView.new(interactions[:new_transaction])
+      when ['/test/transactions/new', :view]
+        CreateTransactionView.new(interactions[:create_transaction])
       else
         raise "Attempted to execute unknown interaction: #{interaction[:name]}"
       end

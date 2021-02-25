@@ -48,12 +48,17 @@ get '/transactions/:id/tags/create' do
   erb :transaction_tag_form
 end
 
-get '/test/transactions' do
-  ErbRenderer.new(application.create_transaction_view).render
-end
-
-post '/test/transactions' do
-  application.execute(application.create_transaction_view.create_transaction_interaction, params)
+application.interactions.values.each do |interaction|
+  case interaction[:type]
+  when :create
+    post interaction[:name] do
+      ErbRenderer.new(application.execute(interaction, params)).render
+    end
+  when :view
+    get interaction[:name] do
+      ErbRenderer.new(application.execute(interaction, params)).render
+    end
+  end
 end
 
 application.use_cases.each do |_name, use_case|
