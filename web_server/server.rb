@@ -49,16 +49,14 @@ get '/transactions/:id/tags/create' do
 end
 
 application.interactions.values.each do |interaction|
-  execute = -> do
-    ErbRenderer.new(application.execute(interaction, params)).render
-  end
-
   method = {
     create: :post,
     view: :get
   }[interaction[:type]]
 
-  send(method, interaction[:name], &execute)
+  send(method, interaction[:name]) do
+    ErbRenderer.new(application.execute(interaction, params)).render
+  end
 end
 
 application.use_cases.each do |_name, use_case|
