@@ -152,12 +152,6 @@ module PersonalFinance
     end
   end
 
-  class MemoryServer
-    def initialize(persistence: MemoryPersistence.new)
-      @persistence = persistence
-    end
-  end
-
   # The top-level Personal Finance application
   class Application
     extend Forwardable
