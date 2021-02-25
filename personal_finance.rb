@@ -152,6 +152,12 @@ module PersonalFinance
     end
   end
 
+  class MemoryServer
+    def initialize(persistence: MemoryPersistence.new)
+      @persistence = persistence
+    end
+  end
+
   # The top-level Personal Finance application
   class Application
     extend Forwardable
@@ -232,6 +238,48 @@ module PersonalFinance
       relation(:transaction_tags).map do |data|
         TransactionTag.new(data)
       end.uniq(&:name)
+    end
+    
+    class CreateTransactionView
+      def template
+        %{
+          <form action="<%= create_transaction_interaction[:name] %>">
+            <button type="submit">
+          </form>
+        }
+      end
+
+      def create_transaction_interaction
+        {
+          name: :'/test/transactions',
+          type: :create,
+          # Create "schema" type here using Dry::Struct?
+          fields: [
+            {
+              type: 'decimal',
+              name: 'amount'
+            },
+            {
+              type: 'string',
+              name: 'name'
+            },
+          ]
+        }
+      end
+    end
+
+    def execute(interaction, params)
+      case [interaction[:name], interaction[:type]]
+      when [:'/test/transactions', :create]
+        puts "Execute - calling with params: #{params}"
+        create_transaction(**params)
+      else
+        raise "Attempted to execute unknown interaction: #{interaction[:name]}"
+      end
+    end
+
+    def create_transaction_view
+      CreateTransactionView.new
     end
 
     private
