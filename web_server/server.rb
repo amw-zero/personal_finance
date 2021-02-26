@@ -56,6 +56,13 @@ application.interactions.values.each do |interaction|
 
   send(method, interaction[:name]) do
     ErbRenderer.new(application.execute(interaction, params)).render
+    # result = application.execute(interaction, params)
+    # case result
+    # when ViewResult
+    #   ErbRenderer.new(result.view).render
+    # when RedirectResult
+    #   redirect_to result.path
+    # end
   end
 end
 

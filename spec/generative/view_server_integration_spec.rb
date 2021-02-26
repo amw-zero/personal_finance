@@ -17,7 +17,7 @@ describe 'Viewing Transactions within a Period' do
     test_app = test_application
     starting_transactions = test_app.all_transactions.transactions
 
-    view = test_app.create_transaction_view
+    view = test_app.execute(test_app.interactions[:new_transaction], {})
     interaction = view.create_transaction_interaction
     
     params = interaction[:fields].map do |field|
@@ -35,5 +35,5 @@ describe 'Viewing Transactions within a Period' do
 
     expect(test_app.all_transactions.transactions).to eq(starting_transactions + [new_transaction])
     expect(ErbRenderer.new(view).render).to_not be_nil
-  end
+  end   
 end

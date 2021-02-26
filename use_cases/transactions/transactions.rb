@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative '../memory_persistence'
-require_relative '../data_interactor'
-require_relative '../types'
+require_relative '../../memory_persistence'
+require_relative '../../data_interactor'
+require_relative '../../types'
 
 module UseCase
   class Transactions
@@ -160,7 +160,12 @@ module UseCase
         end
       end
 
-      TransactionSet.new(transactions: applicable_transactions)
+      # Move non-transaction data up into Application
+      {
+        tag_index: tag_index,
+        tag_sets: all_transaction_tag_sets,
+        transactions: TransactionSet.new(transactions: applicable_transactions)
+      }
     end
 
     def cash_flow(account_id)

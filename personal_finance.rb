@@ -10,7 +10,9 @@ require 'rrule'
 require_relative 'data_interactor'
 require_relative 'memory_persistence'
 require_relative 'types'
-require_relative 'use_cases/transactions'
+require_relative 'use_cases/transactions/transactions'
+require_relative 'use_cases/transactions/create_transaction_view'
+require_relative 'use_cases/transactions/transactions_view'
 
 # Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
@@ -259,58 +261,19 @@ module PersonalFinance
       end.uniq(&:name)
     end
 
-    class TransactionsView
-      attr_reader :new_transaction_interaction
-      
-      def initialize(new_transaction_interaction)
-        @new_transaction_interaction = new_transaction_interaction
-      end
-
-      def get_binding
-        binding
-      end
-
-      def template
-        %{
-          testing
-
-          <a href="<%= new_transaction_interaction[:name] %>">New Transaction></a>
-        }
-      end
-    end
-    
-    class CreateTransactionView
-      attr_reader :create_transaction_interaction
-
-      def initialize(create_transaction_interaction)
-        @create_transaction_interaction = create_transaction_interaction
-      end
-
-      def get_binding
-        binding
-      end
-
-      def template
-        %{
-          <html>
-            <body>
-              Testing
-              <form action="<%= create_transaction_interaction[:name] %>">
-                <button type="submit">
-              </form>
-            </body>
-          </html>
-        }
-      end      
-    end
-
-    def execute(interaction, params)
+    def execute(interaction, params = {})
       case [interaction[:name], interaction[:type]]
       when ['/test/transactions', :create]
         create_transaction(**params)
         TransactionsView.new(interactions[:new_transaction])
       when ['/test/transactions', :view]
-        TransactionsView.new(interactions[:new_transaction])
+        data = transactions(params)
+        TransactionsView.new(
+          new_transaction_interaction: interactions[:new_transaction],
+          accounts: accounts, 
+          data: data, 
+          params: params
+        )
       when ['/test/transactions/new', :view]
         CreateTransactionView.new(interactions[:create_transaction])
       else
