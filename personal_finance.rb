@@ -13,6 +13,7 @@ require_relative 'types'
 require_relative 'use_cases/transactions/transactions'
 require_relative 'use_cases/transactions/create_transaction_view'
 require_relative 'use_cases/transactions/transactions_view'
+require_relative 'use_cases/transactions/layout_view'
 
 # Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
@@ -268,11 +269,13 @@ module PersonalFinance
         TransactionsView.new(interactions[:new_transaction])
       when ['/test/transactions', :view]
         data = transactions(params)
-        TransactionsView.new(
-          new_transaction_interaction: interactions[:new_transaction],
-          accounts: accounts, 
-          data: data, 
-          params: params
+        LayoutView.new(
+          TransactionsView.new(
+            new_transaction_interaction: interactions[:new_transaction],
+            accounts: accounts, 
+            data: data, 
+            params: params
+          )
         )
       when ['/test/transactions/new', :view]
         CreateTransactionView.new(interactions[:create_transaction])
