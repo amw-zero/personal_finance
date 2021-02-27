@@ -1,10 +1,10 @@
 <div class="container">
   <h1 class="title">Create Transaction</h1>
-  <form action="/transactions" method="post">
-    <div class="field">
-      <label class="label" for="name">Name</label>
-      <input class="input" name="name" />
-    </div>
+  <form 
+    action="<%= interactions[:create_transaction][:name] %>" 
+    method="<%= form_action(interactions[:create_transaction]) %>"
+  >
+    <%= form_field(interactions[:create_transaction], :name) %>
 
     <div class="field">
       <label class="label" for="account_id">Account</label>
@@ -19,25 +19,10 @@
       </div>
     </div>
 
-    <div class="field">
-      <label class="label" for="amount">Amount</label>
-      <input class="input"name="amount" type="number" step="0.01" />
-    </div>
-
-    <div class="field">
-      <label class="label" for="currency">Currency</label>
-      <input class="input"name="currency" type="text" />
-    </div>
-
-    <div class="field">
-      <label class="label" for="recurrence_rule">Recurrence rule (iCalendar spec)</label>
-      <input class="input"name="recurrence_rule" type="text" />
-    </div>
-
-    <div class="field">
-      <label class="label" for="occurs_on">Occurs on</label>
-      <input class="input"name="occurs_on" type="date" />
-    </div>
+    <%= form_field(interactions[:create_transaction], :amount) %>
+    <%= form_field(interactions[:create_transaction], :currency) %>
+    <%= form_field(interactions[:create_transaction], :recurrence_rule) %>
+    <%= form_field(interactions[:create_transaction], :occurs_on) %>
 
     <button class="button is-primary" type="submit">Create Transaction</input>
   </form>

@@ -193,6 +193,14 @@ module PersonalFinance
             {
               type: :date,
               name: :occurs_on
+            },
+            {
+              type: :string,
+              name: :currency
+            },
+            {
+              type: :string,
+              name: :recurrence_rule
             }
           ]
         },
@@ -269,7 +277,7 @@ module PersonalFinance
     def execute(interaction, params = {})
       content = case [interaction[:name], interaction[:type]]
               when ['/test/transactions', :create]
-                create_transaction_from_params(**params)
+                create_transaction_from_params(params)
                 data = transactions({})
                 TransactionsView.new(
                   new_transaction_interaction: interactions[:new_transaction],
@@ -289,18 +297,14 @@ module PersonalFinance
                 )
               when ['/test/transactions/new', :view]
                 CreateTransactionView.new(
-                  interactions[:create_transaction], 
+                  interactions: interactions, 
                   accounts: accounts
                 )
               else
                 raise "Attempted to execute unknown interaction: #{interaction[:name]}"
               end
-              
-      LayoutView.new(content)
-    end
 
-    def create_transaction_view
-      CreateTransactionView.new(interactions[:create_transaction])
+      LayoutView.new(content)
     end
 
     private

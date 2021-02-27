@@ -62,6 +62,41 @@ module View
     end    
   end
 
+  def form_action(interaction)
+    case interaction[:type]
+    when :create
+      'POST'
+    end
+  end
+
+  def form_field(interaction, field_name)
+    field = interaction[:fields].find { |f| f[:name] == field_name }
+    type = case field[:type]
+          when :string
+            'text'
+          when :decimal
+            'number'
+          when :date
+            'date'
+          end
+
+    
+    input = case field[:type]
+            when :decimal
+              %{ <input class="input" type="#{type}" name="#{field_name}" step="0.01" /> }
+            else
+              %{ <input class="input" type="#{type}" name="#{field_name}" /> }
+            end
+
+
+    %{ 
+      <div class="field">
+        <label class="label" for="#{field_name}">#{field_name}</label>
+        #{input}
+      </div>
+     }
+  end
+
   def get_binding
     binding
   end

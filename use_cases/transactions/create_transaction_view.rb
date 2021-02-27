@@ -1,13 +1,13 @@
+require_relative '../../view'
+
 class CreateTransactionView
-  attr_reader :create_transaction_interaction
+  include View
 
-  def initialize(create_transaction_interaction, accounts:)
-    @create_transaction_interaction = create_transaction_interaction
+  attr_reader :interactions
+
+  def initialize(interactions:, accounts:)
+    @interactions = interactions
     @accounts = accounts
-  end
-
-  def get_binding
-    binding
   end
 
   def template

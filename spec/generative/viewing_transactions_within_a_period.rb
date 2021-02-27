@@ -13,6 +13,9 @@ describe 'Viewing Transactions within a Period' do
     # TODO: Meta-tests. If an account isn't created here, a transaction never will be,
     # and the test will always pass
 
+    # Model after todo-subsecond. 
+    # Create "Assemblies" where I can test everything in memory,
+    # or end to end depending on assembly. Same test.
     test_actions = [
       ApplicationActions::CREATE_ACCOUNT,
       ApplicationActions::CREATE_TRANSACTION
