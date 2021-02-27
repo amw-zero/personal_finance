@@ -212,6 +212,10 @@ module PersonalFinance
         new_transaction: {
           name: '/test/transactions/new',
           type: :view
+        },
+        delete_transaction: {
+          name: '/test/transactions/:id',
+          type: :delete
         }
       }
     end
@@ -279,28 +283,16 @@ module PersonalFinance
       content = case [interaction[:name], interaction[:type]]
                 when ['/test/transactions', :create]
                   create_transaction_from_params(params)
-                  data = transactions({})
-                  TransactionsView.new(
-                    new_transaction_interaction: interactions[:new_transaction],
-                    accounts: accounts,
-                    data: data,
-                    params: {},
-                    interactions: interactions
-                  )
+
+                  transactions_view({})
                 when ['/test/transactions', :view]
-                  data = transactions(params)
-                  TransactionsView.new(
-                    new_transaction_interaction: interactions[:new_transaction],
-                    accounts: accounts,
-                    data: data,
-                    params: params,
-                    interactions: interactions
-                  )
+                  transactions_view(params)
                 when ['/test/transactions/new', :view]
-                  CreateTransactionView.new(
-                    interactions: interactions,
-                    accounts: accounts
-                  )
+                  create_transaction_view
+                when ['/test/transactions/:id', :delete]
+                  delete_transaction(params)
+
+                  transactions_view(params)
                 else
                   raise "Attempted to execute unknown interaction: #{interaction[:name]}"
                 end
@@ -309,6 +301,24 @@ module PersonalFinance
     end
 
     private
+
+    def transactions_view(params)
+      data = transactions(params)
+      TransactionsView.new(
+        new_transaction_interaction: interactions[:new_transaction],
+        accounts: accounts,
+        data: data,
+        params: params,
+        interactions: interactions
+      )
+    end
+
+    def create_transaction_view
+      CreateTransactionView.new(
+        interactions: interactions,
+        accounts: accounts
+      )
+    end
 
     def log(msg)
       puts msg if @log_level == :verbose

@@ -4,15 +4,12 @@ require_relative '../../view'
 
 class PlannedTransactionTableView
   include View
-  attr_reader :transactions, :tag_index
+  attr_reader :interactions, :transactions, :tag_index
 
-  def initialize(transactions:, tag_index:)
+  def initialize(interactions:, transactions:, tag_index:)
+    @interactions = interactions
     @transactions = transactions
     @tag_index = tag_index
-  end
-
-  def get_binding
-    binding
   end
 
   def template

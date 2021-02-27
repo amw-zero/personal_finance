@@ -29,6 +29,7 @@ describe 'Viewing Transactions within a Period' do
     view = test_app.execute(interaction, {})
     expect(ErbRenderer.new(view).render).to_not be_nil
 
+    # Create transaction
     interaction = test_app.interactions[:create_transaction]
     params = interaction[:fields].map do |field|
       value = case field[:type]
@@ -58,5 +59,14 @@ describe 'Viewing Transactions within a Period' do
     expect(created_transaction.attributes.except(:id)).to eq(expected_transaction.attributes)
     expect(created_transactions.count).to eq(1)
     expect(ErbRenderer.new(view).render).to_not be_nil
+
+    # Delete transaction
+    deleted_id = after_transactions.first.id
+    test_app.execute(test_app.interactions[:delete_transaction], { id: deleted_id })
+
+    deleted_transaction = test_app.all_transactions[:transactions].transactions.find do |t|
+      t.id == deleted_id
+    end
+    expect(deleted_transaction).to be_nil
   end
 end

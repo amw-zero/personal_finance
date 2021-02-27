@@ -64,9 +64,20 @@ module View
 
   def form_action(interaction)
     case interaction[:type]
-    when :create
+    when :create, :delete
       'POST'
     end
+  end
+
+  def delete_form(interaction, id, classes)
+    path = interaction[:name]
+    path.gsub(':id', id.to_s)
+    %(
+     <form action="#{path}" method="POST">
+       <button type="submit" class="button is-small is-danger #{classes}">Delete</button>
+       <input type="hidden" name="_method" value="DELETE">
+     </form>
+    )
   end
 
   def form_field(interaction, field_name)

@@ -181,8 +181,11 @@ module UseCase
       to_models(relation(:transaction_tag_sets), TransactionTagSet)
     end
 
-    def delete_transaction(id)
-      @persistence.delete(:transactions, relation(:transactions).restrict(id: id))
+    def delete_transaction(params)
+      @persistence.delete(
+        :transactions,
+        relation(:transactions).restrict(id: params[:id].to_i)
+      )
     end
 
     def tag_index
