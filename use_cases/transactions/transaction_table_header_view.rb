@@ -1,12 +1,13 @@
-class TransactionTableHeaderView
-  attr_reader :title
-  
-  def initialize(title:)
-    @title = title
-  end
+require_relative '../../view'
 
-  def get_binding
-    binding
+class TransactionTableHeaderView
+  include View
+  
+  attr_reader :title, :interactions
+  
+  def initialize(title:, interactions:)
+    @title = title
+    @interactions = interactions
   end
 
   def template

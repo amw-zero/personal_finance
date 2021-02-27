@@ -159,7 +159,7 @@ module PersonalFinance
   class Application
     extend Forwardable
     def_delegators :@data_interactor, :to_models, :relation
-    def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction, :tag_index
+    def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction, :create_transaction_from_params, :tag_index
 
     attr_reader :endpoints, :use_cases, :interactions
 
@@ -183,16 +183,20 @@ module PersonalFinance
           # Create "schema" type here using Dry::Struct?
           fields: [
             {
-              type: 'decimal',
-              name: 'amount'
+              type: :decimal,
+              name: :amount
             },
             {
-              type: 'string',
-              name: 'name'
+              type: :string,
+              name: :name
             },
+            {
+              type: :date,
+              name: :occurs_on
+            }
           ]
         },
-        view_transaction: {
+        view_transactions: {
           name: '/test/transactions',
           type: :view
         },
@@ -265,8 +269,17 @@ module PersonalFinance
     def execute(interaction, params = {})
       case [interaction[:name], interaction[:type]]
       when ['/test/transactions', :create]
-        create_transaction(**params)
-        TransactionsView.new(interactions[:new_transaction])
+        create_transaction_from_params(**params)
+        data = transactions({})
+        LayoutView.new(
+          TransactionsView.new(
+            new_transaction_interaction: interactions[:new_transaction],
+            accounts: accounts, 
+            data: data, 
+            params: {},
+            interactions: interactions
+          )
+        )
       when ['/test/transactions', :view]
         data = transactions(params)
         LayoutView.new(
@@ -274,11 +287,15 @@ module PersonalFinance
             new_transaction_interaction: interactions[:new_transaction],
             accounts: accounts, 
             data: data, 
-            params: params
+            params: params,
+            interactions: interactions,
           )
         )
       when ['/test/transactions/new', :view]
-        CreateTransactionView.new(interactions[:create_transaction])
+        CreateTransactionView.new(
+          interactions[:create_transaction], 
+          accounts: accounts
+        )
       else
         raise "Attempted to execute unknown interaction: #{interaction[:name]}"
       end

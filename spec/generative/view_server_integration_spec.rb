@@ -15,25 +15,45 @@ describe 'Viewing Transactions within a Period' do
 
   specify do
     test_app = test_application
-    starting_transactions = test_app.all_transactions.transactions
-
-    view = test_app.execute(test_app.interactions[:new_transaction], {})
-    interaction = view.create_transaction_interaction
+    starting_transactions = test_app.all_transactions[:transactions].transactions
     
-    params = interaction[:fields].map do |field|
-      case field[:type]
-      when 'decimal'
-        [field[:name].to_sym, 10.0]
-      when 'string'
-        [field[:name].to_sym, 'Test']
-      end
-    end.to_h
+    # test_app
+    #   .execute(test_app.interactions[:view_transactions])
+    #   .new_transaction
+    #   .execute({})
 
+    view = test_app.execute(test_app.interactions[:view_transactions])
+    expect(ErbRenderer.new(view).render).to_not be_nil
+
+    interaction = test_app.interactions[:new_transaction]
+    view = test_app.execute(interaction, {})
+    expect(ErbRenderer.new(view).render).to_not be_nil
+
+    interaction = test_app.interactions[:create_transaction]
+    params = interaction[:fields].map do |field|
+      value = case field[:type]
+      when :decimal
+        10.0
+      when :string
+        'Test'
+      when :date
+        '2020-01-03'
+      end
+
+      [field[:name], value]
+    end.to_h
     params.merge!({ account_id: 1, currency: :usd, recurrence_rule: 'Testing' })
 
-    new_transaction = test_app.execute(interaction, params)
 
-    expect(test_app.all_transactions.transactions).to eq(starting_transactions + [new_transaction])
+    view = test_app.execute(interaction, params)
+
+    after_transactions = test_app.all_transactions[:transactions].transactions
+    created_transactions = after_transactions - starting_transactions
+    created_transaction = created_transactions.first
+    expected_transaction = PlannedTransaction.new(params)
+
+    expect(created_transaction.attributes.except(:id)).to eq(expected_transaction.attributes)
+    expect(created_transactions.count).to eq (1)
     expect(ErbRenderer.new(view).render).to_not be_nil
   end   
 end

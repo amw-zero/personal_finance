@@ -68,18 +68,26 @@
     <% end %>
   </div>
   
-  <!-- Add tables -->
-
   <div class="column">
     <% if @page == :transactions_schedule %>
-      <%= render(TransactionTableHeaderView.new(title: 'Scheduled Transactions')) %>
+      <%= render(
+        TransactionTableHeaderView.new(
+          title: 'Scheduled Transactions', 
+          interactions: interactions,
+          )
+        ) %>
       <% if data[:transactions].first.respond_to?(:incomes) %>
         <%= render(TransactionsByPayPeriodView.new(pay_periods: data[:transactions])) %>
       <% else %>
         <%= render(TransactionsByMonthView.new(periods: data[:transactions])) %>
       <% end %>
     <% else%>
-      <%= render(TransactionTableHeaderView.new(title: 'Recurring Transactions')) %>
+      <%= render(
+        TransactionTableHeaderView.new(
+          title: 'Recurring Transactions',
+          interactions: interactions
+        )
+       ) %>
       <%= render(PlannedTransactionTableView.new(transactions: data[:transactions].transactions, tag_index: data[:tag_index])) %>
     <% end %>
   </div>
