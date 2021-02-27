@@ -267,40 +267,36 @@ module PersonalFinance
     end
 
     def execute(interaction, params = {})
-      case [interaction[:name], interaction[:type]]
-      when ['/test/transactions', :create]
-        create_transaction_from_params(**params)
-        data = transactions({})
-        LayoutView.new(
-          TransactionsView.new(
-            new_transaction_interaction: interactions[:new_transaction],
-            accounts: accounts, 
-            data: data, 
-            params: {},
-            interactions: interactions
-          )
-        )
-      when ['/test/transactions', :view]
-        data = transactions(params)
-        LayoutView.new(
-          TransactionsView.new(
-            new_transaction_interaction: interactions[:new_transaction],
-            accounts: accounts, 
-            data: data, 
-            params: params,
-            interactions: interactions,
-          )
-        )
-      when ['/test/transactions/new', :view]
-        LayoutView.new(
-          CreateTransactionView.new(
-            interactions[:create_transaction], 
-            accounts: accounts
-          )
-        )
-      else
-        raise "Attempted to execute unknown interaction: #{interaction[:name]}"
-      end
+      content = case [interaction[:name], interaction[:type]]
+              when ['/test/transactions', :create]
+                create_transaction_from_params(**params)
+                data = transactions({})
+                TransactionsView.new(
+                  new_transaction_interaction: interactions[:new_transaction],
+                  accounts: accounts, 
+                  data: data, 
+                  params: {},
+                  interactions: interactions
+                )
+              when ['/test/transactions', :view]
+                data = transactions(params)
+                TransactionsView.new(
+                  new_transaction_interaction: interactions[:new_transaction],
+                  accounts: accounts, 
+                  data: data, 
+                  params: params,
+                  interactions: interactions,
+                )
+              when ['/test/transactions/new', :view]
+                CreateTransactionView.new(
+                  interactions[:create_transaction], 
+                  accounts: accounts
+                )
+              else
+                raise "Attempted to execute unknown interaction: #{interaction[:name]}"
+              end
+              
+      LayoutView.new(content)
     end
 
     def create_transaction_view
