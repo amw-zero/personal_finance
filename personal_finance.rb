@@ -280,7 +280,7 @@ module PersonalFinance
     end
 
     def execute(interaction, params = {})
-      content = case [interaction[:name], interaction[:type]]
+      result = case [interaction[:name], interaction[:type]]
                 when ['/test/transactions', :create]
                   create_transaction_from_params(params)
 
@@ -292,12 +292,18 @@ module PersonalFinance
                 when ['/test/transactions/:id', :delete]
                   delete_transaction(params)
 
-                  transactions_view(params)
+                  interactions[:view_transactions]
                 else
                   raise "Attempted to execute unknown interaction: #{interaction[:name]}"
                 end
 
-      LayoutView.new(content)
+      if result.is_a?(Hash)
+        interaction = result
+        interaction
+      else
+        content = result
+        LayoutView.new(content)
+      end
     end
 
     private

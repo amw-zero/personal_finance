@@ -51,18 +51,19 @@ end
 application.interactions.each_value do |interaction|
   method = {
     create: :post,
-    view: :get
+    view: :get,
+    delete: :delete,
   }[interaction[:type]]
 
   send(method, interaction[:name]) do
-    ErbRenderer.new(application.execute(interaction, params)).render
-    # result = application.execute(interaction, params)
-    # case result
-    # when ViewResult
-    #   ErbRenderer.new(result.view).render
-    # when RedirectResult
-    #   redirect_to result.path
-    # end
+    result = application.execute(interaction, params)
+
+    # Returning an Interaction redirects to it
+    if result.is_a?(Hash)
+      redirect result[:name]
+    else
+      ErbRenderer.new(result).render
+    end
   end
 end
 

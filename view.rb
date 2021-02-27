@@ -71,7 +71,7 @@ module View
 
   def delete_form(interaction, id, classes)
     path = interaction[:name]
-    path.gsub(':id', id.to_s)
+    path = path.gsub(':id', id.to_s)
     %(
      <form action="#{path}" method="POST">
        <button type="submit" class="button is-small is-danger #{classes}">Delete</button>
