@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require_relative '../../view'
 
 class TransactionFiltersTagsView
   attr_reader :params, :tag_index, :accounts
 
-  def initialize(params:, tag_index:, accounts:)    
+  def initialize(params:, tag_index:, accounts:)
     @params = params
     @tag_index = tag_index
     @accounts = accounts

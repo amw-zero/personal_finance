@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 class TransactionsByMonthView
   attr_reader :periods
-  
+
   def initialize(periods:)
     @periods
   end

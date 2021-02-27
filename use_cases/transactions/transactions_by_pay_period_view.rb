@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 class TransactionsByPayPeriodView
   attr_reader :pay_periods
-  
+
   def initialize(pay_periods:)
     @pay_periods = pay_periods
   end

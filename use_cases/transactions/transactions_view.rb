@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative './transaction_filters_tags_view'
 require_relative './transaction_filters_tag_sets_view'
 require_relative './planned_transaction_table_view'
@@ -20,7 +22,7 @@ class TransactionsView
     @params = params
     @interactions = interactions
   end
-  
+
   def template
     File.read('use_cases/transactions/transactions_view.erb')
   end

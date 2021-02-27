@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../../view'
 
 class CreateTransactionView
@@ -12,5 +14,5 @@ class CreateTransactionView
 
   def template
     File.read('use_cases/transactions/create_transaction_view.erb')
-  end      
+  end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'erb'
 
 class ErbRenderer
@@ -15,11 +17,9 @@ module View
   def display_recurrence_rule(rule)
     parts = rule.split(';')
 
-    values = parts.reduce({}) do |values, param|
+    values = parts.each_with_object({}) do |param, values|
       name, value = param.split('=')
       values[name] = value
-
-      values
     end
 
     days = {
@@ -36,30 +36,30 @@ module View
 
     if values.keys.include?('INTERVAL')
       freq_str, on = case frequency
-                when 'MONTHLY'
-                  if frequency == 1
-                    ['month', values['BYMONTHDAY']]
-                  else
-                    ['months', values['BYMONTHDAY']]
-                  end
-                when 'WEEKLY'
-                  if frequency == 1
-                    ['week', values['BYDAY']]
-                  else
-                    ['weeks', days[values['BYDAY']]]
-                  end
-                end
+                     when 'MONTHLY'
+                       if frequency == 1
+                         ['month', values['BYMONTHDAY']]
+                       else
+                         ['months', values['BYMONTHDAY']]
+                       end
+                     when 'WEEKLY'
+                       if frequency == 1
+                         ['week', values['BYDAY']]
+                       else
+                         ['weeks', days[values['BYDAY']]]
+                       end
+                     end
       "Every #{values['INTERVAL']} #{freq_str} on #{on}"
     else
       freq_str, on = case frequency
-                        when 'MONTHLY'
-                          ['month', values['BYMONTHDAY']]
-                        when 'WEEKLY'
-                          ['week', days[values['BYDAY']]]
-                        end
+                     when 'MONTHLY'
+                       ['month', values['BYMONTHDAY']]
+                     when 'WEEKLY'
+                       ['week', days[values['BYDAY']]]
+                     end
 
       "Every #{freq_str} on #{on}"
-    end    
+    end
   end
 
   def form_action(interaction)
@@ -72,29 +72,27 @@ module View
   def form_field(interaction, field_name)
     field = interaction[:fields].find { |f| f[:name] == field_name }
     type = case field[:type]
-          when :string
-            'text'
-          when :decimal
-            'number'
-          when :date
-            'date'
-          end
+           when :string
+             'text'
+           when :decimal
+             'number'
+           when :date
+             'date'
+           end
 
-    
     input = case field[:type]
             when :decimal
-              %{ <input class="input" type="#{type}" name="#{field_name}" step="0.01" /> }
+              %( <input class="input" type="#{type}" name="#{field_name}" step="0.01" /> )
             else
-              %{ <input class="input" type="#{type}" name="#{field_name}" /> }
+              %( <input class="input" type="#{type}" name="#{field_name}" /> )
             end
 
-
-    %{ 
+    %(
       <div class="field">
         <label class="label" for="#{field_name}">#{field_name}</label>
         #{input}
       </div>
-     }
+     )
   end
 
   def get_binding

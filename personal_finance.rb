@@ -159,7 +159,8 @@ module PersonalFinance
   class Application
     extend Forwardable
     def_delegators :@data_interactor, :to_models, :relation
-    def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction, :create_transaction_from_params, :tag_index
+    def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction,
+                   :create_transaction_from_params, :tag_index
 
     attr_reader :endpoints, :use_cases, :interactions
 
@@ -276,33 +277,33 @@ module PersonalFinance
 
     def execute(interaction, params = {})
       content = case [interaction[:name], interaction[:type]]
-              when ['/test/transactions', :create]
-                create_transaction_from_params(params)
-                data = transactions({})
-                TransactionsView.new(
-                  new_transaction_interaction: interactions[:new_transaction],
-                  accounts: accounts, 
-                  data: data, 
-                  params: {},
-                  interactions: interactions
-                )
-              when ['/test/transactions', :view]
-                data = transactions(params)
-                TransactionsView.new(
-                  new_transaction_interaction: interactions[:new_transaction],
-                  accounts: accounts, 
-                  data: data, 
-                  params: params,
-                  interactions: interactions,
-                )
-              when ['/test/transactions/new', :view]
-                CreateTransactionView.new(
-                  interactions: interactions, 
-                  accounts: accounts
-                )
-              else
-                raise "Attempted to execute unknown interaction: #{interaction[:name]}"
-              end
+                when ['/test/transactions', :create]
+                  create_transaction_from_params(params)
+                  data = transactions({})
+                  TransactionsView.new(
+                    new_transaction_interaction: interactions[:new_transaction],
+                    accounts: accounts,
+                    data: data,
+                    params: {},
+                    interactions: interactions
+                  )
+                when ['/test/transactions', :view]
+                  data = transactions(params)
+                  TransactionsView.new(
+                    new_transaction_interaction: interactions[:new_transaction],
+                    accounts: accounts,
+                    data: data,
+                    params: params,
+                    interactions: interactions
+                  )
+                when ['/test/transactions/new', :view]
+                  CreateTransactionView.new(
+                    interactions: interactions,
+                    accounts: accounts
+                  )
+                else
+                  raise "Attempted to execute unknown interaction: #{interaction[:name]}"
+                end
 
       LayoutView.new(content)
     end

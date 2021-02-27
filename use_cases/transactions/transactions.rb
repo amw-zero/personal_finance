@@ -87,14 +87,14 @@ module UseCase
         amount: params[:amount].to_f,
         currency: params[:currency].to_sym,
         recurrence_rule: params[:recurrence_rule],
-        occurs_on: occurs_on,
+        occurs_on: occurs_on
       )
     end
 
     def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:, occurs_on: Date.today)
       # This is to be able to start the recurrence rule in the past, so that
       # the transaction appears if you display months in the past
-      occurs_on = occurs_on || Date.today
+      occurs_on ||= Date.today
       one_thousand_weeks = (7 * 1_000)
       PlannedTransaction.new(
         name: name,
@@ -197,10 +197,10 @@ module UseCase
     def partition_transactions_by_month(transactions, in_period:)
       raise if in_period.begin.year != in_period.end.year
 
-      months = in_period.begin.month.upto(in_period.end.month + 1).with_index.map do |month, i|
+      months = in_period.begin.month.upto(in_period.end.month + 1).with_index.map do |month, _i|
         year_offset = month / 12
 
-        Date.new(in_period.begin.year + year_offset, month % 12 == 0 ? 12 : month % 12, 1)
+        Date.new(in_period.begin.year + year_offset, (month % 12).zero? ? 12 : month % 12, 1)
       end
       periods = months.each_cons(2).map { |dates| Range.new(*dates, true) }
       periods[-1] = periods[-1].begin..periods[-1].end

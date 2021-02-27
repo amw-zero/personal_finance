@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 class TransactionFiltersTagSetsView
   attr_reader :params, :tag_sets
-  
+
   def initialize(params:, tag_sets:)
     @params = params
     @tag_sets = tag_sets

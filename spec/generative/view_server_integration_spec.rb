@@ -16,7 +16,7 @@ describe 'Viewing Transactions within a Period' do
   specify do
     test_app = test_application
     starting_transactions = test_app.all_transactions[:transactions].transactions
-    
+
     # test_app
     #   .execute(test_app.interactions[:view_transactions])
     #   .new_transaction
@@ -32,18 +32,17 @@ describe 'Viewing Transactions within a Period' do
     interaction = test_app.interactions[:create_transaction]
     params = interaction[:fields].map do |field|
       value = case field[:type]
-      when :decimal
-        10.0
-      when :string
-        'Test'
-      when :date
-        '2020-01-03'
-      end
+              when :decimal
+                10.0
+              when :string
+                'Test'
+              when :date
+                '2020-01-03'
+              end
 
       [field[:name], value]
     end.to_h
     params.merge!({ account_id: 1, currency: :usd, recurrence_rule: 'Testing' })
-
 
     view = test_app.execute(interaction, params)
 
@@ -53,7 +52,7 @@ describe 'Viewing Transactions within a Period' do
     expected_transaction = PlannedTransaction.new(params)
 
     expect(created_transaction.attributes.except(:id)).to eq(expected_transaction.attributes)
-    expect(created_transactions.count).to eq (1)
+    expect(created_transactions.count).to eq(1)
     expect(ErbRenderer.new(view).render).to_not be_nil
-  end   
+  end
 end

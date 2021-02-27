@@ -48,7 +48,7 @@ get '/transactions/:id/tags/create' do
   erb :transaction_tag_form
 end
 
-application.interactions.values.each do |interaction|
+application.interactions.each_value do |interaction|
   method = {
     create: :post,
     view: :get
@@ -108,11 +108,9 @@ helpers do
   def display_recurrence_rule(rule)
     parts = rule.split(';')
 
-    values = parts.reduce({}) do |values, param|
+    values = parts.each_with_object({}) do |param, values|
       name, value = param.split('=')
       values[name] = value
-
-      values
     end
 
     days = {
@@ -129,27 +127,27 @@ helpers do
 
     if values.keys.include?('INTERVAL')
       freq_str, on = case frequency
-                 when 'MONTHLY'
-                  if frequency == 1
-                    ['month', values['BYMONTHDAY']]
-                  else
-                    ['months', values['BYMONTHDAY']]
-                  end
-                 when 'WEEKLY'
-                   if frequency == 1
-                    ['week', values['BYDAY']]
-                   else
-                    ['weeks', days[values['BYDAY']]]
-                   end
-                 end
+                     when 'MONTHLY'
+                       if frequency == 1
+                         ['month', values['BYMONTHDAY']]
+                       else
+                         ['months', values['BYMONTHDAY']]
+                       end
+                     when 'WEEKLY'
+                       if frequency == 1
+                         ['week', values['BYDAY']]
+                       else
+                         ['weeks', days[values['BYDAY']]]
+                       end
+                     end
       "Every #{values['INTERVAL']} #{freq_str} on #{on}"
     else
       freq_str, on = case frequency
-                        when 'MONTHLY'
-                          ['month', values['BYMONTHDAY']]
-                        when 'WEEKLY'
-                          ['week', days[values['BYDAY']]]
-                        end
+                     when 'MONTHLY'
+                       ['month', values['BYMONTHDAY']]
+                     when 'WEEKLY'
+                       ['week', days[values['BYDAY']]]
+                     end
 
       "Every #{freq_str} on #{on}"
     end

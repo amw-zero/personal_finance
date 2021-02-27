@@ -13,7 +13,7 @@ describe 'Viewing Transactions within a Period' do
     # TODO: Meta-tests. If an account isn't created here, a transaction never will be,
     # and the test will always pass
 
-    # Model after todo-subsecond. 
+    # Model after todo-subsecond.
     # Create "Assemblies" where I can test everything in memory,
     # or end to end depending on assembly. Same test.
     test_actions = [
@@ -42,33 +42,33 @@ describe 'Viewing Transactions within a Period' do
       end_date = any gen_date.call(greater_than: start_date), name: 'End Date'
 
       params = any(element_of([
-        {
-          start_date: start_date.to_s,
-          end_date: end_date.to_s
-        },
-        {
-          date_period: 'current_month'
-        },
-        {
-          date_period: 'current_year'
-        },
-      ]), name: 'Params')
+                                {
+                                  start_date: start_date.to_s,
+                                  end_date: end_date.to_s
+                                },
+                                {
+                                  date_period: 'current_month'
+                                },
+                                {
+                                  date_period: 'current_year'
+                                }
+                              ]), name: 'Params')
 
       period = if params[:start_date] && params[:end_date]
-                  start_date..end_date
-                elsif params[:date_period] == 'current_month'
-                  today = Date.today
-                  first = Date.new(today.year, today.month, 1)
-                  last = Date.new(today.year, today.month + 1, 1) - 1
+                 start_date..end_date
+               elsif params[:date_period] == 'current_month'
+                 today = Date.today
+                 first = Date.new(today.year, today.month, 1)
+                 last = Date.new(today.year, today.month + 1, 1) - 1
 
-                  first..last
-                else
-                  today = Date.today
-                  new_years = Date.new(today.year, 1, 1)
-                  new_years_eve = Date.new(today.year, 12, 31)
+                 first..last
+               else
+                 today = Date.today
+                 new_years = Date.new(today.year, 1, 1)
+                 new_years_eve = Date.new(today.year, 12, 31)
 
-                  new_years..new_years_eve
-                end
+                 new_years..new_years_eve
+               end
 
       pay_periods = test_app.transactions(params)
 
@@ -93,13 +93,13 @@ describe 'Viewing Transactions within a Period' do
           end
         end
         .group_by { |transaction| transaction.planned_transaction.id }
-        .transform_values { |transactions| transactions.map { |t| t.date } }
+        .transform_values { |transactions| transactions.map(&:date) }
         .each do |transaction_id, occurrences|
           expect(occurrences.all? { |o| period.include?(o) }).to eq(true)
           expect(occurrences.map(&:to_s)).to eq(expected_occurrences[transaction_id])
         end
 
-        # Transactions are grouped by pay period
+      # Transactions are grouped by pay period
       # income_dates = d
       # incomes = all_transactions.select { |t| t.income? }
 
