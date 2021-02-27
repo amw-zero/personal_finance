@@ -292,9 +292,11 @@ module PersonalFinance
           )
         )
       when ['/test/transactions/new', :view]
-        CreateTransactionView.new(
-          interactions[:create_transaction], 
-          accounts: accounts
+        LayoutView.new(
+          CreateTransactionView.new(
+            interactions[:create_transaction], 
+            accounts: accounts
+          )
         )
       else
         raise "Attempted to execute unknown interaction: #{interaction[:name]}"
