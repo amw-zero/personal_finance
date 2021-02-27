@@ -49,7 +49,11 @@ describe 'Viewing Transactions within a Period' do
     after_transactions = test_app.all_transactions[:transactions].transactions
     created_transactions = after_transactions - starting_transactions
     created_transaction = created_transactions.first
-    expected_transaction = PlannedTransaction.new(params)
+
+    expected_params = params.dup
+    expected_params[:occurs_on] = Date.parse(expected_params[:occurs_on]) - 7 * 1000
+
+    expected_transaction = PlannedTransaction.new(expected_params)
 
     expect(created_transaction.attributes.except(:id)).to eq(expected_transaction.attributes)
     expect(created_transactions.count).to eq(1)
