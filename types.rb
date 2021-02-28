@@ -39,7 +39,7 @@ class PlannedTransaction < Dry::Struct
   def occurrences_within(period)
     start_date = period.begin.to_time
 
-    RRule.parse(recurrence_rule, dtstart: occurs_on.to_time, tzid: Time.now.getlocal.zone).between(
+    RRule.parse(recurrence_rule, dtstart: occurs_on.to_time, tzid: 'UTC').between(
       start_date,
       period.end.to_time
     )

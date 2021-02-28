@@ -10,9 +10,6 @@ describe 'Viewing Transactions within a Period' do
   include Hypothesis::Possibilities
 
   specify do
-    # TODO: Meta-tests. If an account isn't created here, a transaction never will be,
-    # and the test will always pass
-
     # Model after todo-subsecond.
     # Create "Assemblies" where I can test everything in memory,
     # or end to end depending on assembly. Same test.
@@ -27,7 +24,7 @@ describe 'Viewing Transactions within a Period' do
       test_actions,
       fresh_application: -> { test_application }
     ).check!(max_checks: 200) do |test_app|
-      all_transactions = test_app.all_transactions.transactions
+      all_transactions = test_app.all_transactions[:transactions].transactions
       transaction_count = all_transactions.count
       max_transaction_count = transaction_count if transaction_count > max_transaction_count
 

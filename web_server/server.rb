@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'sinatra'
-require 'ostruct'
 require_relative '../personal_finance'
 require_relative '../postgres/postgres_persistence'
 require_relative '../view'

@@ -37,13 +37,16 @@ module ApplicationActions
       date_offset = any integers(min: -500, max: 500)
       occurs_on = Date.today + date_offset
 
-      test_app.create_transaction(
-        name: any(strings),
-        account_id: account.id,
-        amount: amount.to_f,
-        currency: :usd,
-        recurrence_rule: rrule,
-        occurs_on: occurs_on
+      test_app.execute(
+        test_app.interactions[:create_transaction],
+        {
+          name: any(strings),
+          account_id: account.id.to_s,
+          amount: amount.to_f.to_s,
+          currency: :usd.to_s,
+          recurrence_rule: rrule,
+          occurs_on: occurs_on.to_s
+        }
       )
     when :create_tag
       return if test_app.all_transactions.transactions.empty?

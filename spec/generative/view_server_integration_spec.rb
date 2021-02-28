@@ -62,12 +62,13 @@ describe 'Viewing Transactions within a Period' do
 
     # Delete transaction
     deleted_id = after_transactions.first.id
-    view = test_app.execute(test_app.interactions[:delete_transaction], { id: deleted_id })
+    next_interaction = test_app.execute(test_app.interactions[:delete_transaction], { id: deleted_id })
 
     deleted_transaction = test_app.all_transactions[:transactions].transactions.find do |t|
       t.id == deleted_id
     end
     expect(deleted_transaction).to be_nil
+    view = test_app.execute(next_interaction, {})
     expect(ErbRenderer.new(view).render).to_not be_nil
   end
 end
