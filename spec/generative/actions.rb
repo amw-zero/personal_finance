@@ -83,9 +83,12 @@ module ApplicationActions
     include Hypothesis
     include Hypothesis::Possibilities
 
+    attr_reader :executed, :actions, :application_block
+
     def initialize(actions, fresh_application:)
       @actions = actions
       @application_block = fresh_application
+      @executed = []
     end
 
     def check!(max_checks: 1_000)
@@ -100,13 +103,12 @@ module ApplicationActions
           ),
           name: 'Actions'
         ).each do |action|
+          @executed << action
           ApplicationActions.execute(action, in_app: test_app)
         end
 
-        yield test_app
+        yield test_app, executed
       end
     end
-
-    attr_reader :actions, :application_block
   end
 end

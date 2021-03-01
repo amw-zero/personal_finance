@@ -15,7 +15,7 @@ application.interactions.each_value do |interaction|
   method = {
     create: :post,
     view: :get,
-    delete: :delete,
+    delete: :delete
   }[interaction[:type]]
 
   send(method, interaction[:name]) do

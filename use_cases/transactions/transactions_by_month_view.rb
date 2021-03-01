@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
+require_relative '../../view'
+
 class TransactionsByMonthView
+  include View
+
   attr_reader :periods
 
   def initialize(periods:)
-    @periods
-  end
-
-  def get_binding
-    binding
+    @periods = periods
   end
 
   def template

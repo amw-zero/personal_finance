@@ -209,6 +209,10 @@ module PersonalFinance
           name: '/test/transactions',
           type: :view
         },
+        view_transactions_schedule: {
+          name: '/test/transactions/schedule',
+          type: :view
+        },
         new_transaction: {
           name: '/test/transactions/new',
           type: :view
@@ -226,12 +230,6 @@ module PersonalFinance
 
     def create_account(name)
       @use_cases[:accounts].create_account(name)
-    end
-
-    def link_account(person:, account:)
-      LinkedAccount.new(person: person, account: account).tap do |la|
-        @linked_accounts << la
-      end
     end
 
     def tag_transaction(transaction_id, tag:)
@@ -261,14 +259,6 @@ module PersonalFinance
       @use_cases[:transactions]
     end
 
-    def cash_flow(account_id)
-      @use_cases[:transactions].cash_flow(account_id)
-    end
-
-    def transactions_for_tag_sets(tag_set_ids)
-      @use_cases[:transactions].transactions_for_tag_sets(tag_set_ids)
-    end
-
     def all_transaction_tag_sets
       @use_cases[:transactions].all_transaction_tag_sets
     end
@@ -281,40 +271,43 @@ module PersonalFinance
 
     def execute(interaction, params = {})
       result = case [interaction[:name], interaction[:type]]
-                when ['/test/transactions', :create]
-                  create_transaction_from_params(params)
+               when ['/test/transactions', :create]
+                 create_transaction_from_params(params)
 
-                  transactions_view({})
-                when ['/test/transactions', :view]
-                  transactions_view(params)
-                when ['/test/transactions/new', :view]
-                  create_transaction_view
-                when ['/test/transactions/:id', :delete]
-                  delete_transaction(params)
+                 transactions_view(:view_transactions, {})
+               when ['/test/transactions', :view]
+                 transactions_view(:view_transactions, params)
+               when ['/test/transactions/schedule', :view]
+                 transactions_view(:view_transactions_schedule, params, is_schedule: true)
+               when ['/test/transactions/new', :view]
+                 create_transaction_view
+               when ['/test/transactions/:id', :delete]
+                 delete_transaction(params)
 
-                  interactions[:view_transactions]
-                else
-                  raise "Attempted to execute unknown interaction: #{interaction[:name]}"
-                end
+                 interactions[:view_transactions]
+               else
+                 raise "Attempted to execute unknown interaction: #{interaction[:name]}"
+               end
 
       if result.is_a?(Hash)
-        interaction = result
-        interaction
+        result
+
       else
         content = result
-        LayoutView.new(content)
+        LayoutView.new(content, interactions: interactions)
       end
     end
 
     private
 
-    def transactions_view(params)
-      data = transactions(params)
+    def transactions_view(interaction_name, params, is_schedule: false)
+      data = transactions(params, is_schedule: is_schedule)
       TransactionsView.new(
         new_transaction_interaction: interactions[:new_transaction],
         accounts: accounts,
         data: data,
         params: params,
+        page: interaction_name,
         interactions: interactions
       )
     end

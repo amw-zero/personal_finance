@@ -23,7 +23,7 @@ describe 'Viewing Transactions within a Period' do
     ApplicationActions::Sequences.new(
       test_actions,
       fresh_application: -> { test_application }
-    ).check!(max_checks: 200) do |test_app|
+    ).check!(max_checks: 200) do |test_app, _executed|
       all_transactions = test_app.all_transactions[:transactions].transactions
       transaction_count = all_transactions.count
       max_transaction_count = transaction_count if transaction_count > max_transaction_count
@@ -48,18 +48,20 @@ describe 'Viewing Transactions within a Period' do
                                 },
                                 {
                                   date_period: 'current_year'
-                                }
+                                },
+                                {}
                               ]), name: 'Params')
 
       period = if params[:start_date] && params[:end_date]
                  start_date..end_date
-               elsif params[:date_period] == 'current_month'
+               elsif params[:date_period] == 'current_month' || params.empty?
                  today = Date.today
                  first = Date.new(today.year, today.month, 1)
                  last = Date.new(today.year, today.month + 1, 1) - 1
 
                  first..last
                else
+                 params[:date_period] == 'current_year'
                  today = Date.today
                  new_years = Date.new(today.year, 1, 1)
                  new_years_eve = Date.new(today.year, 12, 31)
@@ -67,7 +69,11 @@ describe 'Viewing Transactions within a Period' do
                  new_years..new_years_eve
                end
 
-      pay_periods = test_app.transactions(params)
+      view = test_app.execute(test_app.interactions[:view_transactions_schedule], params)
+
+      expect(ErbRenderer.new(view).render).to_not be_nil
+
+      pay_periods = test_app.transactions(params, is_schedule: true)[:transactions]
 
       # Expected occurrences are what the rrule expansion says they should be
       expected_occurrences = all_transactions.map do |transaction|

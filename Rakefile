@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 def in_utc_timezone(cmd)
   "TZ=UTC #{cmd}"
 end

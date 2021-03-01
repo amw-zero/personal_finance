@@ -5,10 +5,11 @@ require_relative '../../view'
 class LayoutView
   include View
 
-  attr_reader :content
+  attr_reader :content, :interactions
 
-  def initialize(content)
+  def initialize(content, interactions:)
     @content = content
+    @interactions = interactions
   end
 
   def template

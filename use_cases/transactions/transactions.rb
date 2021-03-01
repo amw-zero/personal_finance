@@ -57,7 +57,6 @@ module UseCase
           page: :transactions_schedule,
           path: '/transactions/schedule',
           action: lambda do |params|
-            params = { date_period: 'current_month' } if params.keys.empty?
             {
               tag_index: tag_index,
               tag_sets: all_transaction_tag_sets,
@@ -108,7 +107,8 @@ module UseCase
       end
     end
 
-    def transactions(params)
+    def transactions(params, is_schedule: false)
+      params = { date_period: 'current_month' } if params.keys.empty? && is_schedule
       period = if params[:start_date] && !params[:start_date].empty? && params[:end_date] && !params[:end_date].empty?
                  Date.parse(params[:start_date])..Date.parse(params[:end_date])
                elsif params[:date_period] == 'current_year'
@@ -153,11 +153,15 @@ module UseCase
           end
         end.sort_by(&:date)
 
-        if applicable_transactions.any?(&:income?)
-          return partition_transactions_by_pay_period(applicable_transactions, in_period: period)
-        else
-          return partition_transactions_by_month(applicable_transactions, in_period: period)
-        end
+        periods = if applicable_transactions.any?(&:income?)
+                    partition_transactions_by_pay_period(applicable_transactions, in_period: period)
+                  else
+                    partition_transactions_by_month(applicable_transactions, in_period: period)
+                  end
+        return {
+          tag_index: tag_index,
+          transactions: periods
+        }
       end
 
       # Move non-transaction data up into Application

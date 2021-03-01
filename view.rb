@@ -14,6 +14,15 @@ class ErbRenderer
 end
 
 module View
+  def display_date_range(range)
+    start = range.begin
+    ending = range.end - 1
+
+    fmt = ->(d) { d.strftime('%b %e, %Y') }
+
+    "#{fmt.call(range.begin)} - #{fmt.call(range.end - 1)}"
+  end
+
   def display_recurrence_rule(rule)
     parts = rule.split(';')
 
