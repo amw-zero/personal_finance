@@ -14,27 +14,6 @@ module UseCase
       @data_interactor = DataInteractor.new(persistence)
     end
 
-    def name
-      :transactions
-    end
-
-    def endpoints
-      [
-        {
-          method: :get,
-          page: :transactions_tag_sets,
-          path: '/transactions/tag_sets',
-          action: lambda do |params|
-            {
-              tag_index: tag_index,
-              tag_sets: all_transaction_tag_sets,
-              transactions: transactions(params)
-            }
-          end
-        }
-      ]
-    end
-
     # TODO: Test from_params methods separately
     # Can simply call the method to check for type check errors.
     def create_transaction_from_params(params)
