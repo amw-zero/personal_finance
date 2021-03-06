@@ -31,7 +31,7 @@ module UseCase
               transactions: transactions(params)
             }
           end
-        },
+        }
       ]
     end
 

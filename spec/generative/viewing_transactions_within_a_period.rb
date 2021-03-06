@@ -99,7 +99,6 @@ describe 'Viewing Transactions within a Period' do
         .group_by { |transaction| transaction.planned_transaction.id }
         .transform_values { |transactions| transactions.map(&:date) }
         .each do |transaction_id, occurrences|
-
           binding.pry if occurrences.any? { |o| !period.include?(o) }
           binding.pry if occurrences.map(&:to_s) != expected_occurrences[transaction_id]
           expect(occurrences.all? { |o| period.include?(o) }).to eq(true)
