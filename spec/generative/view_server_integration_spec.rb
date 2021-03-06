@@ -2,6 +2,7 @@
 
 require_relative '../test_application'
 require_relative './actions'
+require_relative './interaction_params'
 require_relative '../../view'
 
 require 'hypothesis'
@@ -14,61 +15,61 @@ describe 'Viewing Transactions within a Period' do
   include Hypothesis::Possibilities
 
   specify do
-    test_app = test_application
-    starting_transactions = test_app.all_transactions[:transactions].transactions
+    test_actions = [
+      ApplicationActions::CREATE_ACCOUNT,
+      ApplicationActions::CREATE_TRANSACTION
+    ]
 
-    # test_app
-    #   .execute(test_app.interactions[:view_transactions])
-    #   .new_transaction
-    #   .execute({})
+    max_transaction_count = 0
 
-    view = test_app.execute(test_app.interactions[:view_transactions])
-    expect(ErbRenderer.new(view).render).to_not be_nil
+    ApplicationActions::Sequences.new(
+      test_actions,
+      fresh_application: -> { test_application }
+    ).check!(max_checks: 200) do |test_app, _executed|
+      starting_transactions = test_app.all_transactions[:transactions].transactions
 
-    interaction = test_app.interactions[:new_transaction]
-    view = test_app.execute(interaction, {})
-    expect(ErbRenderer.new(view).render).to_not be_nil
+      # test_app
+      #   .execute(test_app.interactions[:view_transactions])
+      #   .new_transaction
+      #   .execute({})
 
-    # Create transaction
-    interaction = test_app.interactions[:create_transaction]
-    params = interaction[:fields].map do |field|
-      value = case field[:type]
-              when :decimal
-                10.0
-              when :string
-                'Test'
-              when :date
-                '2020-01-03'
-              end
+      view = test_app.execute(test_app.interactions[:view_transactions])
+      expect(ErbRenderer.new(view).render).to_not be_nil
 
-      [field[:name], value]
-    end.to_h
-    params.merge!({ account_id: 1, currency: :usd, recurrence_rule: 'Testing' })
+      interaction = test_app.interactions[:new_transaction]
+      view = test_app.execute(interaction, {})
+      expect(ErbRenderer.new(view).render).to_not be_nil
 
-    view = test_app.execute(interaction, params)
+      # Create transaction
+      interaction = test_app.interactions[:create_transaction]
+      params = interaction_params(interaction)
+      params.merge!({ account_id: 1, currency: :usd, recurrence_rule: 'Testing' })
 
-    after_transactions = test_app.all_transactions[:transactions].transactions
-    created_transactions = after_transactions - starting_transactions
-    created_transaction = created_transactions.first
+      view = test_app.execute(interaction, params)
 
-    expected_params = params.dup
-    expected_params[:occurs_on] = Date.parse(expected_params[:occurs_on]) - 7 * 1000
+      after_transactions = test_app.all_transactions[:transactions].transactions
+      created_transactions = after_transactions - starting_transactions
+      created_transaction = created_transactions.first
 
-    expected_transaction = PlannedTransaction.new(expected_params)
+      expected_params = params.dup
+      expected_params[:occurs_on] = Date.parse(expected_params[:occurs_on]) - 7 * 1000
 
-    expect(created_transaction.attributes.except(:id)).to eq(expected_transaction.attributes)
-    expect(created_transactions.count).to eq(1)
-    expect(ErbRenderer.new(view).render).to_not be_nil
+      expected_transaction = PlannedTransaction.new(expected_params)
 
-    # Delete transaction
-    deleted_id = after_transactions.first.id
-    next_interaction = test_app.execute(test_app.interactions[:delete_transaction], { id: deleted_id })
+      expect(created_transaction.attributes.except(:id)).to eq(expected_transaction.attributes)
+      expect(created_transactions.count).to eq(1)
+      expect(ErbRenderer.new(view).render).to_not be_nil
 
-    deleted_transaction = test_app.all_transactions[:transactions].transactions.find do |t|
-      t.id == deleted_id
+      # Delete transaction
+      deleted_id = after_transactions.first.id
+      next_interaction = test_app.execute(test_app.interactions[:delete_transaction], { id: deleted_id })
+
+      deleted_transaction = test_app.all_transactions[:transactions].transactions.find do |t|
+        t.id == deleted_id
+      end
+      expect(deleted_transaction).to be_nil
+      view = test_app.execute(next_interaction, {})
+      expect(ErbRenderer.new(view).render).to_not be_nil
     end
-    expect(deleted_transaction).to be_nil
-    view = test_app.execute(next_interaction, {})
-    expect(ErbRenderer.new(view).render).to_not be_nil
   end
 end

@@ -2,6 +2,7 @@
 
 require_relative '../test_application'
 require_relative './actions'
+require_relative './interaction_params'
 
 require 'hypothesis'
 
@@ -32,7 +33,11 @@ describe 'Viewing Transactions within a Period' do
       view = test_app.execute(test_app.interactions[:new_transaction_tag], { id: transaction.id })
       ErbRenderer.new(view).render
 
-      test_app.execute(test_app.interactions[:tag_transaction], { transaction_id: transaction.id, tag: 'tag' })
+      interaction = test_app.interactions[:tag_transaction]
+      params = interaction_params(interaction)
+      params.merge!({ transaction_id: transaction.id })
+
+      test_app.execute(interaction, params)
     end
 
     expect(max_transaction_count).to be > 0
