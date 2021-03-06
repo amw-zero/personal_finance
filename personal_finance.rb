@@ -14,6 +14,7 @@ require_relative 'use_cases/transactions/transactions'
 require_relative 'use_cases/transactions/create_transaction_view'
 require_relative 'use_cases/transactions/transactions_view'
 require_relative 'use_cases/transactions/layout_view'
+require_relative 'use_cases/transaction_tags/transaction_tag_form_view'
 
 # Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
@@ -103,17 +104,6 @@ module PersonalFinance
         @data_interactor = DataInteractor.new(persistence)
       end
 
-      def endpoints
-        [
-          {
-            method: :post,
-            path: '/transaction_tags',
-            return: '/transactions',
-            action: ->(params) { tag_transaction(params[:transaction_id].to_i, tag: params[:name]) }
-          }
-        ]
-      end
-
       def tag_transaction(transaction_id, tag:)
         TransactionTag.new(
           transaction_id: transaction_id,
@@ -179,7 +169,7 @@ module PersonalFinance
       }
       @interactions = {
         create_transaction: {
-          name: '/test/transactions',
+          name: '/transactions',
           type: :create,
           # Create "schema" type here using Dry::Struct?
           fields: [
@@ -206,20 +196,34 @@ module PersonalFinance
           ]
         },
         view_transactions: {
-          name: '/test/transactions',
+          name: '/transactions',
           type: :view
         },
         view_transactions_schedule: {
-          name: '/test/transactions/schedule',
+          name: '/transactions/schedule',
           type: :view
         },
         new_transaction: {
-          name: '/test/transactions/new',
+          name: '/transactions/new',
           type: :view
         },
         delete_transaction: {
-          name: '/test/transactions/:id',
+          name: '/transactions/:id',
           type: :delete
+        },
+        tag_transaction: {
+          name: '/transaction_tags',
+          type: :create,
+          fields: [
+            {
+              type: :string,
+              name: :name
+            }
+          ]
+        },
+        new_transaction_tag: {
+          name: '/transactions/:id/tags/create',
+          type: :view,
         }
       }
     end
@@ -271,18 +275,24 @@ module PersonalFinance
 
     def execute(interaction, params = {})
       result = case [interaction[:name], interaction[:type]]
-               when ['/test/transactions', :create]
+               when ['/transactions', :create]
                  create_transaction_from_params(params)
 
                  transactions_view(:view_transactions, {})
-               when ['/test/transactions', :view]
+               when ['/transactions', :view]
                  transactions_view(:view_transactions, params)
-               when ['/test/transactions/schedule', :view]
+               when ['/transactions/schedule', :view]
                  transactions_view(:view_transactions_schedule, params, is_schedule: true)
-               when ['/test/transactions/new', :view]
+               when ['/transactions/new', :view]
                  create_transaction_view
-               when ['/test/transactions/:id', :delete]
+               when ['/transactions/:id', :delete]
                  delete_transaction(params)
+
+                 interactions[:view_transactions]
+               when ['/transactions/:id/tags/create', :view]
+                transaction_tag_form(params)
+               when ['/transaction_tags', :create]
+                 tag_transaction(params[:transaction_id].to_i, tag: params[:name])
 
                  interactions[:view_transactions]
                else
@@ -316,6 +326,13 @@ module PersonalFinance
       CreateTransactionView.new(
         interactions: interactions,
         accounts: accounts
+      )
+    end
+
+    def transaction_tag_form(params)
+      TransactionTagFormView.new(
+        transaction: all_transactions[:transactions].transactions.find { |t| t.id == params[:id].to_i },
+        interactions: interactions,
       )
     end
 

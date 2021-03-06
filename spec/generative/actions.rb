@@ -52,7 +52,10 @@ module ApplicationActions
       return if test_app.all_transactions[:transactions].transactions.empty?
 
       transaction = any(element_of(test_app.all_transactions[:transactions].transactions))
-      test_app.tag_transaction(transaction.id, tag: any(strings))
+      test_app.execute(
+        test_app.interactions[:tag_transaction],
+        { transaction_id: transaction.id, tag: any(strings) }
+      )
     when :create_tag_set
       # params = {
       #   transaction_tag: [String]
