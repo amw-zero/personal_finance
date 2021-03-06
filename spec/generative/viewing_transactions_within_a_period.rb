@@ -87,6 +87,7 @@ describe 'Viewing Transactions within a Period' do
       end.to_h
 
       # All transactions get expanded into their proper occurrences
+      require 'pry'
       pay_periods
         .flat_map do |period|
           if period.is_a?(Period)
@@ -98,6 +99,9 @@ describe 'Viewing Transactions within a Period' do
         .group_by { |transaction| transaction.planned_transaction.id }
         .transform_values { |transactions| transactions.map(&:date) }
         .each do |transaction_id, occurrences|
+
+          binding.pry if occurrences.any? { |o| !period.include?(o) }
+          binding.pry if occurrences.map(&:to_s) != expected_occurrences[transaction_id]
           expect(occurrences.all? { |o| period.include?(o) }).to eq(true)
           expect(occurrences.map(&:to_s)).to eq(expected_occurrences[transaction_id])
         end

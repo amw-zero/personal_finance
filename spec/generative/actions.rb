@@ -49,9 +49,9 @@ module ApplicationActions
         }
       )
     when :create_tag
-      return if test_app.all_transactions.transactions.empty?
+      return if test_app.all_transactions[:transactions].transactions.empty?
 
-      transaction = any(element_of(test_app.all_transactions.transactions))
+      transaction = any(element_of(test_app.all_transactions[:transactions].transactions))
       test_app.tag_transaction(transaction.id, tag: any(strings))
     when :create_tag_set
       # params = {
