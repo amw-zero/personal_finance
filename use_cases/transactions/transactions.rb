@@ -21,26 +21,6 @@ module UseCase
     def endpoints
       [
         {
-          method: :post,
-          path: '/transactions',
-          action: lambda do |params|
-            create_transaction_from_params(params)
-          end
-        },
-        {
-          method: :get,
-          # Coupling here - /transactions is referred to in view
-          # It should reference the use case path probably
-          # Try and change this route and see what breaks
-          path: '/transactions',
-          action: lambda do |params|
-            {
-              tag_index: tag_index,
-              transactions: transactions(params)
-            }
-          end
-        },
-        {
           method: :get,
           page: :transactions_tag_sets,
           path: '/transactions/tag_sets',
@@ -52,27 +32,6 @@ module UseCase
             }
           end
         },
-        {
-          method: :get,
-          page: :transactions_schedule,
-          path: '/transactions/schedule',
-          action: lambda do |params|
-            {
-              tag_index: tag_index,
-              tag_sets: all_transaction_tag_sets,
-              transactions: transactions(params)
-            }
-          end
-        },
-        # TODO: Simulate HTTP in tests and test proper endpoints / paths / actions
-        {
-          method: :delete,
-          return: '/transactions',
-          path: '/transactions/:id',
-          action: lambda do |params|
-            delete_transaction(params[:id])
-          end
-        }
       ]
     end
 
