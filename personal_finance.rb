@@ -123,17 +123,6 @@ module PersonalFinance
         @data_interactor = DataInteractor.new(persistence)
       end
 
-      def endpoints
-        [
-          {
-            method: :post,
-            path: '/transaction_tag_sets',
-            return: '/transactions',
-            action: ->(params) { create_transaction_tag_set(params) }
-          }
-        ]
-      end
-
       def create_transaction_tag_set(params)
         title = params[:title]
         tags = params[:transaction_tag]

@@ -92,9 +92,7 @@ module UseCase
             intersection: params[:intersection] == 'true'
           )
         elsif params[:transaction_tag_set]
-          return TransactionSet.new(transactions: []) if params[:transaction_tag_set].empty?
-
-          transactions_for_tag_sets(params[:transaction_tag_set])
+          params[:transaction_tag_set].empty? ? [] : transactions_for_tag_sets(params[:transaction_tag_set])
         elsif params[:account]
           cash_flow(params[:account].to_i)
         else

@@ -32,12 +32,13 @@ describe 'Transactions by Tag Set' do
       transactions = test_app
                      .transactions({
                                      transaction_tag_set: tag_set_subject
-                                   }).transactions
+                                   })[:transactions]
+
       tags = tag_set_subject.flat_map(&:tags)
 
       expect(
         Propositions::FilteredTransactionsRespectTags(
-          transactions,
+          transactions.transactions,
           tags,
           test_app
         )

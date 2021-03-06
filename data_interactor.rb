@@ -19,8 +19,9 @@ class DataInteractor
       end
     when 'TransactionTagSet'
       relation.map do |data|
-        data[:tags] = data[:tags].split(',')
-        model_klass.new(data)
+        attrs = data.dup
+        attrs[:tags] = attrs[:tags].split(',')
+        model_klass.new(attrs)
       end
     else
       relation.map do |data|

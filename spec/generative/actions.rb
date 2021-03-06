@@ -54,7 +54,7 @@ module ApplicationActions
       transaction = any(element_of(test_app.all_transactions[:transactions].transactions))
       test_app.execute(
         test_app.interactions[:tag_transaction],
-        { transaction_id: transaction.id, tag: any(strings) }
+        { transaction_id: transaction.id, name: any(strings) }
       )
     when :create_tag_set
       # params = {
