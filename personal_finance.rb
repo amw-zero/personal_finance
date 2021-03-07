@@ -67,34 +67,6 @@ module PersonalFinance
       end
     end
 
-    class People
-      extend Forwardable
-      def_delegators :@data_interactor, :to_models, :relation
-
-      def initialize(persistence: MemoryPersistence.new)
-        @persistence = persistence
-        @data_interactor = DataInteractor.new(persistence)
-      end
-
-      def endpoints
-        [
-          {
-            method: :post,
-            path: '/people',
-            action: lambda do |params|
-              create_person(params[:name])
-            end
-          }
-        ]
-      end
-
-      def create_person(name)
-        Person.new(name: name).tap do |p|
-          @persistence.persist(:people, p.attributes)
-        end
-      end
-    end
-
     class TransactionTags
       extend Forwardable
       def_delegators :@data_interactor, :to_models, :relation
