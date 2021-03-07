@@ -15,6 +15,7 @@ require_relative 'use_cases/transactions/create_transaction_view'
 require_relative 'use_cases/transactions/transactions_view'
 require_relative 'use_cases/transactions/layout_view'
 require_relative 'use_cases/transaction_tags/transaction_tag_form_view'
+require_relative 'use_cases/transaction_tags/transaction_tags'
 
 # Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
@@ -66,26 +67,7 @@ module PersonalFinance
         )
       end
     end
-
-    class TransactionTags
-      extend Forwardable
-      def_delegators :@data_interactor, :to_models, :relation
-
-      def initialize(persistence: MemoryPersistence.new)
-        @persistence = persistence
-        @data_interactor = DataInteractor.new(persistence)
-      end
-
-      def tag_transaction(transaction_id, tag:)
-        TransactionTag.new(
-          transaction_id: transaction_id,
-          name: tag
-        ).tap do |i|
-          @persistence.persist(:transaction_tags, i.attributes)
-        end
-      end
-    end
-
+    
     class TransactionTagSets
       extend Forwardable
       def_delegators :@data_interactor, :to_models, :relation
@@ -123,9 +105,8 @@ module PersonalFinance
       @log_level = log_level ? log_level.to_sym : :quiet
       @use_cases = {
         accounts: UseCase::Accounts.new(persistence: persistence),
-        people: UseCase::People.new(persistence: persistence),
         transactions: ::UseCase::Transactions.new(persistence: persistence),
-        transaction_tags: UseCase::TransactionTags.new(persistence: persistence),
+        transaction_tags: ::UseCase::TransactionTags.new(persistence: persistence),
         transaction_tag_sets: UseCase::TransactionTagSets.new(persistence: persistence)
       }
       @interactions = {
