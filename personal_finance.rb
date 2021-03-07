@@ -13,9 +13,14 @@ require_relative 'types'
 require_relative 'use_cases/transactions/transactions'
 require_relative 'use_cases/transactions/create_transaction_view'
 require_relative 'use_cases/transactions/transactions_view'
+
+# TODO: This doesn't belong in Transactions use case
 require_relative 'use_cases/transactions/layout_view'
+
 require_relative 'use_cases/transaction_tags/transaction_tag_form_view'
 require_relative 'use_cases/transaction_tags/transaction_tags'
+
+require_relative 'use_cases/transaction_tag_sets/transaction_tag_sets'
 
 # Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
@@ -67,25 +72,6 @@ module PersonalFinance
         )
       end
     end
-    
-    class TransactionTagSets
-      extend Forwardable
-      def_delegators :@data_interactor, :to_models, :relation
-
-      def initialize(persistence: MemoryPersistence.new)
-        @persistence = persistence
-        @data_interactor = DataInteractor.new(persistence)
-      end
-
-      def create_transaction_tag_set(params)
-        title = params[:title]
-        tags = params[:transaction_tag]
-        TransactionTagSet.new(title: title, tags: tags).tap do |t|
-          t.attributes[:tags] = t.attributes[:tags].join(',')
-          @persistence.persist(:transaction_tag_sets, t.attributes)
-        end
-      end
-    end
   end
 
   # The top-level Personal Finance application
@@ -94,6 +80,7 @@ module PersonalFinance
     def_delegators :@data_interactor, :to_models, :relation
     def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction,
                    :create_transaction_from_params, :tag_index
+    def_delegators :transaction_tags_use_case, :tag_transaction
 
     attr_reader :endpoints, :use_cases, :interactions
 
@@ -107,7 +94,7 @@ module PersonalFinance
         accounts: UseCase::Accounts.new(persistence: persistence),
         transactions: ::UseCase::Transactions.new(persistence: persistence),
         transaction_tags: ::UseCase::TransactionTags.new(persistence: persistence),
-        transaction_tag_sets: UseCase::TransactionTagSets.new(persistence: persistence)
+        transaction_tag_sets: ::UseCase::TransactionTagSets.new(persistence: persistence)
       }
       @interactions = {
         create_transaction: {
@@ -178,8 +165,8 @@ module PersonalFinance
       @use_cases[:accounts].create_account(name)
     end
 
-    def tag_transaction(transaction_id, tag:)
-      @use_cases[:transaction_tags].tag_transaction(transaction_id, tag: tag)
+    def transaction_tags_use_case
+      @use_cases[:transaction_tags]
     end
 
     def create_transaction_tag_set(params)
