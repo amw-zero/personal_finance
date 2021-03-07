@@ -2,7 +2,7 @@
 
 require_relative 'test_application'
 
-describe 'Viewing cash flow' do
+xdescribe 'Viewing cash flow' do
   subject { test_application }
 
   let(:checking_account) { subject.create_account('Checking') }
