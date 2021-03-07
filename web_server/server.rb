@@ -29,5 +29,3 @@ application.interactions.each_value do |interaction|
     end
   end
 end
-
-

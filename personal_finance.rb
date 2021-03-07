@@ -10,11 +10,20 @@ require 'rrule'
 require_relative 'data_interactor'
 require_relative 'memory_persistence'
 require_relative 'types'
+
+require_relative 'use_cases/accounts/accounts'
+
 require_relative 'use_cases/transactions/transactions'
 require_relative 'use_cases/transactions/create_transaction_view'
 require_relative 'use_cases/transactions/transactions_view'
+
+# TODO: This doesn't belong in Transactions use case
 require_relative 'use_cases/transactions/layout_view'
+
 require_relative 'use_cases/transaction_tags/transaction_tag_form_view'
+require_relative 'use_cases/transaction_tags/transaction_tags'
+
+require_relative 'use_cases/transaction_tag_sets/transaction_tag_sets'
 
 # Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
@@ -22,124 +31,14 @@ require_relative 'use_cases/transaction_tags/transaction_tag_form_view'
 
 # The top-level module for the Personal Finance app
 module PersonalFinance
-  module UseCase
-    class Accounts
-      extend Forwardable
-      def_delegators :@data_interactor, :to_models, :relation
-
-      def initialize(persistence: MemoryPersistence.new)
-        @persistence = persistence
-        @data_interactor = DataInteractor.new(persistence)
-      end
-
-      def name
-        :accounts
-      end
-
-      def endpoints
-        [
-          {
-            method: :post,
-            path: '/accounts',
-            action: lambda do |params|
-              create_account(params[:name])
-            end
-          },
-          {
-            method: :get,
-            path: '/accounts',
-            action: ->(_) { accounts }
-          }
-        ]
-      end
-
-      def create_account(name)
-        Account.new(name: name).tap do |a|
-          @persistence.persist(:accounts, a.attributes)
-        end
-      end
-
-      def accounts
-        to_models(
-          relation(:accounts),
-          Account
-        )
-      end
-    end
-
-    class People
-      extend Forwardable
-      def_delegators :@data_interactor, :to_models, :relation
-
-      def initialize(persistence: MemoryPersistence.new)
-        @persistence = persistence
-        @data_interactor = DataInteractor.new(persistence)
-      end
-
-      def endpoints
-        [
-          {
-            method: :post,
-            path: '/people',
-            action: lambda do |params|
-              create_person(params[:name])
-            end
-          }
-        ]
-      end
-
-      def create_person(name)
-        Person.new(name: name).tap do |p|
-          @persistence.persist(:people, p.attributes)
-        end
-      end
-    end
-
-    class TransactionTags
-      extend Forwardable
-      def_delegators :@data_interactor, :to_models, :relation
-
-      def initialize(persistence: MemoryPersistence.new)
-        @persistence = persistence
-        @data_interactor = DataInteractor.new(persistence)
-      end
-
-      def tag_transaction(transaction_id, tag:)
-        TransactionTag.new(
-          transaction_id: transaction_id,
-          name: tag
-        ).tap do |i|
-          @persistence.persist(:transaction_tags, i.attributes)
-        end
-      end
-    end
-
-    class TransactionTagSets
-      extend Forwardable
-      def_delegators :@data_interactor, :to_models, :relation
-
-      def initialize(persistence: MemoryPersistence.new)
-        @persistence = persistence
-        @data_interactor = DataInteractor.new(persistence)
-      end
-
-      def create_transaction_tag_set(params)
-        title = params[:title]
-        tags = params[:transaction_tag]
-        TransactionTagSet.new(title: title, tags: tags).tap do |t|
-          t.attributes[:tags] = t.attributes[:tags].join(',')
-          @persistence.persist(:transaction_tag_sets, t.attributes)
-        end
-      end
-    end
-  end
-
   # The top-level Personal Finance application
   class Application
     extend Forwardable
     def_delegators :@data_interactor, :to_models, :relation
+    def_delegators :accounts_use_case, :accounts, :create_account
     def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction,
                    :create_transaction_from_params, :tag_index
+    def_delegators :transaction_tags_use_case, :tag_transaction
 
     attr_reader :endpoints, :use_cases, :interactions
 
@@ -151,8 +50,7 @@ module PersonalFinance
       @log_level = log_level ? log_level.to_sym : :quiet
       @use_cases = {
         accounts: UseCase::Accounts.new(persistence: persistence),
-        people: UseCase::People.new(persistence: persistence),
-        transactions: ::UseCase::Transactions.new(persistence: persistence),
+        transactions: UseCase::Transactions.new(persistence: persistence),
         transaction_tags: UseCase::TransactionTags.new(persistence: persistence),
         transaction_tag_sets: UseCase::TransactionTagSets.new(persistence: persistence)
       }
@@ -212,40 +110,25 @@ module PersonalFinance
         },
         new_transaction_tag: {
           name: '/transactions/:id/tags/create',
-          type: :view,
+          type: :view
         }
       }
     end
 
-    def create_person(name)
-      @use_cases[:people].create_person(name)
-    end
-
-    def create_account(name)
-      @use_cases[:accounts].create_account(name)
-    end
-
-    def tag_transaction(transaction_id, tag:)
-      @use_cases[:transaction_tags].tag_transaction(transaction_id, tag: tag)
+    def transaction_tags_use_case
+      @use_cases[:transaction_tags]
     end
 
     def create_transaction_tag_set(params)
       @use_cases[:transaction_tag_sets].create_transaction_tag_set(params)
     end
 
-    def people
-      to_models(
-        relation(:people),
-        Person
-      )
-    end
-
-    def accounts
-      @use_cases[:accounts].accounts
-    end
-
     def all_transactions
       @use_cases[:transactions].transactions({})
+    end
+
+    def accounts_use_case
+      @use_cases[:accounts]
     end
 
     def transactions_use_case
@@ -279,7 +162,7 @@ module PersonalFinance
 
                  interactions[:view_transactions]
                when ['/transactions/:id/tags/create', :view]
-                transaction_tag_form(params)
+                 transaction_tag_form(params)
                when ['/transaction_tags', :create]
                  tag_transaction(params[:transaction_id].to_i, tag: params[:name])
 
@@ -321,7 +204,7 @@ module PersonalFinance
     def transaction_tag_form(params)
       TransactionTagFormView.new(
         transaction: all_transactions[:transactions].transactions.find { |t| t.id == params[:id].to_i },
-        interactions: interactions,
+        interactions: interactions
       )
     end
 
