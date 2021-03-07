@@ -135,10 +135,6 @@ module PersonalFinance
       @use_cases[:transactions]
     end
 
-    def all_transaction_tag_sets
-      @use_cases[:transactions].all_transaction_tag_sets
-    end
-
     def transaction_tags
       relation(:transaction_tags).map do |data|
         TransactionTag.new(data)
