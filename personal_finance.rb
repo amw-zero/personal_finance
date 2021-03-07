@@ -30,7 +30,7 @@ require_relative 'use_cases/transaction_tag_sets/transaction_tag_sets'
 # i.e. Alloy style attributes are separate relations
 
 # The top-level module for the Personal Finance app
-module PersonalFinance  
+module PersonalFinance
   # The top-level Personal Finance application
   class Application
     extend Forwardable
@@ -110,7 +110,7 @@ module PersonalFinance
         },
         new_transaction_tag: {
           name: '/transactions/:id/tags/create',
-          type: :view,
+          type: :view
         }
       }
     end
@@ -162,7 +162,7 @@ module PersonalFinance
 
                  interactions[:view_transactions]
                when ['/transactions/:id/tags/create', :view]
-                transaction_tag_form(params)
+                 transaction_tag_form(params)
                when ['/transaction_tags', :create]
                  tag_transaction(params[:transaction_id].to_i, tag: params[:name])
 
@@ -204,7 +204,7 @@ module PersonalFinance
     def transaction_tag_form(params)
       TransactionTagFormView.new(
         transaction: all_transactions[:transactions].transactions.find { |t| t.id == params[:id].to_i },
-        interactions: interactions,
+        interactions: interactions
       )
     end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 def interaction_params(interaction)
   interaction[:fields].map do |field|
     value = case field[:type]
