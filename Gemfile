@@ -17,5 +17,6 @@ source 'https://rubygems.org' do
     gem 'rack-test'
     gem 'rspec'
     gem 'rubocop'
+    gem 'simplecov'
   end
 end

@@ -21,7 +21,7 @@ describe 'Calculating sum of transaction amounts' do
   end
 
   let(:transactions) do
-    subject.transactions({ transaction_tag: ['tag'] })
+    subject.transactions({ transaction_tag: ['tag'] })[:transactions]
   end
 
   it do

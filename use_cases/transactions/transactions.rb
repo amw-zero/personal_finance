@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative '../memory_persistence'
-require_relative '../data_interactor'
-require_relative '../types'
+require_relative '../../memory_persistence'
+require_relative '../../data_interactor'
+require_relative '../../types'
 
 module UseCase
   class Transactions
@@ -12,69 +12,6 @@ module UseCase
     def initialize(persistence: MemoryPersistence.new)
       @persistence = persistence
       @data_interactor = DataInteractor.new(persistence)
-    end
-
-    def name
-      :transactions
-    end
-
-    def endpoints
-      [
-        {
-          method: :post,
-          path: '/transactions',
-          action: lambda do |params|
-            create_transaction_from_params(params)
-          end
-        },
-        {
-          method: :get,
-          # Coupling here - /transactions is referred to in view
-          # It should reference the use case path probably
-          # Try and change this route and see what breaks
-          path: '/transactions',
-          action: lambda do |params|
-            {
-              tag_index: tag_index,
-              transactions: transactions(params)
-            }
-          end
-        },
-        {
-          method: :get,
-          page: :transactions_tag_sets,
-          path: '/transactions/tag_sets',
-          action: lambda do |params|
-            {
-              tag_index: tag_index,
-              tag_sets: all_transaction_tag_sets,
-              transactions: transactions(params)
-            }
-          end
-        },
-        {
-          method: :get,
-          page: :transactions_schedule,
-          path: '/transactions/schedule',
-          action: lambda do |params|
-            params = { date_period: 'current_month' } if params.keys.empty?
-            {
-              tag_index: tag_index,
-              tag_sets: all_transaction_tag_sets,
-              transactions: transactions(params)
-            }
-          end
-        },
-        # TODO: Simulate HTTP in tests and test proper endpoints / paths / actions
-        {
-          method: :delete,
-          return: '/transactions',
-          path: '/transactions/:id',
-          action: lambda do |params|
-            delete_transaction(params[:id])
-          end
-        }
-      ]
     end
 
     # TODO: Test from_params methods separately
@@ -87,14 +24,14 @@ module UseCase
         amount: params[:amount].to_f,
         currency: params[:currency].to_sym,
         recurrence_rule: params[:recurrence_rule],
-        occurs_on: occurs_on,
+        occurs_on: occurs_on
       )
     end
 
     def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:, occurs_on: Date.today)
       # This is to be able to start the recurrence rule in the past, so that
       # the transaction appears if you display months in the past
-      occurs_on = occurs_on || Date.today
+      occurs_on ||= Date.today
       one_thousand_weeks = (7 * 1_000)
       PlannedTransaction.new(
         name: name,
@@ -108,7 +45,8 @@ module UseCase
       end
     end
 
-    def transactions(params)
+    def transactions(params, is_schedule: false)
+      params = params.merge({ date_period: 'current_month' }) if params[:date_period].nil? && is_schedule
       period = if params[:start_date] && !params[:start_date].empty? && params[:end_date] && !params[:end_date].empty?
                  Date.parse(params[:start_date])..Date.parse(params[:end_date])
                elsif params[:date_period] == 'current_year'
@@ -133,9 +71,7 @@ module UseCase
             intersection: params[:intersection] == 'true'
           )
         elsif params[:transaction_tag_set]
-          return TransactionSet.new(transactions: []) if params[:transaction_tag_set].empty?
-
-          transactions_for_tag_sets(params[:transaction_tag_set])
+          params[:transaction_tag_set].empty? ? [] : transactions_for_tag_sets(params[:transaction_tag_set])
         elsif params[:account]
           cash_flow(params[:account].to_i)
         else
@@ -153,14 +89,23 @@ module UseCase
           end
         end.sort_by(&:date)
 
-        if applicable_transactions.any?(&:income?)
-          return partition_transactions_by_pay_period(applicable_transactions, in_period: period)
-        else
-          return partition_transactions_by_month(applicable_transactions, in_period: period)
-        end
+        periods = if applicable_transactions.any?(&:income?)
+                    partition_transactions_by_pay_period(applicable_transactions, in_period: period)
+                  else
+                    partition_transactions_by_month(applicable_transactions, in_period: period)
+                  end
+        return {
+          tag_index: tag_index,
+          transactions: periods
+        }
       end
 
-      TransactionSet.new(transactions: applicable_transactions)
+      # Move non-transaction data up into Application
+      {
+        tag_index: tag_index,
+        tag_sets: all_transaction_tag_sets,
+        transactions: TransactionSet.new(transactions: applicable_transactions)
+      }
     end
 
     def cash_flow(account_id)
@@ -176,8 +121,11 @@ module UseCase
       to_models(relation(:transaction_tag_sets), TransactionTagSet)
     end
 
-    def delete_transaction(id)
-      @persistence.delete(:transactions, relation(:transactions).restrict(id: id))
+    def delete_transaction(params)
+      @persistence.delete(
+        :transactions,
+        relation(:transactions).restrict(id: params[:id].to_i)
+      )
     end
 
     def tag_index
@@ -192,10 +140,10 @@ module UseCase
     def partition_transactions_by_month(transactions, in_period:)
       raise if in_period.begin.year != in_period.end.year
 
-      months = in_period.begin.month.upto(in_period.end.month + 1).with_index.map do |month, i|
+      months = in_period.begin.month.upto(in_period.end.month + 1).with_index.map do |month, _i|
         year_offset = month / 12
 
-        Date.new(in_period.begin.year + year_offset, month % 12 == 0 ? 12 : month % 12, 1)
+        Date.new(in_period.begin.year + year_offset, (month % 12).zero? ? 12 : month % 12, 1)
       end
       periods = months.each_cons(2).map { |dates| Range.new(*dates, true) }
       periods[-1] = periods[-1].begin..periods[-1].end

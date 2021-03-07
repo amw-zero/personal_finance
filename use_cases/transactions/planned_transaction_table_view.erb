@@ -23,10 +23,11 @@
         <td>
           <div class="columns">
             <div class="column is-pulled-right">
-              <form action="/transactions/<%= transaction.id %>" method="POST">
-                <button type="submit" class="button is-small is-danger is-pulled-right">Delete</button>
-                <input type="hidden" name="_method" value="DELETE">
-              </form>
+              <%= delete_form(
+                interactions[:delete_transaction], 
+                transaction.id,
+                'is-pulled-right'
+              ) %>              
             </div>
             <div class="column is-pulled-right">
               <a class="button is-small is-primary is-pulled-right" href="/transactions/<%= transaction.id %>/tags/create">Add Tag</a>

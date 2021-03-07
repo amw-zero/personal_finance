@@ -1,0 +1,94 @@
+require 'erb'
+require_relative 'view'
+
+
+class TestRenderer
+  def initialize(view)
+    @view = view
+  end
+
+  def render
+    {}
+  end
+end
+
+class View
+  def initialize(app)
+    @app = app
+    @value = 5
+  end
+
+  # User input is a function from input -> params
+  # This is an "interaction." An interaction can be
+  # performed later on, and has a platform specific "interpreter"
+  # or thing that actually executes it. This is where platform-specific
+  # code (i.e. a Sinatra endpoint) can live, as well as having a simulated 
+  # version for tests
+  def create_something
+    {
+      action: {
+        name: '/somethings',
+        type: :create
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'amount'
+        }
+      ]
+    }
+  end
+
+  def amount_field
+    create_something[:fields].find { |f| f[:name] == 'amount' }
+  end
+
+  def template
+    %{
+      <p><%= @value %></p>
+      <form action="<%= create_something[:action][:name] %>">
+        <input type="<%= amount_field[:type]%>" name="<%= amount_field[:name] %>">
+        <button type="submit">Submit the thing</button>
+      </form>
+    }
+  end
+
+  def get_binding
+    binding
+  end
+end
+
+view = View.new(nil)
+
+server_create_something = ->(params) do
+  { type: :something, amount: params[:amount] }
+end
+
+validate = ->(raw_params, interaction) do
+  raw_params.keys.each do |field_name|
+    if interaction[:fields].select { |h| h[:name].to_sym == field_name }.empty?
+      raise 'this interaction does not know about this field'
+    end
+  end
+end
+
+perform = ->(interaction, raw_params) do
+  result = case interaction[:action][:name]
+           when '/somethings'
+             validate.(raw_params, interaction)
+             server_create_something.(raw_params)
+           end
+
+   puts result
+end
+
+interaction = view.create_something
+perform.call(interaction, { amount: 'Testing' })
+
+# Catches bugs with calling wrong methods in view,
+# i.e. a type check
+puts ErbRenderer.new(view).render
+
+# Rendering template => user can perform action
+# Template can render
+# user can perform action

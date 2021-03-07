@@ -4,20 +4,22 @@
 
     <nav class="panel">
       <div class="panel-tabs">
-        <a class="<%= 'is-active' if @page == :transactions %>" href="/transactions">Tags</a>
+        <a class="<%= 'is-active' if @page == :view_transactions %>" href="/transactions">Tags</a>
         <a class="<%= 'is-active' if @page == :transactions_tag_sets %>" href="/transactions/tag_sets">Tag Sets</a>
       </div>
 
       <!-- Need to handle nesting here. transactions_schedule is nested within transactions.  -->
       <!-- Prob need a "navigation path" -->
-      <% if @page == :transactions || @page == :transactions_schedule %>
-        <%= erb :transaction_filters_tags, locals: { params: params, tag_index: data[:tag_index], accounts: accounts } %>
+
+      <% if @page == :view_transactions || @page == :view_transactions_schedule %>
+        <%= render(TransactionFiltersTagsView.new(params: params, tag_index: data[:tag_index], accounts: accounts)) %>
       <% elsif @page == :transactions_tag_sets %>
-        <%= erb :transaction_filters_tag_sets, locals: { params: params, tag_sets: data[:tag_sets] } %>
+        <%= render(TransactionFiltersTagSetsView.new(params: params, tag_sets: data[:tag_sets])) %>
       <% end %>
+      
     </nav>
-    <% if @page == :transactions_schedule %>
-      <form action="/transactions/schedule">
+    <% if @page == :view_transactions_schedule %>
+      <form action="/test/transactions/schedule">
         <div class="card">
           <div class="card-content">
             <h1 class="title is-5">Date period</h1>
@@ -67,17 +69,34 @@
   </div>
   
   <div class="column">
-    <% if @page == :transactions_schedule %>
-      <%= erb :transaction_table_header, locals: { title: 'Scheduled Transactions' } %>
+    <% if page == :view_transactions_schedule %>
+      <%= render(
+        TransactionTableHeaderView.new(
+          title: 'Scheduled Transactions', 
+          interactions: interactions,
+          )
+        ) %>
       <% if data[:transactions].first.respond_to?(:incomes) %>
-        <%= erb :transactions_by_pay_period, locals: { pay_periods: data[:transactions] } %>
+        <%= render(TransactionsByPayPeriodView.new(pay_periods: data[:transactions])) %>
       <% else %>
-       <%= erb :transactions_by_month, locals: { periods: data[:transactions] } %>
+        <%= render(TransactionsByMonthView.new(periods: data[:transactions])) %>
       <% end %>
     <% else%>
-      <%= erb :transaction_table_header, locals: { title: 'Recurring Transactions' } %>
-      <%= erb :planned_transaction_table, locals: { transactions: data[:transactions].transactions, tag_index: data[:tag_index] } %>
+      <%= render(
+        TransactionTableHeaderView.new(
+          title: 'Recurring Transactions',
+          interactions: interactions
+        )
+       ) %>
+      <%= render(
+        PlannedTransactionTableView.new(
+          interactions: interactions, 
+          transactions: data[:transactions].transactions, 
+          tag_index: data[:tag_index]
+        )
+      ) %>
     <% end %>
   </div>
+  
 </div>
 

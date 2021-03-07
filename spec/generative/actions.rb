@@ -30,26 +30,32 @@ module ApplicationActions
       month_day = any integers(min: 1, max: 31)
       week_day = any element_of(%w[MO TU WE TH FR SA SU])
       rrule = any element_of([
-                              "FREQ=MONTHLY;BYMONTHDAY=#{month_day}",
-                              "FREQ=WEEKLY;BYDAY=#{week_day}"
-                            ])
+                               "FREQ=MONTHLY;BYMONTHDAY=#{month_day}",
+                               "FREQ=WEEKLY;BYDAY=#{week_day}"
+                             ])
 
       date_offset = any integers(min: -500, max: 500)
       occurs_on = Date.today + date_offset
 
-      test_app.create_transaction(
-        name: any(strings),
-        account_id: account.id,
-        amount: amount.to_f,
-        currency: :usd,
-        recurrence_rule: rrule,
-        occurs_on: occurs_on
+      test_app.execute(
+        test_app.interactions[:create_transaction],
+        {
+          name: any(strings),
+          account_id: account.id.to_s,
+          amount: amount.to_f.to_s,
+          currency: :usd.to_s,
+          recurrence_rule: rrule,
+          occurs_on: occurs_on.to_s
+        }
       )
     when :create_tag
-      return if test_app.all_transactions.transactions.empty?
+      return if test_app.all_transactions[:transactions].transactions.empty?
 
-      transaction = any(element_of(test_app.all_transactions.transactions))
-      test_app.tag_transaction(transaction.id, tag: any(strings))
+      transaction = any(element_of(test_app.all_transactions[:transactions].transactions))
+      test_app.execute(
+        test_app.interactions[:tag_transaction],
+        { transaction_id: transaction.id, name: any(strings) }
+      )
     when :create_tag_set
       # params = {
       #   transaction_tag: [String]
@@ -80,9 +86,12 @@ module ApplicationActions
     include Hypothesis
     include Hypothesis::Possibilities
 
+    attr_reader :executed, :actions, :application_block
+
     def initialize(actions, fresh_application:)
       @actions = actions
       @application_block = fresh_application
+      @executed = []
     end
 
     def check!(max_checks: 1_000)
@@ -97,13 +106,12 @@ module ApplicationActions
           ),
           name: 'Actions'
         ).each do |action|
+          @executed << action
           ApplicationActions.execute(action, in_app: test_app)
         end
 
-        yield test_app
+        yield test_app, executed
       end
     end
-
-    attr_reader :actions, :application_block
   end
 end

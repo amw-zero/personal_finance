@@ -15,10 +15,18 @@
 
   <div id="navbarBasicExample" class="navbar-menu">
     <div class="navbar-start">
-      <a class="navbar-item is-tab <%='is-active' if @page == :transactions %>" href="/transactions">
+      <a
+        class="navbar-item is-tab
+        <%='is-active' if @page == :transactions %>"
+        href="<%= interactions[:view_transactions][:name] %>"
+      >
         Plan
       </a>
-      <a class="navbar-item is-tab <%='is-active' if @page == :transactions_schedule %>" href="/transactions/schedule">
+      <a
+        class="navbar-item is-tab
+        <%='is-active' if @page == :transactions_schedule %>"
+        href="<%= interactions[:view_transactions_schedule][:name] %>"
+      >
         Schedule
       </a>
     </div>
@@ -39,5 +47,5 @@
 </nav>
 
 <div class="container is-fluid">
-    <%= yield %>
+    <%= render(content) %>
 </div>

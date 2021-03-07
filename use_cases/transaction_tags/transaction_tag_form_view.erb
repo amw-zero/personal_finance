@@ -1,9 +1,9 @@
 <h1 class="title">Transaction: <%= @transaction.name %></h1>
-<form action="/transaction_tags" method="post">
-  <div class="field">
-    <label class="label" for="name">Tag Name</label>
-    <input class="label" name="name" type="text" />
-  </div>
+<form 
+  action="/transaction_tags" 
+  method="<%= form_action(interactions[:tag_transaction]) %>"
+>
+  <%= form_field(interactions[:tag_transaction], :name) %>
 
   <div class="field">
     <input class="input is-hidden" name="transaction_id" value="<%= @transaction.id %>"></input>
