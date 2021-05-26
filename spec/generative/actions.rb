@@ -5,6 +5,7 @@ require_relative '../../personal_finance'
 
 module ApplicationActions
   CREATE_ACCOUNT = :create_account
+  CREATE_SCENARIO = :create_scenario
   CREATE_TRANSACTION = :create_transaction
   CREATE_TAG = :create_tag
   CREATE_TAG_SET = :create_tag_set
@@ -22,9 +23,10 @@ module ApplicationActions
         test_app.create_account(account_name)
       end
     when :create_transaction
-      return if test_app.accounts.empty?
+      return if test_app.accounts.empty? || test_app.scenarios.empty?
 
       account = any element_of(test_app.accounts), name: 'Transaction Account'
+      scenario = any element_of(test_app.scenarios), name: 'Scenario'
       amount = any integers(min: -500, max: 500), name: 'Transaction Amount'
 
       month_day = any integers(min: 1, max: 31)
@@ -45,7 +47,8 @@ module ApplicationActions
           amount: amount.to_f.to_s,
           currency: :usd.to_s,
           recurrence_rule: rrule,
-          occurs_on: occurs_on.to_s
+          occurs_on: occurs_on.to_s,
+          scenario_id: scenario.id
         }
       )
     when :create_tag
@@ -77,6 +80,16 @@ module ApplicationActions
       )
 
       test_app.create_transaction_tag_set(params)
+    when :create_scenario
+      params = any(
+        hashes_of_shape(
+          name: strings
+        )
+      )
+      test_app.execute(
+        test_app.interactions[:create_scenario],
+        params
+      )
     else
       raise "Attempted to execute unknown action: #{action}"
     end

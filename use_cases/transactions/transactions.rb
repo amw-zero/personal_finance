@@ -24,11 +24,12 @@ module UseCase
         amount: params[:amount].to_f,
         currency: params[:currency].to_sym,
         recurrence_rule: params[:recurrence_rule],
-        occurs_on: occurs_on
+        occurs_on: occurs_on,
+        scenario_id: params[:scenario_id].to_i
       )
     end
 
-    def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:, occurs_on: Date.today)
+    def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:, scenario_id:, occurs_on: Date.today)
       # This is to be able to start the recurrence rule in the past, so that
       # the transaction appears if you display months in the past
       occurs_on ||= Date.today
@@ -39,12 +40,14 @@ module UseCase
         amount: amount,
         currency: currency,
         recurrence_rule: recurrence_rule,
+        scenario_id: scenario_id,
         occurs_on: (occurs_on - one_thousand_weeks)
       ).tap do |i|
         @persistence.persist(:transactions, persistable_transaction(i))
       end
     end
 
+    # (params, is_schedule, relation(:transactions))
     def transactions(params, is_schedule: false)
       params = params.merge({ date_period: 'current_month' }) if params[:date_period].nil? && is_schedule
       period = if params[:start_date] && !params[:start_date].empty? && params[:end_date] && !params[:end_date].empty?
@@ -63,7 +66,7 @@ module UseCase
                  first..last
                end
 
-      applicable_transactions =
+      rel =
         if params[:transaction_tag]
           transactions_for_tags(
             params[:transaction_tag],
@@ -75,11 +78,11 @@ module UseCase
         elsif params[:account]
           cash_flow(params[:account].to_i)
         else
-          transactions = to_models(
-            relation(:transactions),
-            PlannedTransaction
-          ).sort_by(&:name)
+          relation(:transactions)
         end
+
+      rel = rel.restrict(scenario_id: params[:scenario_id])
+      applicable_transactions = to_models(rel, PlannedTransaction).sort_by(&:name)
 
       # This branch has to come out of here. Different types get returned from this function
       if period
@@ -111,10 +114,8 @@ module UseCase
     def cash_flow(account_id)
       transactions = relation(:transactions)
       accounts = relation(:accounts).restrict(id: account_id)
-      to_models(
-        transactions.join(accounts, { account_id: :id }),
-        PlannedTransaction
-      ).sort_by(&:name)
+
+      transactions.join(accounts, { account_id: :id })
     end
 
     def all_transaction_tag_sets
@@ -175,16 +176,14 @@ module UseCase
     end
 
     def transactions_for_tags(tags, tag_index, intersection: false)
-      transaction_relation = if intersection
-                               transaction_ids = tag_index.select do |_, t|
-                                 (t.map(&:name) & tags).count == tags.count
-                               end.keys
-                               relation(:transactions).restrict(id: transaction_ids)
-                             else
-                               _transactions_for_tags(tags)
-                             end
-
-      to_models(transaction_relation, PlannedTransaction)
+      if intersection
+        transaction_ids = tag_index.select do |_, t|
+          (t.map(&:name) & tags).count == tags.count
+        end.keys
+        relation(:transactions).restrict(id: transaction_ids)
+      else
+        _transactions_for_tags(tags)
+      end
     end
 
     def transactions_for_tag_sets(tag_set_ids)
@@ -195,10 +194,7 @@ module UseCase
 
       return [] if tag_sets.empty?
 
-      to_models(
-        _transactions_for_tags(tag_sets.first.tags),
-        PlannedTransaction
-      )
+      _transactions_for_tags(tag_sets.first.tags)
     end
 
     def persistable_transaction(transaction)

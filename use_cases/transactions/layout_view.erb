@@ -29,6 +29,13 @@
       >
         Schedule
       </a>
+      <a
+        class="navbar-item is-tab
+        <%='is-active' if @page == :create_scenarios %>"
+        href="<%= interactions[:new_scenario][:name] %>"
+      >
+        Scenarios
+      </a>
     </div>
 
     <div class="navbar-end">

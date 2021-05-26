@@ -17,6 +17,7 @@ describe 'Viewing Transactions within a Period' do
   specify do
     test_actions = [
       ApplicationActions::CREATE_ACCOUNT,
+      ApplicationActions::CREATE_SCENARIO,
       ApplicationActions::CREATE_TRANSACTION
     ]
 
@@ -43,11 +44,16 @@ describe 'Viewing Transactions within a Period' do
       # Create transaction
       interaction = test_app.interactions[:create_transaction]
       params = interaction_params(interaction)
-      params.merge!({ account_id: 1, currency: :usd, recurrence_rule: 'Testing' })
+      params.merge!({ account_id: 1, currency: :usd, recurrence_rule: 'Testing', scenario_id: 1 })
 
       view = test_app.execute(interaction, params)
 
       after_transactions = test_app.all_transactions[:transactions].transactions
+      expect(after_transactions.all? { |t| t.scenario_id == 1 }).to eq(true)
+
+      puts "Starting transactions: #{starting_transactions}"
+      puts "After trans: #{after_transactions}"
+
       created_transactions = after_transactions - starting_transactions
       created_transaction = created_transactions.first
 

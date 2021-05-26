@@ -7,9 +7,10 @@ class CreateTransactionView
 
   attr_reader :interactions
 
-  def initialize(interactions:, accounts:)
+  def initialize(interactions:, accounts:, scenarios:)
     @interactions = interactions
     @accounts = accounts
+    @scenarios = scenarios
   end
 
   def template

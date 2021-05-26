@@ -1,0 +1,11 @@
+<div class="container">
+  <h1 class="title">Create Scenario</h1>
+  <form 
+    action="<%= interactions[:create_scenario][:name] %>" 
+    method="<%= form_action(interactions[:create_scenario]) %>"
+  >
+    <%= form_field(interactions[:create_scenario], :name) %>
+
+    <button class="button is-primary" type="submit">Create Scenario</input>
+  </form>
+</div>

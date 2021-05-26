@@ -13,6 +13,8 @@ require_relative 'types'
 
 require_relative 'use_cases/accounts/accounts'
 
+require_relative 'use_cases/scenarios/scenario_form_view'
+
 require_relative 'use_cases/transactions/transactions'
 require_relative 'use_cases/transactions/create_transaction_view'
 require_relative 'use_cases/transactions/transactions_view'
@@ -111,6 +113,20 @@ module PersonalFinance
         new_transaction_tag: {
           name: '/transactions/:id/tags/create',
           type: :view
+        },
+        new_scenario: {
+          name: '/scenarios/new',
+          type: :view
+        },
+        create_scenario: {
+          name: '/scenarios',
+          type: :create,
+          fields: [
+            {
+              type: :string,
+              name: :name
+            }
+          ]
         }
       }
     end
@@ -141,6 +157,15 @@ module PersonalFinance
       end.uniq(&:name)
     end
 
+    def scenarios
+      relation(:scenarios).map { |data| Scenario.new(data) }.sort_by(&:name)
+    end
+    
+    def create_scenario(params)
+      scenario = Scenario.new(name: params[:name])
+      @persistence.persist(:scenarios, scenario.attributes)
+    end
+
     def execute(interaction, params = {})
       result = case [interaction[:name], interaction[:type]]
                when ['/transactions', :create]
@@ -163,13 +188,18 @@ module PersonalFinance
                  tag_transaction(params[:transaction_id].to_i, tag: params[:name])
 
                  interactions[:view_transactions]
+               when ['/scenarios', :create]
+                create_scenario(params)
+
+                interactions[:view_transactions]
+              when ['/scenarios/new', :view]
+                scenarios_form(params)
                else
                  raise "Attempted to execute unknown interaction: #{interaction[:name]}"
                end
 
       if result.is_a?(Hash)
         result
-
       else
         content = result
         LayoutView.new(content, interactions: interactions)
@@ -193,13 +223,20 @@ module PersonalFinance
     def create_transaction_view
       CreateTransactionView.new(
         interactions: interactions,
-        accounts: accounts
+        accounts: accounts,
+        scenarios: scenarios
       )
     end
 
     def transaction_tag_form(params)
       TransactionTagFormView.new(
         transaction: all_transactions[:transactions].transactions.find { |t| t.id == params[:id].to_i },
+        interactions: interactions
+      )
+    end
+
+    def scenarios_form(params)
+      ScenarioFormView.new(
         interactions: interactions
       )
     end

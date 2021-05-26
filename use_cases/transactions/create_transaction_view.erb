@@ -19,6 +19,19 @@
       </div>
     </div>
 
+    <div class="field">
+      <label class="label" for="scenario_id">Scenario</label>
+      <div class="control">
+        <div class="select">
+          <select id="scenario_select" name="scenario_id">
+            <% @scenarios.each do |a| %>
+              <option value="<%= a.id %>"><%= a.name %></option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <%= form_field(interactions[:create_transaction], :amount) %>
     <%= form_field(interactions[:create_transaction], :currency) %>
     <%= form_field(interactions[:create_transaction], :recurrence_rule) %>
