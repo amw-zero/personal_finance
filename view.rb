@@ -89,15 +89,39 @@ module View
     )
   end
 
-  def form_field(interaction, field_name)
+  def select_field(interaction, field_name, data)
+    field = interaction[:fields].find { |f| f[:name] == field_name }
+
+    field = field_name
+    select_name = "#{field}_id"
+    select_id = "#{field}_select"
+    label = field.capitalize
+
+    %(
+      <div class="field">
+        <label class="label" for="#{select_name}">#{label}</label>
+        <div class="control">
+          <div class="select">
+            <select id="#{select_id}" name="#{select_name}">
+              #{data.map do |a|
+                "<option value=#{a.id}>#{a.name}</option>"
+              end}
+            </select>
+          </div>
+        </div>
+      </div>
+    )
+  end
+
+  def input_field(interaction, field_name)
     field = interaction[:fields].find { |f| f[:name] == field_name }
     type = case field[:type]
            when :string
-             'text'
+            'text'
            when :decimal
-             'number'
+            'number'
            when :date
-             'date'
+            'date'
            end
 
     input = case field[:type]
@@ -112,7 +136,7 @@ module View
         <label class="label" for="#{field_name}">#{field_name}</label>
         #{input}
       </div>
-     )
+    )
   end
 
   def get_binding

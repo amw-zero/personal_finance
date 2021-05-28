@@ -136,6 +136,10 @@ module UseCase
       ).group_by(&:transaction_id)
     end
 
+    def persist_transaction(t)
+      @persistence.persist(:transactions, persistable_transaction(t))
+    end
+
     private
 
     def partition_transactions_by_month(transactions, in_period:)

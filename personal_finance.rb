@@ -129,6 +129,10 @@ module PersonalFinance
             {
               type: :string,
               name: :name
+            },
+            {
+              type: :scenario,
+              name: :clone_from
             }
           ]
         }
@@ -162,12 +166,33 @@ module PersonalFinance
     end
 
     def scenarios
-      relation(:scenarios).map { |data| Scenario.new(data) }.sort_by(&:name)
+      to_models(
+        relation(:scenarios),
+        Scenario
+      ).sort_by(&:name)
     end
     
     def create_scenario(params)
       scenario = Scenario.new(name: params[:name])
       @persistence.persist(:scenarios, scenario.attributes)
+      created_scenario = to_models(relation(:scenarios).restrict(name: params[:name]), Scenario).first
+
+      if params[:clone_from_id] != 'none'
+        transactions = to_models(
+          relation(:transactions)
+            .restrict(scenario_id: params[:clone_from_id].to_i),
+          PlannedTransaction
+        )
+
+        transactions.each do |transaction|
+          attrs = transaction.attributes.dup
+          attrs[:scenario_id] = created_scenario.id
+          attrs.delete(:id)
+          
+          clone = PlannedTransaction.new(attrs)
+          @use_cases[:transactions].persist_transaction(clone)
+        end
+      end
     end
 
     def default_scenario
@@ -251,7 +276,8 @@ module PersonalFinance
 
     def scenarios_form(params)
       ScenarioFormView.new(
-        interactions: interactions
+        interactions: interactions,
+        scenarios: scenarios
       )
     end
 

@@ -4,7 +4,8 @@
     action="<%= interactions[:create_scenario][:name] %>" 
     method="<%= form_action(interactions[:create_scenario]) %>"
   >
-    <%= form_field(interactions[:create_scenario], :name) %>
+    <%= input_field(interactions[:create_scenario], :name) %>
+    <%= select_field(interactions[:create_scenario], :clone_from, scenarios) %>
 
     <button class="button is-primary" type="submit">Create Scenario</input>
   </form>
