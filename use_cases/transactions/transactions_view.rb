@@ -12,15 +12,16 @@ require_relative '../../view'
 class TransactionsView
   include View
 
-  attr_reader :new_transaction_interaction, :data, :params, :page, :accounts, :interactions
+  attr_reader :new_transaction_interaction, :data, :params, :page, :accounts, :interactions, :scenarios
 
-  def initialize(new_transaction_interaction:, accounts:, data:, page:, params:, interactions:)
+  def initialize(new_transaction_interaction:, accounts:, data:, page:, params:, interactions:, scenarios:)
     @new_transaction_interaction = new_transaction_interaction
     @accounts = accounts
     @page = page
     @data = data
     @params = params
     @interactions = interactions
+    @scenarios = scenarios
   end
 
   def template

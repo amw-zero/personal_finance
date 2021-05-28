@@ -3,6 +3,22 @@
     <h1 class="title is-4"><%= title %></h1>
   </div>
   <div class="column">
+    <form>
+      <div class="control level-right">
+        <div class="select">
+          <select onchange="this.form.submit()" id="scenario_select" name="scenario_id">
+            <% @scenarios.each do |a| %>
+              <option
+                value="<%= a.id %>"
+                <%= 'selected' if a.id == selected_scenario_id %>
+              >
+                <%= a.name %>
+              </option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+    </form>
     <span class="level-right">
       <a href="<%= interactions[:new_transaction][:name] %>" class="button is-primary">Add Transaction</a>
     </span>

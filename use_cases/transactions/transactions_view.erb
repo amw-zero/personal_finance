@@ -74,8 +74,10 @@
         TransactionTableHeaderView.new(
           title: 'Scheduled Transactions', 
           interactions: interactions,
-          )
-        ) %>
+          scenarios: scenarios,
+          selected_scenario_id: params[:scenario_id].to_i
+        )
+      ) %>
       <% if data[:transactions].first.respond_to?(:incomes) %>
         <%= render(TransactionsByPayPeriodView.new(pay_periods: data[:transactions])) %>
       <% else %>
@@ -85,7 +87,9 @@
       <%= render(
         TransactionTableHeaderView.new(
           title: 'Recurring Transactions',
-          interactions: interactions
+          interactions: interactions,
+          scenarios: scenarios,
+          selected_scenario_id: params[:scenario_id].to_i
         )
        ) %>
       <%= render(

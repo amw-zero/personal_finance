@@ -177,10 +177,7 @@ module PersonalFinance
     def execute(interaction, params = {})
       result = case [interaction[:name], interaction[:type]]
                when ['/', :view]
-                 view_transactions = interactions[:view_transactions].dup
-                 view_transactions[:name] = "#{view_transactions[:name]}?scenario_id=#{default_scenario.id}"
-
-                 view_transactions
+                 interactions[:view_transactions]
                when ['/transactions', :create]
                  create_transaction_from_params(params)
 
@@ -222,6 +219,9 @@ module PersonalFinance
     private
 
     def transactions_view(interaction_name, params, is_schedule: false)
+      unless params[:scenario_id]
+        params[:scenario_id] = default_scenario.id
+      end
       data = transactions(params, is_schedule: is_schedule)
       TransactionsView.new(
         new_transaction_interaction: interactions[:new_transaction],
@@ -229,7 +229,8 @@ module PersonalFinance
         data: data,
         params: params,
         page: interaction_name,
-        interactions: interactions
+        interactions: interactions,
+        scenarios: scenarios
       )
     end
 
