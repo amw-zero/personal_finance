@@ -13,6 +13,7 @@ require_relative 'types'
 
 require_relative 'use_cases/accounts/accounts'
 
+require_relative 'use_cases/scenarios/scenarios'
 require_relative 'use_cases/scenarios/scenario_form_view'
 
 require_relative 'use_cases/transactions/transactions'
@@ -38,6 +39,7 @@ module PersonalFinance
     extend Forwardable
     def_delegators :@data_interactor, :to_models, :relation
     def_delegators :accounts_use_case, :accounts, :create_account
+    def_delegators :scenarios_use_case, :create_scenario, :scenarios, :default_scenario
     def_delegators :transactions_use_case, :delete_transaction, :transactions, :create_transaction,
                    :create_transaction_from_params, :tag_index
     def_delegators :transaction_tags_use_case, :tag_transaction
@@ -52,6 +54,7 @@ module PersonalFinance
       @log_level = log_level ? log_level.to_sym : :quiet
       @use_cases = {
         accounts: UseCase::Accounts.new(persistence: persistence),
+        scenarios: UseCase::Scenarios.new(persistence: persistence),
         transactions: UseCase::Transactions.new(persistence: persistence),
         transaction_tags: UseCase::TransactionTags.new(persistence: persistence),
         transaction_tag_sets: UseCase::TransactionTagSets.new(persistence: persistence)
@@ -163,44 +166,14 @@ module PersonalFinance
       @use_cases[:transactions]
     end
 
+    def scenarios_use_case
+      @use_cases[:scenarios]
+    end
+
     def transaction_tags
       relation(:transaction_tags).map do |data|
         TransactionTag.new(data)
       end.uniq(&:name)
-    end
-
-    def scenarios
-      to_models(
-        relation(:scenarios),
-        Scenario
-      ).sort_by(&:name)
-    end
-    
-    def create_scenario(params)
-      scenario = Scenario.new(name: params[:name])
-      @persistence.persist(:scenarios, scenario.attributes)
-      created_scenario = to_models(relation(:scenarios).restrict(name: params[:name]), Scenario).first
-
-      if params[:clone_from_id] != 'none'
-        transactions = to_models(
-          relation(:transactions)
-            .restrict(scenario_id: params[:clone_from_id].to_i),
-          PlannedTransaction
-        )
-
-        transactions.each do |transaction|
-          attrs = transaction.attributes.dup
-          attrs[:scenario_id] = created_scenario.id
-          attrs.delete(:id)
-          
-          clone = PlannedTransaction.new(attrs)
-          @use_cases[:transactions].persist_transaction(clone)
-        end
-      end
-    end
-
-    def default_scenario
-      relation(:scenarios).restrict(id: 1).first.then { |data| Scenario.new(data) }
     end
 
     def execute(interaction, params = {})
