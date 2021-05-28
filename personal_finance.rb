@@ -67,6 +67,10 @@ module PersonalFinance
           # Create "schema" type here using Dry::Struct?
           fields: [
             {
+              type: :account,
+              name: :account
+            },
+            {
               type: :decimal,
               name: :amount
             },
