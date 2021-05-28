@@ -1,5 +1,12 @@
 # frozen_string_literal: true
 
+# Todo: Make Scenarios#create_transaction. Remove scenario dropdown from transactions form.
+# Bounded context - creating a transaction is different when in the scenarios context
+
+# Fix filtering, demo filter does not persist between views
+
+# Investigate state machine , State + Interaction design. One test which just traverses state graph, asserting properties
+
 require 'bmg'
 require 'bmg/sequel'
 require 'dry-struct'
@@ -30,6 +37,7 @@ require_relative 'use_cases/transaction_tag_sets/transaction_tag_sets'
 
 # Thoughts: It is easier to never build nested data. Using the pattern like the
 # tag_index, you can pull the associated data when you need.
+
 # i.e. Alloy style attributes are separate relations
 
 # The top-level module for the Personal Finance app
@@ -52,10 +60,11 @@ module PersonalFinance
       @persistence = persistence
       @data_interactor = DataInteractor.new(persistence)
       @log_level = log_level ? log_level.to_sym : :quiet
+      transactions_use_case = UseCase::Transactions.new(persistence: persistence)
       @use_cases = {
         accounts: UseCase::Accounts.new(persistence: persistence),
-        scenarios: UseCase::Scenarios.new(persistence: persistence),
-        transactions: UseCase::Transactions.new(persistence: persistence),
+        scenarios: UseCase::Scenarios.new(persistence: persistence, transactions_use_case: transactions_use_case),
+        transactions: transactions_use_case,
         transaction_tags: UseCase::TransactionTags.new(persistence: persistence),
         transaction_tag_sets: UseCase::TransactionTagSets.new(persistence: persistence)
       }

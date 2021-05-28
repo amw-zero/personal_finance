@@ -3,9 +3,10 @@ module UseCase
     extend Forwardable
     def_delegators :@data_interactor, :to_models, :relation
 
-    def initialize(persistence: MemoryPersistence.new)
+    def initialize(persistence: MemoryPersistence.new, transactions_use_case:)
       @persistence = persistence
       @data_interactor = DataInteractor.new(persistence)
+      @transactions_use_case = transactions_use_case
     end
 
     def scenarios
@@ -33,7 +34,7 @@ module UseCase
           attrs.delete(:id)
 
           clone = PlannedTransaction.new(attrs)
-          @use_cases[:transactions].persist_transaction(clone)
+          @transactions_use_case.persist_transaction(clone)
         end
       end
     end
