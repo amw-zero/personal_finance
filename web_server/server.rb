@@ -7,10 +7,6 @@ require_relative '../view'
 
 application = PersonalFinance::Application.new(log_level: ENV['LOG_LEVEL'], persistence: PostgresPersistence.new)
 
-get '/' do
-  redirect '/transactions'
-end
-
 application.interactions.each_value do |interaction|
   method = {
     create: :post,

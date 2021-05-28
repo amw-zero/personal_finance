@@ -57,6 +57,10 @@ module PersonalFinance
         transaction_tag_sets: UseCase::TransactionTagSets.new(persistence: persistence)
       }
       @interactions = {
+        root: {
+          name: '/',
+          type: :view
+        },
         create_transaction: {
           name: '/transactions',
           type: :create,
@@ -166,8 +170,17 @@ module PersonalFinance
       @persistence.persist(:scenarios, scenario.attributes)
     end
 
+    def default_scenario
+      relation(:scenarios).restrict(id: 1).first.then { |data| Scenario.new(data) }
+    end
+
     def execute(interaction, params = {})
       result = case [interaction[:name], interaction[:type]]
+               when ['/', :view]
+                 view_transactions = interactions[:view_transactions].dup
+                 view_transactions[:name] = "#{view_transactions[:name]}?scenario_id=#{default_scenario.id}"
+
+                 view_transactions
                when ['/transactions', :create]
                  create_transaction_from_params(params)
 
