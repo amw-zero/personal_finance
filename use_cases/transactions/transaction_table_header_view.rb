@@ -5,13 +5,11 @@ require_relative '../../view'
 class TransactionTableHeaderView
   include View
 
-  attr_reader :title, :interactions, :scenarios, :selected_scenario_id
+  attr_reader :title, :interactions
 
-  def initialize(title:, interactions:, scenarios:, selected_scenario_id:)
+  def initialize(title:, interactions:)
     @title = title
     @interactions = interactions
-    @scenarios = scenarios
-    @selected_scenario_id = selected_scenario_id
   end
 
   def template
