@@ -155,36 +155,6 @@ module PersonalFinance
       }
     end
 
-    def transaction_tags_use_case
-      @use_cases[:transaction_tags]
-    end
-
-    def create_transaction_tag_set(params)
-      @use_cases[:transaction_tag_sets].create_transaction_tag_set(params)
-    end
-
-    def all_transactions
-      @use_cases[:transactions].transactions({})
-    end
-
-    def accounts_use_case
-      @use_cases[:accounts]
-    end
-
-    def transactions_use_case
-      @use_cases[:transactions]
-    end
-
-    def scenarios_use_case
-      @use_cases[:scenarios]
-    end
-
-    def transaction_tags
-      relation(:transaction_tags).map do |data|
-        TransactionTag.new(data)
-      end.uniq(&:name)
-    end
-
     def execute(interaction, params = {})
       result = case [interaction[:name], interaction[:type]]
                when ['/', :view]
@@ -228,6 +198,36 @@ module PersonalFinance
     end
 
     private
+
+    def transaction_tags_use_case
+      @use_cases[:transaction_tags]
+    end
+
+    def create_transaction_tag_set(params)
+      @use_cases[:transaction_tag_sets].create_transaction_tag_set(params)
+    end
+
+    def all_transactions
+      @use_cases[:transactions].transactions({})
+    end
+
+    def accounts_use_case
+      @use_cases[:accounts]
+    end
+
+    def transactions_use_case
+      @use_cases[:transactions]
+    end
+
+    def scenarios_use_case
+      @use_cases[:scenarios]
+    end
+
+    def transaction_tags
+      relation(:transaction_tags).map do |data|
+        TransactionTag.new(data)
+      end.uniq(&:name)
+    end
 
     def transactions_view(interaction_name, params, is_schedule: false)
       unless params[:scenario_id]
