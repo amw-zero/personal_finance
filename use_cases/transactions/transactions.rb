@@ -131,6 +131,7 @@ module UseCase
 
     def tag_index
       to_models(
+        # need to join here with transactions + restrict scenario id
         relation(:transaction_tags),
         TransactionTag
       ).group_by(&:transaction_id)
