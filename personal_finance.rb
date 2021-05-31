@@ -207,10 +207,6 @@ module PersonalFinance
       @use_cases[:transaction_tag_sets].create_transaction_tag_set(params)
     end
 
-    def all_transactions
-      @use_cases[:transactions].transactions({})
-    end
-
     def accounts_use_case
       @use_cases[:accounts]
     end
@@ -230,7 +226,7 @@ module PersonalFinance
     end
 
     def transactions_view(interaction_name, params, is_schedule: false)
-      unless params[:scenario_id]
+      if !params[:scenario_id] && default_scenario
         params[:scenario_id] = default_scenario.id
       end
       data = transactions(params, is_schedule: is_schedule)
@@ -255,7 +251,7 @@ module PersonalFinance
 
     def transaction_tag_form(params)
       TransactionTagFormView.new(
-        transaction: all_transactions[:transactions].transactions.find { |t| t.id == params[:id].to_i },
+        transaction: to_models(relation(:transactions).restrict(id: params[:id].to_i), PlannedTransaction).first,
         interactions: interactions
       )
     end

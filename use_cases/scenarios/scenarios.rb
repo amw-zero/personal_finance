@@ -40,7 +40,7 @@ module UseCase
     end
 
     def default_scenario
-      relation(:scenarios).restrict(id: 1).first.then { |data| Scenario.new(data) }
+      relation(:scenarios).restrict(id: 1).first&.then { |data| Scenario.new(data) }
     end
   end
 end
