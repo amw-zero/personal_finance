@@ -19,18 +19,16 @@ describe 'Transactions by Tag' do
       test_actions,
       fresh_application: -> { test_application }
     ).check! do |test_app|
-      next if test_app.transaction_tags.empty?
+      transaction_tags = test_app.execute_and_render(test_app.interactions[:view_transactions]).data[:tag_index].values.uniq
+      next if transaction_tags.empty?
 
-      possible_tags = any(arrays(of: element_of(test_app.transaction_tags))).map(&:name)
-
-      view = test_app
-             .execute(test_app.interactions[:view_transactions], { transaction_tag: possible_tags })
-      expect(ErbRenderer.new(view).render).to_not be_nil
+      possible_tags = any(arrays(of: element_of(transaction_tags))).map(&:name)
 
       view = test_app
-             .execute(test_app.interactions[:view_transactions_schedule], { transaction_tag: possible_tags })
+             .execute_and_render(test_app.interactions[:view_transactions], { transaction_tag: possible_tags })
 
-      expect(ErbRenderer.new(view).render).to_not be_nil
+      view = test_app
+             .execute_and_render(test_app.interactions[:view_transactions_schedule], { transaction_tag: possible_tags })
 
       filtered_transactions = test_app
                               .transactions({ transaction_tag: possible_tags })[:transactions].transactions

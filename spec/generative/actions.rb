@@ -52,9 +52,10 @@ module ApplicationActions
         }
       )
     when :create_tag
-      return if test_app.all_transactions[:transactions].transactions.empty?
+      all_transactions = test_app.execute_and_render(test_app.interactions[:view_transactions]).data[:transactions].transactions
+      return if all_transactions.empty?
 
-      transaction = any(element_of(test_app.all_transactions[:transactions].transactions))
+      transaction = any(element_of(all_transactions))
       test_app.execute(
         test_app.interactions[:tag_transaction],
         { transaction_id: transaction.id, name: any(strings) }
@@ -66,7 +67,7 @@ module ApplicationActions
       # use_case = [String] -> [TransactionTag] -> ApplicationState
       # Would be good to have a domain constraint, i.e. "Strings are valid TransactionTags"
 
-      tags = test_app.transaction_tags.map(&:name)
+      tags = test_app.execute_and_render(test_app.interactions[:view_transactions]).data[:tag_index].values.map(&:name)
       return if tags.empty?
 
       bad_inputs = %w[jkl randM]

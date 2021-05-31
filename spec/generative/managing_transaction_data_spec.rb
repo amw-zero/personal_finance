@@ -19,14 +19,16 @@ describe 'Creating, updating, and deleting Transactions' do
       test_actions,
       fresh_application: -> { test_application }
     ).check! do |test_app|
-      starting_transactions = test_app.all_transactions[:transactions].transactions
+      starting_transactions = test_app.execute_and_render(test_app.interactions[:view_transactions]).data[:transactions].transactions
       next if starting_transactions.empty?
 
       transaction_to_delete = any element_of(starting_transactions)
 
       test_app.delete_transaction({ id: transaction_to_delete.id })
 
-      expect(Set.new(test_app.all_transactions[:transactions].transactions)).to eq(Set.new(starting_transactions - [transaction_to_delete]))
+      all_transactions = test_app.execute_and_render(test_app.interactions[:view_transactions]).data[:transactions].transactions
+
+      expect(Set.new(all_transactions)).to eq(Set.new(starting_transactions - [transaction_to_delete]))
     end
   end
 end

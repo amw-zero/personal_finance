@@ -10,7 +10,7 @@ require_relative '../memory_persistence'
 require_relative '../view'
 
 class TestApplication < SimpleDelegator
-  def execute_and_render(interaction, params)
+  def execute_and_render(interaction, params={})
     result = execute(interaction, params)
 
     if result.is_a?(Hash)

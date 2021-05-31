@@ -24,7 +24,7 @@ describe 'Transactions by Tag Set' do
       test_actions,
       fresh_application: -> { test_application }
     ).check! do |test_app|
-      tag_sets = test_app.all_transactions[:tag_sets]
+      tag_sets = test_app.execute_and_render(test_app.interactions[:view_transactions]).data[:tag_sets]
 
       next if tag_sets.empty?
 

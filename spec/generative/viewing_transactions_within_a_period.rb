@@ -21,7 +21,7 @@ describe 'Viewing Transactions within a Period' do
       test_actions,
       fresh_application: -> { test_application }
     ).check!(max_checks: 200) do |test_app, _executed|
-      all_transactions = test_app.all_transactions[:transactions].transactions
+      all_transactions = test_app.execute_and_render(test_app.interactions[:view_transactions]).data[:transactions].transactions
       transaction_count = all_transactions.count
       max_transaction_count = transaction_count if transaction_count > max_transaction_count
 
