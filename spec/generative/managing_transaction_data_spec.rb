@@ -12,6 +12,7 @@ describe 'Creating, updating, and deleting Transactions' do
   specify 'Deleting Transactions' do
     test_actions = [
       ApplicationActions::CREATE_ACCOUNT,
+      ApplicationActions::CREATE_SCENARIO,
       ApplicationActions::CREATE_TRANSACTION
     ]
 

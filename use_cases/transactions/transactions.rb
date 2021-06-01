@@ -74,7 +74,7 @@ module UseCase
             intersection: params[:intersection] == 'true'
           )
         elsif params[:transaction_tag_set]
-          params[:transaction_tag_set].empty? ? [] : transactions_for_tag_sets(params[:transaction_tag_set])
+          params[:transaction_tag_set].empty? ? Bmg::Relation.new([]) : transactions_for_tag_sets(params[:transaction_tag_set])
         elsif params[:account]
           cash_flow(params[:account].to_i)
         else
@@ -197,7 +197,7 @@ module UseCase
         TransactionTagSet
       )
 
-      return [] if tag_sets.empty?
+      return Bmg::Relation.new([]) if tag_sets.empty?
 
       _transactions_for_tags(tag_sets.first.tags)
     end

@@ -197,14 +197,14 @@ module PersonalFinance
       end
     end
 
+    def create_transaction_tag_set(params)
+      @use_cases[:transaction_tag_sets].create_transaction_tag_set(params)
+    end
+
     private
 
     def transaction_tags_use_case
       @use_cases[:transaction_tags]
-    end
-
-    def create_transaction_tag_set(params)
-      @use_cases[:transaction_tag_sets].create_transaction_tag_set(params)
     end
 
     def accounts_use_case

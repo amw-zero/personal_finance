@@ -12,6 +12,7 @@ describe 'Transactions by Tag' do
   specify do
     test_actions = [
       ApplicationActions::CREATE_ACCOUNT,
+      ApplicationActions::CREATE_SCENARIO,
       ApplicationActions::CREATE_TRANSACTION,
       ApplicationActions::CREATE_TAG
     ]
@@ -19,7 +20,7 @@ describe 'Transactions by Tag' do
       test_actions,
       fresh_application: -> { test_application }
     ).check! do |test_app|
-      transaction_tags = test_app.execute_and_render(test_app.interactions[:view_transactions]).data[:tag_index].values.uniq
+      transaction_tags = test_app.execute_and_render(test_app.interactions[:view_transactions]).data[:tag_index].values.uniq.flatten
       next if transaction_tags.empty?
 
       possible_tags = any(arrays(of: element_of(transaction_tags))).map(&:name)

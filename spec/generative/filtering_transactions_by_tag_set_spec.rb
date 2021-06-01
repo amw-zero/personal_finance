@@ -15,6 +15,7 @@ describe 'Transactions by Tag Set' do
   specify do
     test_actions = [
       ApplicationActions::CREATE_ACCOUNT,
+      ApplicationActions::CREATE_SCENARIO,
       ApplicationActions::CREATE_TRANSACTION,
       ApplicationActions::CREATE_TAG,
       ApplicationActions::CREATE_TAG_SET
