@@ -14,6 +14,7 @@ describe 'Scenarios' do
   describe 'Cloning a scenario from an existing scenario' do
     it 'clones the transactions from the base scenario' do
       test_app = test_application
+      test_app.execute_and_render(test_app.interactions[:new_scenario])
 
       test_app.execute_and_render(test_app.interactions[:create_scenario], {
         name: 'Scenario'
