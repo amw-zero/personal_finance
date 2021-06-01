@@ -28,7 +28,6 @@ end
 # recurrence rule which represents a conceptual infinite set of Transactions.
 class PlannedTransaction < Dry::Struct
   attribute? :id, Types::Integer
-  attribute? :account, Account
   attribute :account_id, Types::Integer
   attribute :amount, Types::Float
   attribute :name, Types::String

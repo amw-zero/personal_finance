@@ -49,11 +49,10 @@ describe 'Viewing Transactions within a Period' do
       after_transactions = test_app.execute_and_render(test_app.interactions[:view_transactions]).data[:transactions].transactions
       expect(after_transactions.all? { |t| t.scenario_id == 1 }).to eq(true)
 
-      puts "Starting transactions: #{starting_transactions}"
-      puts "After trans: #{after_transactions}"
-
       created_transactions = after_transactions - starting_transactions
       created_transaction = created_transactions.first
+
+      next if created_transaction.nil?
 
       expected_params = params.dup
       expected_params[:occurs_on] = Date.parse(expected_params[:occurs_on]) - 7 * 1000
