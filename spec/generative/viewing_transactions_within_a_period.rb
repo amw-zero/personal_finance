@@ -66,9 +66,7 @@ describe 'Viewing Transactions within a Period' do
                  new_years..new_years_eve
                end
 
-      view = test_app.execute(test_app.interactions[:view_transactions_schedule], params)
-
-      expect(ErbRenderer.new(view).render).to_not be_nil
+      view = test_app.execute_and_render(test_app.interactions[:view_transactions_schedule], params)
 
       pay_periods = test_app.transactions(params, is_schedule: true)[:transactions]
 
@@ -84,7 +82,6 @@ describe 'Viewing Transactions within a Period' do
       end.to_h
 
       # All transactions get expanded into their proper occurrences
-      require 'pry'
       pay_periods
         .flat_map do |period|
           if period.is_a?(Period)
@@ -96,8 +93,6 @@ describe 'Viewing Transactions within a Period' do
         .group_by { |transaction| transaction.planned_transaction.id }
         .transform_values { |transactions| transactions.map(&:date) }
         .each do |transaction_id, occurrences|
-          binding.pry if occurrences.any? { |o| !period.include?(o) }
-          binding.pry if occurrences.map(&:to_s) != expected_occurrences[transaction_id]
           expect(occurrences.all? { |o| period.include?(o) }).to eq(true)
           expect(occurrences.map(&:to_s)).to eq(expected_occurrences[transaction_id])
         end
