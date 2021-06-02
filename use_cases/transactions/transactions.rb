@@ -47,7 +47,6 @@ module UseCase
       end
     end
 
-    # (params, is_schedule, relation(:transactions))
     def transactions(params, is_schedule: false)
       params = params.merge({ date_period: 'current_month' }) if params[:date_period].nil? && is_schedule
       period = if params[:start_date] && !params[:start_date].empty? && params[:end_date] && !params[:end_date].empty?
