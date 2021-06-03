@@ -69,7 +69,7 @@ module UseCase
         if params[:transaction_tag]
           transactions_for_tags(
             params[:transaction_tag],
-            tag_index,
+            tag_index(scenario_id: params[:scenario_id]),
             intersection: params[:intersection] == 'true'
           )
         elsif params[:transaction_tag_set]
@@ -97,14 +97,14 @@ module UseCase
                     partition_transactions_by_month(applicable_transactions, in_period: period)
                   end
         return {
-          tag_index: tag_index,
+          tag_index: tag_index(scenario_id: params[:scenario_id]),
           transactions: periods
         }
       end
 
       # Move non-transaction data up into Application
       {
-        tag_index: tag_index,
+        tag_index: tag_index(scenario_id: params[:scenario_id]),
         tag_sets: all_transaction_tag_sets,
         transactions: TransactionSet.new(transactions: applicable_transactions)
       }
@@ -128,10 +128,9 @@ module UseCase
       )
     end
 
-    def tag_index
+    def tag_index(scenario_id:)
       to_models(
-        # need to join here with transactions + restrict scenario id
-        relation(:transaction_tags),
+        relation(:transaction_tags).join(relation(:transactions), { transaction_id: :id }).restrict(scenario_id: scenario_id),
         TransactionTag
       ).group_by(&:transaction_id)
     end
