@@ -48,19 +48,29 @@ describe 'Transactions by Tag' do
         expect(possible_tags.map(&:transaction_id) & transactions.map(&:id)).to_not be_empty
       end
 
-      view = test_app
-             .execute_and_render(test_app.interactions[:view_transactions], { transaction_tag: possible_tag_names })
+      transactions_view = test_app
+                            .execute_and_render(test_app.interactions[:view_transactions], { scenario_id: scenario.id, transaction_tag: possible_tag_names })
 
-      view = test_app
-             .execute_and_render(test_app.interactions[:view_transactions_schedule], { transaction_tag: possible_tag_names })
+      schedule_view = test_app
+                        .execute_and_render(test_app.interactions[:view_transactions_schedule], { transaction_tag: possible_tag_names })
 
-      filtered_transactions = test_app
-                              .transactions({ transaction_tag: possible_tag_names })[:transactions].transactions
+      filtered_transactions = schedule_view.data[:transactions].flat_map { |period| period.transactions.transactions.map(&:planned_transaction) }.uniq
+
       expect(
         Propositions.FilteredTransactionsRespectTags(
           filtered_transactions,
           possible_tag_names,
-          test_app
+          test_app.tag_index(scenario_id: scenario.id)
+        )
+      ).to be(true)
+
+      filtered_transactions = transactions_view.data[:transactions].transactions
+
+      expect(
+        Propositions.FilteredTransactionsRespectTags(
+          filtered_transactions,
+          possible_tag_names,
+          test_app.tag_index(scenario_id: scenario.id)
         )
       ).to be(true)
 

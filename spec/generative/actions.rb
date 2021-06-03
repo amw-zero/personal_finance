@@ -108,7 +108,7 @@ module ApplicationActions
       @executed = []
     end
 
-    def check!(max_checks: 1_000)
+    def check!(max_checks: 500)
       hypothesis(max_valid_test_cases: max_checks, phases: Phase.excluding(:shrink)) do
         test_app = application_block.call
 

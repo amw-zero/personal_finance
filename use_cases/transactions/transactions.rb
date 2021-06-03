@@ -84,6 +84,7 @@ module UseCase
       applicable_transactions = to_models(rel, PlannedTransaction).sort_by(&:name)
 
       # This branch has to come out of here. Different types get returned from this function
+
       if period
         applicable_transactions = applicable_transactions.flat_map do |transaction|
           transaction.occurrences_within(period).map do |date|
