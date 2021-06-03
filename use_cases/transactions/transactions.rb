@@ -24,11 +24,12 @@ module UseCase
         amount: params[:amount].to_f,
         currency: params[:currency].to_sym,
         recurrence_rule: params[:recurrence_rule],
-        occurs_on: occurs_on
+        occurs_on: occurs_on,
+        scenario_id: params[:scenario_id].to_i
       )
     end
 
-    def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:, occurs_on: Date.today)
+    def create_transaction(name:, account_id:, amount:, currency:, recurrence_rule:, scenario_id:, occurs_on: Date.today)
       # This is to be able to start the recurrence rule in the past, so that
       # the transaction appears if you display months in the past
       occurs_on ||= Date.today
@@ -39,6 +40,7 @@ module UseCase
         amount: amount,
         currency: currency,
         recurrence_rule: recurrence_rule,
+        scenario_id: scenario_id,
         occurs_on: (occurs_on - one_thousand_weeks)
       ).tap do |i|
         @persistence.persist(:transactions, persistable_transaction(i))
@@ -63,25 +65,26 @@ module UseCase
                  first..last
                end
 
-      applicable_transactions =
+      rel =
         if params[:transaction_tag]
           transactions_for_tags(
             params[:transaction_tag],
-            tag_index,
+            tag_index(scenario_id: params[:scenario_id]),
             intersection: params[:intersection] == 'true'
           )
         elsif params[:transaction_tag_set]
-          params[:transaction_tag_set].empty? ? [] : transactions_for_tag_sets(params[:transaction_tag_set])
+          params[:transaction_tag_set].empty? ? Bmg::Relation.new([]) : transactions_for_tag_sets(params[:transaction_tag_set])
         elsif params[:account]
           cash_flow(params[:account].to_i)
         else
-          transactions = to_models(
-            relation(:transactions),
-            PlannedTransaction
-          ).sort_by(&:name)
+          relation(:transactions)
         end
 
+      rel = rel.restrict(scenario_id: params[:scenario_id])
+      applicable_transactions = to_models(rel, PlannedTransaction).sort_by(&:name)
+
       # This branch has to come out of here. Different types get returned from this function
+
       if period
         applicable_transactions = applicable_transactions.flat_map do |transaction|
           transaction.occurrences_within(period).map do |date|
@@ -95,14 +98,14 @@ module UseCase
                     partition_transactions_by_month(applicable_transactions, in_period: period)
                   end
         return {
-          tag_index: tag_index,
+          tag_index: tag_index(scenario_id: params[:scenario_id]),
           transactions: periods
         }
       end
 
       # Move non-transaction data up into Application
       {
-        tag_index: tag_index,
+        tag_index: tag_index(scenario_id: params[:scenario_id]),
         tag_sets: all_transaction_tag_sets,
         transactions: TransactionSet.new(transactions: applicable_transactions)
       }
@@ -111,10 +114,8 @@ module UseCase
     def cash_flow(account_id)
       transactions = relation(:transactions)
       accounts = relation(:accounts).restrict(id: account_id)
-      to_models(
-        transactions.join(accounts, { account_id: :id }),
-        PlannedTransaction
-      ).sort_by(&:name)
+
+      transactions.join(accounts, { account_id: :id })
     end
 
     def all_transaction_tag_sets
@@ -128,11 +129,15 @@ module UseCase
       )
     end
 
-    def tag_index
+    def tag_index(scenario_id:)
       to_models(
-        relation(:transaction_tags),
+        relation(:transaction_tags).join(relation(:transactions), { transaction_id: :id }).restrict(scenario_id: scenario_id),
         TransactionTag
       ).group_by(&:transaction_id)
+    end
+
+    def persist_transaction(t)
+      @persistence.persist(:transactions, persistable_transaction(t))
     end
 
     private
@@ -175,16 +180,14 @@ module UseCase
     end
 
     def transactions_for_tags(tags, tag_index, intersection: false)
-      transaction_relation = if intersection
-                               transaction_ids = tag_index.select do |_, t|
-                                 (t.map(&:name) & tags).count == tags.count
-                               end.keys
-                               relation(:transactions).restrict(id: transaction_ids)
-                             else
-                               _transactions_for_tags(tags)
-                             end
-
-      to_models(transaction_relation, PlannedTransaction)
+      if intersection
+        transaction_ids = tag_index.select do |_, t|
+          (t.map(&:name) & tags).count == tags.count
+        end.keys
+        relation(:transactions).restrict(id: transaction_ids)
+      else
+        _transactions_for_tags(tags)
+      end
     end
 
     def transactions_for_tag_sets(tag_set_ids)
@@ -193,12 +196,9 @@ module UseCase
         TransactionTagSet
       )
 
-      return [] if tag_sets.empty?
+      return Bmg::Relation.new([]) if tag_sets.empty?
 
-      to_models(
-        _transactions_for_tags(tag_sets.first.tags),
-        PlannedTransaction
-      )
+      _transactions_for_tags(tag_sets.first.tags)
     end
 
     def persistable_transaction(transaction)

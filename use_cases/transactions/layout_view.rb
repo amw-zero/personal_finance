@@ -15,4 +15,8 @@ class LayoutView
   def template
     File.read('use_cases/transactions/layout_view.erb')
   end
+
+  def method_missing(m, *args)
+    @content.public_send(m, *args)
+  end
 end

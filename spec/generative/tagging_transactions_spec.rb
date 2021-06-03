@@ -12,6 +12,7 @@ describe 'Viewing Transactions within a Period' do
 
   specify do
     test_actions = [
+      ApplicationActions::CREATE_SCENARIO,
       ApplicationActions::CREATE_ACCOUNT,
       ApplicationActions::CREATE_TRANSACTION
     ]
@@ -22,7 +23,8 @@ describe 'Viewing Transactions within a Period' do
       test_actions,
       fresh_application: -> { test_application }
     ).check!(max_checks: 200) do |test_app, _executed|
-      all_transactions = test_app.all_transactions[:transactions].transactions
+      transactions_view = test_app.execute_and_render(test_app.interactions[:view_transactions], {})
+      all_transactions = transactions_view.data[:transactions].transactions
       transaction_count = all_transactions.count
       max_transaction_count = transaction_count if transaction_count > max_transaction_count
 
@@ -30,14 +32,13 @@ describe 'Viewing Transactions within a Period' do
 
       transaction = all_transactions.first
 
-      view = test_app.execute(test_app.interactions[:new_transaction_tag], { id: transaction.id })
-      ErbRenderer.new(view).render
+      view = test_app.execute_and_render(test_app.interactions[:new_transaction_tag], { id: transaction.id })
 
       interaction = test_app.interactions[:tag_transaction]
       params = interaction_params(interaction)
       params.merge!({ transaction_id: transaction.id })
 
-      test_app.execute(interaction, params)
+      test_app.execute_and_render(interaction, params)
     end
 
     expect(max_transaction_count).to be > 0

@@ -4,25 +4,13 @@
     action="<%= interactions[:create_transaction][:name] %>" 
     method="<%= form_action(interactions[:create_transaction]) %>"
   >
-    <%= form_field(interactions[:create_transaction], :name) %>
-
-    <div class="field">
-      <label class="label" for="account_id">Account</label>
-      <div class="control">
-        <div class="select">
-          <select id="account_select" name="account_id">
-            <% @accounts.each do |a| %>
-              <option value="<%= a.id %>"><%= a.name %></option>
-            <% end %>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <%= form_field(interactions[:create_transaction], :amount) %>
-    <%= form_field(interactions[:create_transaction], :currency) %>
-    <%= form_field(interactions[:create_transaction], :recurrence_rule) %>
-    <%= form_field(interactions[:create_transaction], :occurs_on) %>
+    <%= input_field(interactions[:create_transaction], :name) %>
+    <%= select_field(interactions[:create_transaction], :account, @accounts) %>
+    <%= select_field(interactions[:create_transaction], :scenario, @scenarios) %>
+    <%= input_field(interactions[:create_transaction], :amount) %>
+    <%= input_field(interactions[:create_transaction], :currency) %>
+    <%= input_field(interactions[:create_transaction], :recurrence_rule) %>
+    <%= input_field(interactions[:create_transaction], :occurs_on) %>
 
     <button class="button is-primary" type="submit">Create Transaction</input>
   </form>

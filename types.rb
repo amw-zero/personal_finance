@@ -28,12 +28,12 @@ end
 # recurrence rule which represents a conceptual infinite set of Transactions.
 class PlannedTransaction < Dry::Struct
   attribute? :id, Types::Integer
-  attribute? :account, Account
   attribute :account_id, Types::Integer
   attribute :amount, Types::Float
   attribute :name, Types::String
   attribute :currency, Types::Value(:usd)
   attribute :recurrence_rule, Types::String
+  attribute :scenario_id, Types::Integer
   attribute :occurs_on, Types.Constructor(Date) { |occurs_on| occurs_on }
 
   def occurrences_within(period)
@@ -96,4 +96,9 @@ class TransactionTagSet < Dry::Struct
   attribute? :id, Types::Integer
   attribute :title, Types::String
   attribute :tags, Types::Array(Types::String)
+end
+
+class Scenario < Dry::Struct
+  attribute? :id, Types::Integer
+  attribute :name, Types::String
 end

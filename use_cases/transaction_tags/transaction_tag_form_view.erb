@@ -3,7 +3,7 @@
   action="/transaction_tags" 
   method="<%= form_action(interactions[:tag_transaction]) %>"
 >
-  <%= form_field(interactions[:tag_transaction], :name) %>
+  <%= input_field(interactions[:tag_transaction], :name) %>
 
   <div class="field">
     <input class="input is-hidden" name="transaction_id" value="<%= @transaction.id %>"></input>

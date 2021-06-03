@@ -11,61 +11,78 @@
       <!-- Need to handle nesting here. transactions_schedule is nested within transactions.  -->
       <!-- Prob need a "navigation path" -->
 
-      <% if @page == :view_transactions || @page == :view_transactions_schedule %>
-        <%= render(TransactionFiltersTagsView.new(params: params, tag_index: data[:tag_index], accounts: accounts)) %>
-      <% elsif @page == :transactions_tag_sets %>
-        <%= render(TransactionFiltersTagSetsView.new(params: params, tag_sets: data[:tag_sets])) %>
-      <% end %>
-      
-    </nav>
-    <% if @page == :view_transactions_schedule %>
-      <form action="/transactions/schedule">
-        <div class="card">
-          <div class="card-content">
-            <h1 class="title is-5">Date period</h1>
-
-            <div class="control radio-list">
-              <label class="radio">
-                <input
-                  type="radio"
-                  name="date_period"
-                  value="current_month"
-                  <%= 'checked' if params[:date_period] == 'current_month' || params[:date_period].nil? %>
-                >
-                Current Month
-              </label>
-              <label class="radio">
-                <input
-                  type="radio"
-                  name="date_period"
-                  value="current_year"
-                  <%= 'checked' if params[:date_period] == 'current_year' %>
-                >
-                Current Year
-              </label>
-            </div>
-
-            <div class="field">
-              <label class="label" for="start_date">
-                Start date
-                <input class="input" type="date" value="<%= params[:start_date] %>" name="start_date">
-              </label>
-            </div>
-            <div class="field">
-              <label class="label" for="end_date">
-                End date
-                <input class="input" type="date" value="<%= params[:end_date] %>" name="end_date">
-              </label>
+      <form id="filters">
+        <div class="panel-block">
+          <div class="control">
+            <label class="label" for="scenario_id">Scenario</label>
+            <div class="select">
+              <select onchange="this.form.submit()" id="scenario_select" name="scenario_id">
+                <% scenarios.each do |a| %>
+                  <option
+                    value="<%= a.id %>"
+                    <%= 'selected' if a.id == selected_scenario_id %>
+                  >
+                    <%= a.name %>
+                  </option>
+                <% end %>
+              </select>
             </div>
           </div>
-          <footer class="card-footer">
-            <div class="card-footer-item">
-              <button class="button is-link" type="submit">Apply</button>
-            </div>
-          </footer>
         </div>
+        <% if @page == :view_transactions || @page == :view_transactions_schedule %>
+          <%= render(TransactionFiltersTagsView.new(params: params, tag_index: data[:tag_index], accounts: accounts)) %>
+        <% elsif @page == :transactions_tag_sets %>
+          <%= render(TransactionFiltersTagSetsView.new(params: params, tag_sets: data[:tag_sets])) %>
+        <% end %>
+
+        <% if @page == :view_transactions_schedule %>
+          <div class="card">
+            <div class="card-content">
+              <h1 class="title is-5">Date period</h1>
+
+              <div class="control radio-list">
+                <label class="radio">
+                  <input
+                    type="radio"
+                    name="date_period"
+                    value="current_month"
+                    <%= 'checked' if params[:date_period] == 'current_month' || params[:date_period].nil? %>
+                  >
+                  Current Month
+                </label>
+                <label class="radio">
+                  <input
+                    type="radio"
+                    name="date_period"
+                    value="current_year"
+                    <%= 'checked' if params[:date_period] == 'current_year' %>
+                  >
+                  Current Year
+                </label>
+              </div>
+
+              <div class="field">
+                <label class="label" for="start_date">
+                  Start date
+                  <input class="input" type="date" value="<%= params[:start_date] %>" name="start_date">
+                </label>
+              </div>
+              <div class="field">
+                <label class="label" for="end_date">
+                  End date
+                  <input class="input" type="date" value="<%= params[:end_date] %>" name="end_date">
+                </label>
+              </div>
+            </div>
+            <footer class="card-footer">
+              <div class="card-footer-item">
+                <button class="button is-link" type="submit">Apply</button>
+              </div>
+            </footer>
+          </div>
+        <% end %>
       </form>
-    <% end %>
+    </nav>
   </div>
   
   <div class="column">
@@ -74,8 +91,8 @@
         TransactionTableHeaderView.new(
           title: 'Scheduled Transactions', 
           interactions: interactions,
-          )
-        ) %>
+        )
+      ) %>
       <% if data[:transactions].first.respond_to?(:incomes) %>
         <%= render(TransactionsByPayPeriodView.new(pay_periods: data[:transactions])) %>
       <% else %>
@@ -85,7 +102,7 @@
       <%= render(
         TransactionTableHeaderView.new(
           title: 'Recurring Transactions',
-          interactions: interactions
+          interactions: interactions,
         )
        ) %>
       <%= render(
