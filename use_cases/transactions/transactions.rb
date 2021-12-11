@@ -60,7 +60,8 @@ module UseCase
                elsif params[:date_period] == 'current_month'
                  today = Date.today
                  first = Date.new(today.year, today.month, 1)
-                 last = Date.new(today.year, today.month + 1, 1) - 1
+                 next_month = first >> 1
+                 last = Date.new(next_month.year, next_month.month, 1) - 1
 
                  first..last
                end
