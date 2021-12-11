@@ -2,10 +2,10 @@
 
 require 'sinatra'
 require_relative '../personal_finance'
-require_relative '../postgres/postgres_persistence'
+require_relative '../file_persistence'
 require_relative '../view'
 
-application = PersonalFinance::Application.new(log_level: ENV['LOG_LEVEL'], persistence: PostgresPersistence.new)
+application = PersonalFinance::Application.new(log_level: ENV['LOG_LEVEL'], persistence: FilePersistence.new)
 
 application.interactions.each_value do |interaction|
   method = {
